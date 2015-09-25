@@ -2,9 +2,17 @@
 
 
 SusyModule::SusyModule(VarClass* vc):
-  _vc(vc)
+  _vc(vc),_dbm(nullptr)
 {
   defineLeptonWPS();
+  
+}
+
+SusyModule::SusyModule(VarClass* vc, DataBaseManager* dbm):
+  _vc(vc), _dbm(dbm)
+{
+  defineLeptonWPS();
+  loadDBs();
 }
 
 SusyModule::~SusyModule() {
@@ -12,6 +20,23 @@ SusyModule::~SusyModule() {
   delete _vc;
 }
 
+void
+SusyModule::loadDBs() {
+
+  //_dbm->loadDb("PileupWeights.root",""); -> done with trees
+
+  //HLT scale factors
+  _dbm->loadDb("hltDEG","hltSFDoubleEG.db");
+  _dbm->loadDb("hltDMu","hltSFDoubleMu.db");
+  _dbm->loadDb("hltSEle","hltSFSingleEle.db");
+  _dbm->loadDb("hltSMu","hltSFSingleMu.db");
+  
+  //lepton scale factors
+  _dbm->loadDb("eleSFDb","electronSF.db");
+  _dbm->loadDb("muSFDb","muonSF.db");
+  _dbm->loadDb("tauSFDb","tauSF.db");
+  
+}
 
 void
 SusyModule::defineLeptonWPS() {
@@ -31,42 +56,46 @@ SusyModule::defineLeptonWPS() {
   }
   
   //conv rej ====================
-  _cLostHitWP[kLoose]=1; 
-  _cLostHitWP[kTight]=0; 
+  _cLostHitWP[kDenom] = 1; 
+  _cLostHitWP[kLoose] = 1; 
+  _cLostHitWP[kTight] = 0; 
 
   //pt ============================
-  _ptWP[kEl][kDenom]=7;  _ptWP[kMu][kDenom]=5;
-  _ptWP[kEl][kLoose]=7;  _ptWP[kMu][kLoose]=5;
-  _ptWP[kEl][kTight]=10;  _ptWP[kMu][kTight]=10;
+  _ptWP[kEl][kDenom] = 7 ; _ptWP[kMu][kDenom] = 5 ;
+  _ptWP[kEl][kLoose] = 7 ; _ptWP[kMu][kLoose] = 5 ;
+  _ptWP[kEl][kTight] = 10; _ptWP[kMu][kTight] = 10;
 
   //sip & IP ======================
-  _sipWP[kLoose]=1000.0; 
-  _sipWP[kTight]=4.0; 
+  _sipWP[kDenom] = 4.0; 
+  _sipWP[kLoose] = 1000.0; 
+  _sipWP[kTight] = 4.0; 
   
-  _dxyWP[kLoose]=0.05; //cm
-  _dxyWP[kTight]=0.05; //cm
+  _dxyWP[kDenom] = 0.05; //cm
+  _dxyWP[kLoose] = 0.05; //cm
+  _dxyWP[kTight] = 0.05; //cm
   
-  _dzWP[kLoose]=0.1; //cm
-  _dzWP[kTight]=0.1; //cm
+  _dzWP[kDenom] = 0.1; //cm
+  _dzWP[kLoose] = 0.1; //cm
+  _dzWP[kTight] = 0.1; //cm
 
 
   //el mva id ======================
-  _elMvaIdWP[kEBC][kLoose]=-0.11;
-  _elMvaIdWP[kEBF][kLoose]=-0.35;
-  _elMvaIdWP[kEE][kLoose]=-0.55;
+  _elMvaIdWP[kEBC][kLoose] = -0.11;
+  _elMvaIdWP[kEBF][kLoose] = -0.35;
+  _elMvaIdWP[kEE ][kLoose] = -0.55;
 
-  _elMvaIdWP[kEBC][kTight]=0.73;
-  _elMvaIdWP[kEBF][kTight]=0.57;
-  _elMvaIdWP[kEE][kTight]=0.05;
+  _elMvaIdWP[kEBC][kTight] = 0.73;
+  _elMvaIdWP[kEBF][kTight] = 0.57;
+  _elMvaIdWP[kEE ][kTight] = 0.05;
 
   //multiIso =======================
-  _multiIsoWP[kMiniIso][kDenom]=0.4; _multiIsoWP[kPtRatio][kDenom]=0; _multiIsoWP[kPtRel][kDenom]=0;
-  _multiIsoWP[kMiniIso][kLoose]=0.4; _multiIsoWP[kPtRatio][kLoose]=0; _multiIsoWP[kPtRel][kLoose]=0;
-  _multiIsoWP[kMiniIso][kMedium]=0.14; _multiIsoWP[kPtRatio][kMedium]=0.68; _multiIsoWP[kPtRel][kMedium]=6.7; 
-  _multiIsoWP[kMiniIso][kTight]=0.10; _multiIsoWP[kPtRatio][kTight]=0.70; _multiIsoWP[kPtRel][kTight]=7;
+  _multiIsoWP[kMiniIso][kDenom]      = 0.4 ; _multiIsoWP[kPtRatio][kDenom]      = 0   ; _multiIsoWP[kPtRel][kDenom]      = 0  ;
+  _multiIsoWP[kMiniIso][kLoose]      = 0.4 ; _multiIsoWP[kPtRatio][kLoose]      = 0   ; _multiIsoWP[kPtRel][kLoose]      = 0  ;
+  _multiIsoWP[kMiniIso][kMedium]     = 0.14; _multiIsoWP[kPtRatio][kMedium]     = 0.68; _multiIsoWP[kPtRel][kMedium]     = 6.7; 
+  _multiIsoWP[kMiniIso][kTight]      = 0.10; _multiIsoWP[kPtRatio][kTight]      = 0.70; _multiIsoWP[kPtRel][kTight]      = 7  ;
 
-  _multiIsoWP[kMiniIso][kSpecFakeEl]=0.4; _multiIsoWP[kPtRatio][kSpecFakeEl]=0.70; _multiIsoWP[kPtRel][kSpecFakeEl]=7;
-  _multiIsoWP[kMiniIso][kSpecFakeMu]=0.4; _multiIsoWP[kPtRatio][kSpecFakeMu]=0.68; _multiIsoWP[kPtRel][kSpecFakeMu]=6.7;
+  _multiIsoWP[kMiniIso][kSpecFakeEl] = 0.4 ; _multiIsoWP[kPtRatio][kSpecFakeEl] = 0.70; _multiIsoWP[kPtRel][kSpecFakeEl] = 7  ;
+  _multiIsoWP[kMiniIso][kSpecFakeMu] = 0.4 ; _multiIsoWP[kPtRatio][kSpecFakeMu] = 0.68; _multiIsoWP[kPtRel][kSpecFakeMu] = 6.7;
 }
 
 
@@ -107,12 +136,9 @@ SusyModule::elMvaSel(int idx, int wp) const {
 
   int etaBin=-1;
 
-  if(std::abs(_vc->get("LepGood_eta", idx)) < 0.8) etaBin=0;
+  if     (std::abs(_vc->get("LepGood_eta", idx)) < 0.8  ) etaBin=0;
   else if(std::abs(_vc->get("LepGood_eta", idx)) < 1.479) etaBin=1;
-  else if(std::abs(_vc->get("LepGood_eta", idx)) < 2.5) etaBin=2;
-  
-  // cout<<idx<<" --> "<<etaBin<<"   "<<std::abs(_vc->get("LepGood_eta", idx))<<endl;
-  // cout<<"   "<<_vc->get("LepGood_mvaIdPhys14", idx)<<"   "<<_elMvaIdWP[etaBin][wp]<<endl;
+  else if(std::abs(_vc->get("LepGood_eta", idx)) < 2.5  ) etaBin=2;
 
   if(_vc->get("LepGood_mvaIdPhys14", idx) <  _elMvaIdWP[etaBin][wp]  ) return false;
     
@@ -120,32 +146,23 @@ SusyModule::elMvaSel(int idx, int wp) const {
 }
 
 
+
 bool
 SusyModule::muIdSel(int idx, int wp) const {
 
-  int wpIso=kDenom;
-  
-  if( _vc->get("LepGood_pt" , idx)<_ptWP[kMu][wp] ) return false;
-  //cout<<idx<<"   pt"<<endl;
-  if( std::abs(_vc->get("LepGood_eta" , idx))>2.4 ) return false;
-  //cout<<idx<<"   eta"<<endl;
-  if( _vc->get("LepGood_mediumMuonId", idx)<=0 ) return false;
+  int wpIso = kDenom;
 
-  //cout<<idx<<"   "<<_vc->get("LepGood_tightCharge" , idx)<<endl;
+  if(         _vc->get("LepGood_pt"          , idx)  < _ptWP[kMu][wp]) return false;
+  if(std::abs(_vc->get("LepGood_eta"         , idx)) >  2.4          ) return false;
+  if(         _vc->get("LepGood_mediumMuonId", idx)  <= 0            ) return false;
+  if(         _vc->get("LepGood_tightCharge" , idx)  <= 1            ) return false;
+  if(         _vc->get("LepGood_sip3d"       , idx)  > _sipWP[wp]    ) return false;
+  if(std::abs(_vc->get("LepGood_dz"          , idx)) > _dzWP[wp]     ) return false;
+  if(std::abs(_vc->get("LepGood_dxy"         , idx)) > _dxyWP[wp]    ) return false;
+  if(!multiIsoSel(idx, wpIso)                                        ) return false;
 
-  if(wp!=kLoose)
-    if( _vc->get("LepGood_tightCharge" , idx)<=1 ) return false;
-  //cout<<idx<<"   charge"<<endl;
-  //cout<<idx<<"   "<<_vc->get("LepGood_sip3d", idx)<<endl;
-  if(_vc->get("LepGood_sip3d", idx)>_sipWP[wp]) return false;
-  //cout<<idx<<"   sip"<<endl;
-  if( std::abs(_vc->get("LepGood_dz", idx))>_dzWP[wp] ) return false;
-  //cout<<idx<<"   dz"<<endl;
-  if( std::abs(_vc->get("LepGood_dxy", idx))>_dxyWP[wp] ) return false;
-  //cout<<idx<<"   dxy"<<endl;
-  if( !multiIsoSel(idx, wpIso) ) return false;
-  //cout<<idx<<"   iso"<<endl;
   return true;
+
 }
 
 
@@ -153,27 +170,23 @@ bool
 SusyModule::elIdSel(int idx, int wp, int mvaWp) const {
 
   int wpIso=kDenom;
-  
-  if(_vc->get("LepGood_pt", idx)<_ptWP[kEl][wp] ) return false;
-  if(std::abs(_vc->get("LepGood_eta", idx))>2.5) return false;
-  //FIXME
-  // if(std::abs(_vc->get("LepGood_eta", idx))>1.4442 &&
-  //    std::abs(_vc->get("LepGood_eta", idx))<1.566) return false;
 
-  //cout<<idx<<"   kin "<<_vc->get("LepGood_convVeto", idx)<<"  "<<_vc->get("LepGood_lostHits", idx)<<endl;
+  if(         _vc->get("LepGood_pt"         , idx)  < _ptWP[kEl][wp] ) return false;
+  if(std::abs(_vc->get("LepGood_eta"        , idx)) > 2.5            ) return false;
+  if(std::abs(_vc->get("LepGood_eta"        , idx)) > 1.4442 &&
+     std::abs(_vc->get("LepGood_eta"        , idx)) < 1.566          ) return false;
 
-  if(_vc->get("LepGood_convVeto", idx)!=1) return false;
-  if(_vc->get("LepGood_lostHits", idx)>_cLostHitWP[wp]) return false;
-  //cout<<idx<<"   conv"<<endl;
-  if(wp!=kLoose)
-    if(_vc->get("LepGood_tightCharge", idx)<=1) return false; 
-  //cout<<idx<<"   charge"<<endl;
-  // always tight -> or not!
-  if( !elMvaSel(idx, mvaWp) ) return false;
-  if(_vc->get("LepGood_sip3d", idx)>_sipWP[wp]) return false;
-  if( std::abs(_vc->get("LepGood_dz", idx))>_dzWP[wp] ) return false;
-  if( std::abs(_vc->get("LepGood_dxy", idx))>_dxyWP[wp] ) return false;
-  if( !multiIsoSel(idx, wpIso) ) return false;
+  if(         _vc->get("LepGood_convVeto"   , idx)  != 1             ) return false;
+  if(         _vc->get("LepGood_lostHits"   , idx)  > _cLostHitWP[wp]) return false;
+
+  if(         _vc->get("LepGood_tightCharge", idx)  <= 1             ) return false;
+
+  if(         _vc->get("LepGood_sip3d"      , idx)  > _sipWP[wp]     ) return false;
+  if(std::abs(_vc->get("LepGood_dz"         , idx)) > _dzWP[wp]      ) return false;
+  if(std::abs(_vc->get("LepGood_dxy"        , idx)) > _dxyWP[wp]     ) return false;
+  if(!elMvaSel(idx, mvaWp)                                           ) return false;
+  if(!multiIsoSel(idx, wpIso)                                        ) return false;
+
   //cout<<idx<<"   iso+sip"<<endl;
 
   // electron cleaning ==================
@@ -185,6 +198,7 @@ SusyModule::elIdSel(int idx, int wp, int mvaWp) const {
   //cout<<idx<<"   clean"<<endl;
   return true;
 }
+
 
 //===========================================================
 bool
@@ -246,6 +260,7 @@ SusyModule::mllZVeto(const Candidate* cand, const Candidate* veto) const {
 
   return false;
 }
+
 
 bool
 SusyModule::passMllSingleVeto(const Candidate* c1, const Candidate* c2, 
@@ -364,19 +379,21 @@ SusyModule::bestSSPair(Candidate* c1, const CandList* leps, bool byflav,
 }
 
 
+float
+SusyModule::closestJetPt(int idx) const {
 
+  return _vc->get("LepGood_pt", idx) / _vc->get("LepGood_jetPtRatio", idx);
+}
 
 
 float 
-SusyModule::conePt(int idx) const {
-
-  int isoWp=kMedium;
-  if(std::abs(_vc->get("LepGood_pdgId", idx))==11) isoWp=kTight;
+SusyModule::conePt(int idx, int isoWp) const {
 
   if(_vc->get("LepGood_jetPtRel", idx) > _multiIsoWP[kPtRel][isoWp] ) {
-    return _vc->get("LepGood_pt", idx)*(1 + std::max((double)0., _vc->get("LepGood_miniRelIso", idx)- _multiIsoWP[kMiniIso][isoWp] ) );
+    return _vc->get("LepGood_pt", idx)*(1 + std::max((double) 0., _vc->get("LepGood_miniRelIso", idx) - _multiIsoWP[kMiniIso][isoWp] ) );
   }
-  return std::max(_vc->get("LepGood_pt", idx), _vc->get("LepGood_pt", idx)/_vc->get("LepGood_jetPtRatio",idx) * _multiIsoWP[kPtRatio][isoWp] );  
+  return std::max(_vc->get("LepGood_pt", idx), (double) closestJetPt(idx) * _multiIsoWP[kPtRatio][isoWp] );
+
 }
 
 
@@ -423,6 +440,51 @@ SusyModule::cleanJets(CandList* leptons,
     
     cleanBJets.push_back(jet);
     bJetIdxs.push_back(ij);
+  }
+
+}
+
+// Scale factors ====================================
+void 
+SusyModule::applyHLTSF(const string& hltLine, const CandList& cands, float& weight) {
+
+  if(_dbm==nullptr) {cout<<"Error, DB manager not set in the susy module, please change the constructor"<<endl; abort();}
+
+  if(hltLine=="HLT_DoubleEG") {
+    weight *= _dbm->getDBValue("hltDEG", std::abs(cands[0]->eta()), cands[0]->pt(), cands[1]->eta(), cands[1]->pt() );
+  }
+  else if(hltLine=="HLT_DoubleMu") {
+    weight *= _dbm->getDBValue("hltDMu", std::abs(cands[0]->eta()), cands[0]->pt(), cands[1]->eta(), cands[1]->pt() );
+  }
+  else if(hltLine=="HLT_SingleEle") {
+    weight *= _dbm->getDBValue("hltSEle", std::abs(cands[0]->eta()), cands[0]->pt() );
+  }
+  else if(hltLine=="HLT_SingleMu") {
+    weight *= _dbm->getDBValue("hltSMu", std::abs(cands[0]->eta()), cands[0]->pt() );
+  }
+
+
+}
+
+void 
+SusyModule::applyLepSF(const CandList& cands, float& weight) {
+
+  for(unsigned int ic=0;ic<cands.size();ic++) {
+    applySingleLepSF(cands[ic], weight);
+  }
+
+}
+
+
+void 
+SusyModule::applySingleLepSF(const Candidate* cand, float& weight) {
+
+  if(_dbm==nullptr) {cout<<"Error, DB manager not set in the susy module, please change the constructor"<<endl; abort();}
+
+  switch(std::abs(cand->pdgId())) {
+  case 11: {weight *= _dbm->getDBValue("eleSFDb", std::abs(cand->eta()), cand->pt() ); break;}
+  case 13: {weight *= _dbm->getDBValue("muSFDb", std::abs(cand->eta()), cand->pt() ); break;}
+  case 15: {weight *= _dbm->getDBValue("tauSFDb", std::abs(cand->eta()), cand->pt() ); break;}
   }
 
 }

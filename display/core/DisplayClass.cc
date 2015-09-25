@@ -1176,8 +1176,8 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
   }
   
   _empty->Reset("ICEM");
-  _empty->SetName("h_tmp");
-  _empty->SetTitle("h_tmp");
+  _empty->SetName("");
+  _empty->SetTitle("");
   
   //X axis
   _xmin = xAxTeV?(_xmin/1000):_xmin;
@@ -1253,6 +1253,8 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
  
     ymax *=_logYScale?15:1.5;
     if(_normOpts.find("norm")!=_normOpts.end())
+      //CH: temporary fix
+      //ymax = _ymax; 
       ymax =_logYScale?50:min(ymax,(float)1.5);
     // if(_normOpts.find("dif")!=_normOpts.end())
     //   ymax /= _hMC->GetBinWidth(0); //temporary fix

@@ -5,17 +5,20 @@
 #include "analysis/tools/Candidate.hh"
 #include "analysis/utils/KineUtils.hh"
 
+#include "tools/src/DataBaseManager.hh"
+
 class SusyModule {
 
 public:
 
   SusyModule(VarClass* vc);
+  SusyModule(VarClass* vc, DataBaseManager* dbm);
   ~SusyModule();
 
   
   bool elMvaSel(int elIdx, int wp) const;
   bool muIdSel(int idx, int wp) const;
-  bool elIdSel(int idx, int wp, int mvaWp) const;
+  bool elIdSel(int idx, int wp, int mvaWp = kTight) const;
   bool multiIsoSel(int idx, int wp) const;
   bool multiIsoSelCone(int idx, int wp) const;
   bool invMultiIsoSel(int idx, int wp) const;
@@ -41,7 +44,12 @@ public:
   CandList bestSSPair(Candidate* c1, const CandList* leps, bool byflav,
 		      bool bypassMV, float pTthr, int& idx1, int& idx2);
   
-  float conePt(int idx) const;
+  float closestJetPt(int idx) const;
+  float conePt(int idx, int isoWp = kTight) const; 
+
+  void applyHLTSF(const string& hltLine, const vector<Candidate*>& cands, float& weight);
+  void applyLepSF(const CandList& cands, float& weight);
+  void applySingleLepSF(const Candidate* cand, float& weight);
 
   enum {kDenom=0,
 	kLoose,
@@ -60,8 +68,10 @@ public:
 private:
 
   void defineLeptonWPS();
+  void loadDBs();
   //const
   VarClass* _vc;
+  DataBaseManager* _dbm;
 
   vector<float> _cLostHitWP;
   vector<float> _dxyWP;
