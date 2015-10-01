@@ -12,3 +12,4 @@ tools/lib
 workdir
 *dictgen.mk
 *gen.mk
+*/*_dict_*
