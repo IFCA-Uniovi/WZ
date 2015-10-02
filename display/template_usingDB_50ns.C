@@ -1,21 +1,21 @@
 #include "display/core/MPAFDisplay.hh"
 
 MPAFDisplay md;
-//std::map<std::string, std::map<std::string, double> > get_map_wsum();
+std::map<std::string, std::map<std::string, double> > get_map_wsum();
 
 
 void template_usingDB_25ns(int setproc = 2)  {
-  cout << "1" << endl;
+
   gStyle->SetOptStat(0);
   md.refresh();
   //general parameters ********************* general parameters
   string dir="WZsynchro";
-  string fileName="template_WZ25"; // not needed for statistics
-  string fileList="template_WZ25"; // put command line that gives all files as in a "ls" command
+  string fileName="template_WZ50"; // not needed for statistics
+  string fileList="template_WZ50"; // put command line that gives all files as in a "ls" command
 
 
   bool mcOnly = false;
-  cout << "2" << endl;
+  
   //if(md.isInitStatus()) {
     md.anConf.configureNames( dir, fileName, fileList);
     md.anConf.configureData(false, 0, mcOnly);
@@ -30,7 +30,7 @@ void template_usingDB_25ns(int setproc = 2)  {
     //std::string s_region_dat = s_region;
     //if (s_region != "")  s_region_dat = "_" + s_region;
     std::string s_region_dat="_BR0H"; //Avoiding "_"+string Cling problem manually
-  cout << "3" << endl;
+
     md.dp.setObservables("METWZCR");
     //md.dp.setObservables("MET"+s_region);
     //md.dp.setObservables("HT"+s_region);
@@ -52,7 +52,7 @@ void template_usingDB_25ns(int setproc = 2)  {
     //md.dp.setObservables("NBJetsBR0H");
     //md.dp.setObservables("NJetsBR0H");
   
-  cout << "4" << endl;
+
   //Binning & title ************************* Binning & titre
   string yTitle="number of events";
   int binning=40;
@@ -78,7 +78,7 @@ void template_usingDB_25ns(int setproc = 2)  {
   float yt=0.48;
   float st=0.039;
   string addText="";
-  cout << "5" << endl;
+
   string autoBinFile="susybinning_50ns";
   md.dp.loadAutoBinning(autoBinFile);
 
@@ -91,11 +91,11 @@ void template_usingDB_25ns(int setproc = 2)  {
   bool uncDet=false;
 
   string Norm="";
-    cout << "6" << endl;
+  
   //Lumis( or XSections ) pb-1 & KFactors ************************************
   float lumi=10000; //pb-1 19470
   float energy=13; //TeV
-  cout << "7" << endl;
+
   bool useXS=false;
   md.anConf.loadXSDB("XSectionsSpring15.db");
   map<string,float> LumisXS;
@@ -103,7 +103,7 @@ void template_usingDB_25ns(int setproc = 2)  {
   map<string,float> KFactors;
 
   md.anConf.configureLumi( LumisXS, KFactors, lumi, useXS );
-  cout << "8" << endl;
+
   // SDYJetsM50_HT600toInf_PU_S14_POSTLS170_skimamples **************************  samples
   //if( md.isInitStatus() ) {
 
@@ -244,7 +244,6 @@ void template_usingDB_25ns(int setproc = 2)  {
   
   else if (setproc == 2) {
     md.anConf.addSample("DYJetsToLL_LO_M50_50ns", "DYJetsToLL_LO_M50_50ns", 1);
-      cout << "9" << endl;
     md.anConf.addSample("DYJetsToLL_M10to50_50ns", "DYJetsToLL_M10to50_50ns", 2);
     md.anConf.addSample("DYJetsToLL_M50_50ns", "DYJetsToLL_M50_50ns", 3);
     md.anConf.addSample("TBar_tWch_50ns", "TBar_tWch_50ns", 4);
@@ -256,7 +255,6 @@ void template_usingDB_25ns(int setproc = 2)  {
     md.anConf.addSample("WJetsToLNu_50ns", "WJetsToLNu_50ns", 10);
     md.anConf.addSample("WWTo2L2Nu_50ns", "WW(2l2n)", 11);
     md.anConf.addSample("WZp8_50ns", "WZp8_50ns", 12);
-      cout << "10" << endl;
     md.anConf.addSample("ZZp8_50ns", "ZZp8_50ns", 13);
   
   }
@@ -321,7 +319,7 @@ void template_usingDB_25ns(int setproc = 2)  {
   //md.getStatistics("global");
   //md.getStatistics("global_BR00H");
   //md.getStatistics("global_BR0H");
-  //md.savePlot("phys14exerc");
+  md.savePlot("synchro25exec");
   // md.dp.addText(xt,yt,st,addText);
 
   //gROOT->ProcessLine(".q");

@@ -215,10 +215,11 @@ private:
   bool _categorization;
   bool _DoValidationPlots;
   int _WZstep;
-  string _WZstepname [6]= {"Three leptons",
+  string _WZstepname [7]= {"Three leptons",
 	"WZ candidate",
 	"Z sel",
 	"W sel",
+	"M(3l) < 100 GeV",
 	"1 or 0 b-jets",
 	"0 b-jets"};
 

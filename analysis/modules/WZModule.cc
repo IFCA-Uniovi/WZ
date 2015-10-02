@@ -69,8 +69,10 @@ CandList WZModule::bestZ(const CandList* leps, int& idxZ1, int& idxZ2) {
       if (flav != 0 ) continue;
       
       float mll = Candidate::create(leps->at(il1), leps->at(il2))->mass();
-      float massdiff = std::fabs(91.0 - mll);
+      float massdiff = std::fabs(91.1876 - mll);
+      float massdiff90 = std::fabs(90 - mll);
       
+      if (massdiff90 > 30) continue;
       if (massdiffMin < massdiff) continue;
       
       massdiffMin = massdiff;

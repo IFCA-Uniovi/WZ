@@ -249,7 +249,7 @@ WZsynchro::defineOutput() {
   _hm->addVariable("MT"    , 200, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]"        );
   _hm->addVariable("NBJets",   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)");
   _hm->addVariable("NJets" ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)"          );
-  _hm->addVariable("M3l"   , 250, 0.,  500, "M_{3#font[12]{l}} [GeV]"            );
+  _hm->addVariable("M3l"   , 250, 0.,  500, "M_{3l} [GeV]"            );
 
   if(!_DoValidationPlots) return; 
   ///////////////////////////////////////////////////////////////////////////
@@ -286,7 +286,7 @@ WZsynchro::defineOutput() {
     _hm->addVariable(reg[r]+"_NBJetsMedium25" ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)", false);
     _hm->addVariable(reg[r]+"_NBJetsTight40"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)", false);
     _hm->addVariable(reg[r]+"_NJets40"        ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)", false);
-    _hm->addVariable(reg[r]+"_m3l"             , 250, 0.,  500, "M_{3#font[12]{l}} [GeV]", false);
+    _hm->addVariable(reg[r]+"_m3l"             , 250, 0.,  500, "M_{3l} [GeV]", false);
   }
 
 
@@ -910,11 +910,15 @@ WZsynchro::WZ3lSelection() {
   if (_WZstep == 3) fillWZhistos(0.0, 0.0);
   
   
-  if(!makeCut(_nBJets<=1,"1 or 0 b-jets")) return;
+  if(!makeCut(_m3l > 100, "M(3l) < 100 GeV" )) return;
   if (_WZstep == 4) fillWZhistos(0.0, 0.0);
   
-  if(!makeCut(_nBJets==0,"0 b-jets")) return;
+  
+  if(!makeCut(_nBJets<=1,"1 or 0 b-jets")) return;
   if (_WZstep == 5) fillWZhistos(0.0, 0.0);
+  
+  if(!makeCut(_nBJets==0,"0 b-jets")) return;
+  if (_WZstep == 6) fillWZhistos(0.0, 0.0);
   
   
   
