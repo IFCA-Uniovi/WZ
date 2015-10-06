@@ -1,15 +1,15 @@
 MPAFDisplay md;
-// Template plot producer for WZ validation plots, called by Sub_SynchroPlots_WZ25.sh
+
 //string today = "150910";
-void template_yieldsWZ_25ns(std::string var){
+void template_syncWZ_25ns(std::string var){
   gStyle->SetOptStat(0);
 
   md.refresh();
   
   //general parameters ********************* general parameters
   string dir="WZsynchro"; //_Jun16_WZCR_RA7comp";
-  string fileName="template_WZ25";
-  string fileList="template_WZ25";
+  string fileName="WZ3L_WZSTEP6_LEPFLAVmmm_LHE1001";
+  string fileList="WZ3L_WZSTEP6_LEPFLAVmmm_LHE1001";
   bool mcOnly = false;
 
   //observables **********************
@@ -60,7 +60,7 @@ void template_yieldsWZ_25ns(std::string var){
   bool uncDet=false;
   
   //Lumis( or XSections ) pb-1 & KFactors ************************************
-  string Norm="DNorm";
+  string Norm="";
   
   float lumi=20.4; //pb-1 19470
   float energy=13; //TeV
@@ -74,7 +74,7 @@ void template_yieldsWZ_25ns(std::string var){
   md.anConf.configureLumi( LumisXS, KFactors, lumi, useXS );
 
   //===============================================================  
-  
+  /*
   md.anConf.addSample( "TBar_tWch"               , "Single top" ,  kGray+2); 
   md.anConf.addSample( "T_tWch"                  , "Single top" ,  kGray+2);
   md.anConf.addSample( "TToLeptons_tch"          , "Single top" ,  kGray+2);
@@ -86,6 +86,9 @@ void template_yieldsWZ_25ns(std::string var){
   md.anConf.addSample( "TTJets_LO"               , "t#bar{t}"   ,  kRed   );
   md.anConf.addSample( "DYJetsToLL_M10to50"      , "DY"         ,  kCyan  );
   md.anConf.addSample( "DYJetsToLL_M50"          , "DY"         ,  kCyan  );
+  */
+  
+    md.anConf.addSample( "WZTo3LNu"                    , "WZp8"         ,  kGreen+3);
   
 /*
   md.anConf.addSample( "TBar_tWch"               , "TBar_tWch" ,  kGray+2); 
@@ -101,13 +104,13 @@ void template_yieldsWZ_25ns(std::string var){
   md.anConf.addSample( "DYJetsToLL_M50"          , "DYJetsToLL_M50"         ,  kCyan  );
   */
   // the order MATTERS!!!
-  
+  /*
   md.anConf.addSample( "DoubleEG_Run2015C_v1"              , "data", kBlack);
   md.anConf.addSample( "DoubleMuon_Run2015C_v1"            , "data", kBlack);
   md.anConf.addSample( "MuonEG_Run2015C_v1"                , "data", kBlack);
   md.anConf.addSample( "SingleElectron_Run2015C_v1"        , "data", kBlack);
   md.anConf.addSample( "SingleMuon_Run2015C_v1"            , "data", kBlack);
-  
+  */
 
 //  //===============================================================
   

@@ -219,7 +219,7 @@ private:
 	"WZ candidate",
 	"Z sel",
 	"W sel",
-	"M(3l) < 100 GeV",
+	"M(3l) > 100 GeV",
 	"1 or 0 b-jets",
 	"0 b-jets"};
 
@@ -228,7 +228,7 @@ private:
   
   void fillhistos();
   void fillValidationHistos(std::string reg);
-  void fillWZhistos(double mt, double mtmin);
+  void fillWZhistos(double mt, double mtmin, bool doPlots);
 };
 
 
