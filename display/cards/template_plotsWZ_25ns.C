@@ -1,15 +1,16 @@
 MPAFDisplay md;
-// Template plot producer for WZ validation plots, called by Sub_SynchroPlots_WZ25.sh
+// template plot producer for WZ validation plots, called by Sub_SynchroPlots_WZ25.sh
 //string today = "150910";
-void template_yieldsWZ_25ns(std::string var){
+void template_plotsWZ_25ns(std::string var,std::string fileName){
   gStyle->SetOptStat(0);
 
   md.refresh();
   
   //general parameters ********************* general parameters
-  string dir="WZsynchro"; //_Jun16_WZCR_RA7comp";
-  string fileName="template_WZ25";
-  string fileList="template_WZ25";
+  string dir="WZsynchro"; 
+  //string fileName="template_WZ25";
+  //string fileList="template_WZ25";
+  string fileList=fileName;
   bool mcOnly = false;
 
   //observables **********************
@@ -60,7 +61,7 @@ void template_yieldsWZ_25ns(std::string var){
   bool uncDet=false;
   
   //Lumis( or XSections ) pb-1 & KFactors ************************************
-  string Norm="DNorm";
+  string Norm="";
   
   float lumi=20.4; //pb-1 19470
   float energy=13; //TeV
@@ -74,7 +75,8 @@ void template_yieldsWZ_25ns(std::string var){
   md.anConf.configureLumi( LumisXS, KFactors, lumi, useXS );
 
   //===============================================================  
-  
+      //md.anConf.addSample( "WZTo3LNu"                    , "WZp8"         ,  kGreen+3);
+      
   md.anConf.addSample( "TBar_tWch"               , "Single top" ,  kGray+2); 
   md.anConf.addSample( "T_tWch"                  , "Single top" ,  kGray+2);
   md.anConf.addSample( "TToLeptons_tch"          , "Single top" ,  kGray+2);
@@ -130,7 +132,7 @@ void template_yieldsWZ_25ns(std::string var){
   md.prepareDisplay();
 
   md.doPlot();
-  md.getStatistics("global");
+  //md.getStatistics("global");
   md.savePlot(dir);
   
   //gROOT->ProcessLine(".q");
