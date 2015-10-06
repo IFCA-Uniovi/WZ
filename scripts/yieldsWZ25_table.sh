@@ -40,7 +40,7 @@ if [ ! -d "workdir/logs" ]; then
   mkdir workdir/logs
 fi
 
-> workdir/logs/yieldsWZ25_SSsel.txt
+> workdir/logs/yieldsWZ25.txt
 for iwzstep in ${WZSTEPs[@]}; do
 
       wzstep=$iwzstep
@@ -76,7 +76,7 @@ for iwzstep in ${WZSTEPs[@]}; do
 	      #echo $FILE
 	      #qsub -q all.q -N MPAFjob -o $MPAF/workdir/logs/log_${sr}_${pt}_${mva}_${btag}_${flav}_${LHESYS}${lhe}.out -e $MPAF/workdir/logs/log_${sr}_${pt}_${mva}_${btag}_${flav}_${LHESYS}${lhe}.err $MPAF/scripts/submit.sh $MPAF/cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg              
 	      #analysis -c cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg >& $MPAF/workdir/logs/log_${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.log
-	      root -q -l -b display/cards/listyieldsWZ25.C\(\"${file}\",${wzstep}\) >> workdir/logs/yieldsWZ25_SSsel.txt
+	      root -q -l -b display/cards/listyieldsWZ25.C\(\"${file}\",${wzstep}\) >> workdir/logs/yieldsWZ25.txt
               ilhe=`echo $ilhe +1 | bc`
 
               #ii=`echo $ii +1 | bc`
@@ -85,6 +85,6 @@ for iwzstep in ${WZSTEPs[@]}; do
 	done
 done
 
-sed -i '/Processing/d' workdir/logs/yieldsWZ25_SSsel.txt
-sed -i '/^$/d' workdir/logs/yieldsWZ25_SSsel.txt
+sed -i '/Processing/d' workdir/logs/yieldsWZ25.txt
+sed -i '/^$/d' workdir/logs/yieldsWZ25.txt
 
