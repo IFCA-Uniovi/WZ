@@ -16,7 +16,7 @@ lepW_miniRelIso	5	0	0.4
 lepW_Pt		5	0	100
 lepW_Eta		5	0	2.5
 lepW_SIP3D		5	0	5.0
-htJet40j		10	20. 	800
+htJet40j		20	20. 	800
 mZ1			4	10	300
 MTmin		1	0 	200
 NBJetsLoose25	1	-0.5	7.5
@@ -24,5 +24,5 @@ NBJetsMedium25	1	-0.5	7.5
 NBJetsTight40	1	-0.5  	7.5
 NJets40		1	-0.5  	7.5
 METWZCR			20	0	500
-M3lWZCR			20	0	500
+M3lWZCR			5	0	500
 HTWZCR			20	0	500

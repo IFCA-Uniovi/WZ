@@ -2920,19 +2920,21 @@ DisplayClass::adjustLegend(int iobs, bool skipCoords) {
   if(_normOpts.find("norm")!=_normOpts.end()) legOpt="l";
 	
   if(!_mcOnly)
-    _leg->AddEntry(_gData,"data", legOpt.c_str() );
+    _leg->AddEntry(_gData,Form("data (%.0f)",_hData->Integral()), legOpt.c_str() );
 
   if( _is1D) {
+  double integral_prev = 0;
     for(size_t i=0;i<_nhmc;i++) {
       string nh = (string)( _hClones[i]->GetName());
       if( nh.find("sig")==(size_t)-1) {
-        _leg->AddEntry(_hClones[i],_names[_nhmc-i-1].c_str(),"f");
+        _leg->AddEntry(_hClones[_nhmc-i-1],Form("%s (%.1f)",_names[i].c_str(),(_hClones[_nhmc-i-1]->Integral())-integral_prev),"f");
+        integral_prev = _hClones[_nhmc-i-1]->Integral();
       }
       else {
-        string na = _names[_nhmc-i-1];
-        size_t b = _names[_nhmc-i-1].find("sig");
+        string na = _names[i];
+        size_t b = _names[i].find("sig");
         na.erase(b, 3);	
-        sigs[ na ] = i ;
+        sigs[ na ] = _nhmc-i-1 ;
       }
     }
   }
