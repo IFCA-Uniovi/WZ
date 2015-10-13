@@ -80,22 +80,33 @@ SusyModule::defineLeptonWPS() {
 
 
   //el mva id ======================
-  _elMvaIdWP[kEBC][kLoose] = -0.11;
-  _elMvaIdWP[kEBF][kLoose] = -0.35;
-  _elMvaIdWP[kEE ][kLoose] = -0.55;
+  //Phys14 50ns?
+  // _elMvaIdWP[kEBC][kLoose] = -0.11;
+  // _elMvaIdWP[kEBF][kLoose] = -0.35;
+  // _elMvaIdWP[kEE ][kLoose] = -0.55;
 
-  _elMvaIdWP[kEBC][kTight] = 0.73;
-  _elMvaIdWP[kEBF][kTight] = 0.57;
-  _elMvaIdWP[kEE ][kTight] = 0.05;
+  // _elMvaIdWP[kEBC][kTight] = 0.73;
+  // _elMvaIdWP[kEBF][kTight] = 0.57;
+  // _elMvaIdWP[kEE ][kTight] = 0.05;
+
+  _elMvaIdWP[kEBC][kLoose] = -0.38;
+  _elMvaIdWP[kEBF][kLoose] = -0.49;
+  _elMvaIdWP[kEE ][kLoose] = -0.49;
+
+  _elMvaIdWP[kEBC][kTight] = 0.87;
+  _elMvaIdWP[kEBF][kTight] = 0.60;
+  _elMvaIdWP[kEE ][kTight] = 0.17;
 
   //multiIso =======================
   _multiIsoWP[kMiniIso][kDenom]      = 0.4 ; _multiIsoWP[kPtRatio][kDenom]      = 0   ; _multiIsoWP[kPtRel][kDenom]      = 0  ;
-  _multiIsoWP[kMiniIso][kLoose]      = 0.4 ; _multiIsoWP[kPtRatio][kLoose]      = 0   ; _multiIsoWP[kPtRel][kLoose]      = 0  ;
-  _multiIsoWP[kMiniIso][kMedium]     = 0.14; _multiIsoWP[kPtRatio][kMedium]     = 0.68; _multiIsoWP[kPtRel][kMedium]     = 6.7; 
-  _multiIsoWP[kMiniIso][kTight]      = 0.10; _multiIsoWP[kPtRatio][kTight]      = 0.70; _multiIsoWP[kPtRel][kTight]      = 7  ;
+  _multiIsoWP[kMiniIso][kVLoose]     = 0.25; _multiIsoWP[kPtRatio][kVLoose]     = 0.67; _multiIsoWP[kPtRel][kVLoose]     = 6.0;
+  _multiIsoWP[kMiniIso][kLoose]      = 0.20; _multiIsoWP[kPtRatio][kLoose]      = 0.69; _multiIsoWP[kPtRel][kLoose]      = 6.0;
+  _multiIsoWP[kMiniIso][kMedium]     = 0.16; _multiIsoWP[kPtRatio][kMedium]     = 0.76; _multiIsoWP[kPtRel][kMedium]     = 7.2; 
+  _multiIsoWP[kMiniIso][kTight]      = 0.12; _multiIsoWP[kPtRatio][kTight]      = 0.80; _multiIsoWP[kPtRel][kTight]      = 7.2;
+  _multiIsoWP[kMiniIso][kVTight]     = 0.09; _multiIsoWP[kPtRatio][kVTight]     = 0.84; _multiIsoWP[kPtRel][kVTight]     = 7.2;
 
-  _multiIsoWP[kMiniIso][kSpecFakeEl] = 0.4 ; _multiIsoWP[kPtRatio][kSpecFakeEl] = 0.70; _multiIsoWP[kPtRel][kSpecFakeEl] = 7  ;
-  _multiIsoWP[kMiniIso][kSpecFakeMu] = 0.4 ; _multiIsoWP[kPtRatio][kSpecFakeMu] = 0.68; _multiIsoWP[kPtRel][kSpecFakeMu] = 6.7;
+  _multiIsoWP[kMiniIso][kSpecFakeEl] = 0.4 ; _multiIsoWP[kPtRatio][kSpecFakeEl] = 0.80; _multiIsoWP[kPtRel][kSpecFakeEl] = 7.2;
+  _multiIsoWP[kMiniIso][kSpecFakeMu] = 0.4 ; _multiIsoWP[kPtRatio][kSpecFakeMu] = 0.76; _multiIsoWP[kPtRel][kSpecFakeMu] = 7.2;
 }
 
 
@@ -106,8 +117,8 @@ bool
 SusyModule::multiIsoSel(int idx, int wp) const {
 
   if( _vc->get("LepGood_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
-      (_vc->get("LepGood_jetPtRatio", idx)>_multiIsoWP[kPtRatio][wp] ||
-       _vc->get("LepGood_jetPtRel", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
+      (_vc->get("LepGood_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
+       _vc->get("LepGood_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
   
   return false;
 }
@@ -117,8 +128,8 @@ bool
 SusyModule::multiIsoSelCone(int idx, int wp) const {
 
   if( _vc->get("LepGood_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
-      (conePt(idx)*_vc->get("LepGood_pt",idx) *_vc->get("LepGood_jetPtRatio", idx)>_multiIsoWP[kPtRatio][wp] ||
-       _vc->get("LepGood_jetPtRel", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
+      (conePt(idx)*_vc->get("LepGood_pt",idx) *_vc->get("LepGood_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
+       _vc->get("LepGood_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
   
   return false;
 }
@@ -127,7 +138,7 @@ bool
 SusyModule::invMultiIsoSel(int idx, int wp) const {
   
   if( _vc->get("LepGood_miniRelIso", idx)>_multiIsoWP[kMiniIso][wp]) return false;
-  if( 1./_vc->get("LepGood_jetPtRel", idx) > (1/_multiIsoWP[kPtRel][wp] + _vc->get("LepGood_miniRelIso", idx)) ) return false;
+  if( 1./_vc->get("LepGood_jetPtRelv2", idx) > (1/_multiIsoWP[kPtRel][wp] + _vc->get("LepGood_miniRelIso", idx)) ) return false;
   return true;
 }
 
@@ -140,7 +151,7 @@ SusyModule::elMvaSel(int idx, int wp) const {
   else if(std::abs(_vc->get("LepGood_eta", idx)) < 1.479) etaBin=1;
   else if(std::abs(_vc->get("LepGood_eta", idx)) < 2.5  ) etaBin=2;
 
-  if(_vc->get("LepGood_mvaIdPhys14", idx) <  _elMvaIdWP[etaBin][wp]  ) return false;
+  if(_vc->get("LepGood_mvaIdSpring15", idx) <  _elMvaIdWP[etaBin][wp]  ) return false;
     
   return true;
 }
@@ -382,14 +393,14 @@ SusyModule::bestSSPair(Candidate* c1, const CandList* leps, bool byflav,
 float
 SusyModule::closestJetPt(int idx) const {
 
-  return _vc->get("LepGood_pt", idx) / _vc->get("LepGood_jetPtRatio", idx);
+  return _vc->get("LepGood_pt", idx) / _vc->get("LepGood_jetPtRatiov2", idx);
 }
 
 
 float 
 SusyModule::conePt(int idx, int isoWp) const {
 
-  if(_vc->get("LepGood_jetPtRel", idx) > _multiIsoWP[kPtRel][isoWp] ) {
+  if(_vc->get("LepGood_jetPtRelv2", idx) > _multiIsoWP[kPtRel][isoWp] ) {
     return _vc->get("LepGood_pt", idx)*(1 + std::max((double) 0., _vc->get("LepGood_miniRelIso", idx) - _multiIsoWP[kMiniIso][isoWp] ) );
   }
   return std::max(_vc->get("LepGood_pt", idx), (double) closestJetPt(idx) * _multiIsoWP[kPtRatio][isoWp] );
