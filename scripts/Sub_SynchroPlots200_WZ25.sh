@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# Run this to get validation plots for WZ selection, from rootfiles created with Sub_AnalysisWZ25_plots.sh
+# Run this to get validation plots for WZ selection, from rootfiles created with Sub_AnalysisWZ25_plots_200pb.sh
 
 #REGS=( "ttbar" "ZMuMu" "ZEE" "Zl" "Wl" )
-NAME="WZ3Lplots"
+NAME="WZ3Lplots200"
 DIR="workdir/root/WZsynchro/"
 #FLAVs=( "all" "eee" "eem" "mme" "mmm" )
 FLAVs=( "all" )
 #FLAVs=( "eee" "eem" "mme" "mmm" )
 #WZSTEPs=( "0" )
-WZSTEPs=( "1" "2" "3" "4" "5" "6" )
+WZSTEPs=( "0" "1" "2" "3" "4" "5" "6" )
 
 
 QSQRs=( "1001" )
@@ -32,25 +32,7 @@ if [ ! -z "${PDFrange[0]}" ]; then
 fi
 
 
-VARS=( "lepZ1_jetPtRatio"
-       "lepZ1_jetPtRel"   
-       "lepZ1_miniRelIso" 
-       "lepZ1_Pt"         
-       "lepZ1_Eta"        
-       "lepZ1_SIP3D"      
-       "lepZ2_jetPtRatio" 
-       "lepZ2_jetPtRel"   
-       "lepZ2_miniRelIso" 
-       "lepZ2_Pt"         
-       "lepZ2_Eta"        
-       "lepZ2_SIP3D"      
-       "lepW_jetPtRatio" 
-       "lepW_jetPtRel"   
-       "lepW_miniRelIso" 
-       "lepW_Pt"         
-       "lepW_Eta"        
-       "lepW_SIP3D" 
-       "MET"
+VARS=( "MET"
        "M3l"         
        "HT"         
        "htJet40j"        
@@ -104,7 +86,7 @@ for iwzstep in ${WZSTEPs[@]}; do
   		        for var in ${VARS[@]}; do
 		        	#plot=${reg}_${var}
 		        	plot=${var}_WZSMstep${wzstep}
-		        	root -l -b -q cards/template_plotsWZ_25ns.C\(\"${plot}\",\"${filename}\"\) 
+		        	root -l -b -q cards/template_plotsWZ200_25ns.C\(\"${plot}\",\"${filename}\"\) 
 		
 		        	mv $DIR/png/${plot}.png   $DIR/WZstep${wzstep}/${flav}/${var}.png
 		        	mv $DIR/pdf/${plot}.pdf   $DIR/WZstep${wzstep}/${flav}/${var}.pdf
