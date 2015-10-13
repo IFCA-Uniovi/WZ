@@ -22,6 +22,7 @@ private:
   void run();
   void defineOutput();
   void modifyWeight();
+  double lheWeight();
   void writeOutput();
 
   void modifySkimming();
@@ -29,6 +30,7 @@ private:
   //============================
   bool noIsoSel();
   bool oneIsoSel();
+  bool twoIsoSel();
   float getProbAtLeastNIso(CandList fObjs, vector<unsigned int> idxs, int nIso);
   bool genMatchedMisCharge();
   int genMatchCateg(const Candidate* cand);
@@ -37,6 +39,8 @@ private:
   bool passGenSelection();
   
   float getFR(Candidate* cand, int idx);
+  
+  void chargeFlipProb();
   
   TVector2 varyMET();
 
@@ -115,7 +119,7 @@ private:
 	kBR30H_Fake, kBR30M_Fake, kBR30L_Fake,
 */
 	kGlobalFake,
-	
+	//kGlobalmId,	
 	kWZCR,
 	
 	kWZSM,
@@ -146,6 +150,9 @@ private:
 
   //MM ugly
   std::map<std::string, std::vector<std::vector<std::vector<std::string> > > > _sels;
+  
+  //charge misId
+  bool _isOS;
 
   //fakes
   bool _isFake;
@@ -211,6 +218,7 @@ private:
   string _leptl;
   string _SR;
   string _FR;
+  string _LHESYS;
 
   int _fakeEl;
   int _fakeMu;

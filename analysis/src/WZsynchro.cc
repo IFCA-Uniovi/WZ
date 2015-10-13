@@ -48,11 +48,10 @@ WZsynchro::initialize(){
   _vc->registerVar("LepGood_pdgId"                );
   _vc->registerVar("LepGood_relIso03"             );
   _vc->registerVar("LepGood_relIso04"             );
-  _vc->registerVar("LepGood_jetPtRatio"         );
+  _vc->registerVar("LepGood_jetPtRatio"           );
   _vc->registerVar("LepGood_jetPtRatio_LepAwareJEC");
+  _vc->registerVar("LepGood_jetPtRatiov2"         );
   _vc->registerVar("LepGood_jetPtRel"             );
-  //_vc->registerVar("LepGood_jetPtRatiov2"           );
-  _vc->registerVar("LepGood_jetPtRatio_LepAwareJECv2");
   _vc->registerVar("LepGood_jetPtRelv2"           );
   _vc->registerVar("LepGood_jetBTagCSV"           );
   _vc->registerVar("LepGood_miniRelIso"           );
@@ -102,6 +101,11 @@ WZsynchro::initialize(){
   _vc->registerVar("GenPart_phi"                  );
   _vc->registerVar("GenPart_pdgId"                );
   _vc->registerVar("GenPart_motherId"             );
+
+  //LHE gen level weights
+  _vc->registerVar("nLHEweight"                   );
+  _vc->registerVar("LHEweight_id"                 );
+  _vc->registerVar("LHEweight_wgt"                );
 
   //bjets
   _vc->registerVar("nBJetLoose25"                 );
@@ -192,7 +196,7 @@ WZsynchro::initialize(){
 
   addWorkflow( kGlobalFake, "Fake" );
   addWorkflow( kWZCR, "WZCR");
-  
+  //addWorkflow( kGlobalmId, "mId" );  
   addWorkflow( kWZSM, "WZSM");
   addWorkflow( kWZSM_3l, "WZSMstep0");
   addWorkflow( kWZSM_3lwz, "WZSMstep1");
@@ -229,6 +233,18 @@ WZsynchro::initialize(){
     _dbm->loadDb("Mu","MaySync/CH_FRFile_090615.root","tt/nosel/FRISisofo4RMuPtMIso2");
   }
 
+  //chargeflip DB
+  _dbm->loadDb("chargeMId","superDB.db");
+  
+  
+  int ilhe = (int)atoi(_LHESYS.c_str());
+  bool tmp_ismux = ilhe >= 1001 && ilhe <= 1009;
+  bool tmp_ispdf = ilhe >= 2001 && ilhe <= 2100;
+  
+  if (!tmp_ismux && !tmp_ispdf) {
+    _LHESYS = "0";
+  }
+
 }
 
 void
@@ -236,12 +252,40 @@ WZsynchro::modifyWeight() {
 
   if (_vc->get("isData") != 1) {
     //generator weights
-    _weight *= _vc->get("genWeight");
+    if (_LHESYS == "0") {_weight *= _vc->get("genWeight");}
+    else {_weight *= lheWeight();}
     //pileup weights
     _weight *= _vc->get("puWeight");
   }
 
 }
+
+
+double
+SSDL2015::lheWeight() {
+
+
+  int tmp_nlhe = _vc->get("nLHEweight");
+  //std::cout << "tmp_nlhe=" << tmp_nlhe << std::endl;
+  
+  for (int i = 0; i < tmp_nlhe; i++) {
+        int tmp_lhe_id = _vc->get("LHEweight_id", i);
+	
+      
+        if (tmp_lhe_id == (int)atoi(_LHESYS.c_str())) {
+	  double tmp_lhe_wgt = _vc->get("LHEweight_wgt", i);
+	  
+	  
+          //std::cout << "using weight LHEid[" << i << "]="  << tmp_lhe_id << " LHEvalue=" << tmp_lhe_wgt  <<  std::endl;
+		
+          return tmp_lhe_wgt;
+        }
+      
+  }
+  return 1.0;
+
+}
+
 
 void
 WZsynchro::modifySkimming() {
@@ -504,6 +548,17 @@ WZsynchro::oneIsoSel() {
   return true;
 }
 
+bool
+SSDL2015::twoIsoSel() {
+  
+  if( _fakableLepsVeto10.size()!=2 ) return false;
+
+  float p=getProbAtLeastNIso( _fakableLepsVeto10 ,_fakableLepsVeto10Idx , 2);
+  _weight *= p/(1-p);
+
+  return true;
+}
+
 float
 WZsynchro::getProbAtLeastNIso(CandList fObjs, vector<unsigned int> fObjIdx,
 			      int nIso) {
@@ -615,7 +670,7 @@ WZsynchro::ssLeptonSelection() {
   if(_tightLepsVeto10.size()>=2) { //main
     _isFake=false;
 
-    CandList lepPair=_wzMod->bestSSPair( (&_tightLepsVeto10), true, false, 10, _idxL1, _idxL2);
+    CandList lepPair=_susyMod->bestSSPair( (&_tightLepsVeto10), true, false, 10, _idxL1, _idxL2);
     if(lepPair.size()<2) return false;
     _l1Cand = lepPair[0];
     _l2Cand = lepPair[1];
@@ -624,24 +679,47 @@ WZsynchro::ssLeptonSelection() {
 
     _idxL1 = _tightLepsVeto10Idx[_idxL1];
     _idxL2 = _tightLepsVeto10Idx[_idxL2];
-    
-//    if(!makeCut( _l1Cand->charge()*_l2Cand->charge()>0, "same sign" ) ) return false;
-//    if(!makeCut(_wzMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false), "mll veto") ) return false;
  
     if( _l1Cand->charge()*_l2Cand->charge()<0) return false;
-    if(!_wzMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
+    if(!_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
    
     return true;
   } //MM: validated 2T selection -> sync with CB
    
+  // 2Tight, opposite charge ===================
+
+  if(_tightLepsVeto10.size()>=2) { //main
+    _isFake=false;
+    _isOS=false;
+
+    CandList lepPair=_susyMod->bestSSPair( (&_tightLepsVeto10), true, false, 10, _idxL1, _idxL2);
+    if(lepPair.size()<2) return false;
+    _l1Cand = lepPair[0];
+    _l2Cand = lepPair[1];
+
+    if(_l1Cand==nullptr || _l2Cand==nullptr) return false; //case with less than two leptons or no valid pair
+
+    _idxL1 = _tightLepsVeto10Idx[_idxL1];
+    _idxL2 = _tightLepsVeto10Idx[_idxL2];
+  
+    if( _l1Cand->charge()*_l2Cand->charge()>0) return false;
+    if(!_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
+   
+    return true;
+  }
+   
+
+  //fake stuff==========================================================================================
+
   // 1Tight 1Loose ====================================
   if(_tightLepsVeto10.size()==1 && _fakableLepsVeto10.size()>=1) { // && _fakableLepsVeto10.size()>=1
     _isFake=true;
+    _isOS=false;
+    _dFake=false;
 
-    CandList lepPair=_wzMod->bestSSPair(_tightLepsVeto10[0], (&_fakableLepsVeto10), true, false, 10, _idxL1, _idxL2);
+    CandList lepPair=_susyMod->bestSSPair(_tightLepsVeto10[0], (&_fakableLepsVeto10), true, false, 10, _idxL1, _idxL2);
     
     if(lepPair.size()<2) return false;
-    //cout<<lepPair.size()<<endl;
     _l1Cand = lepPair[0];
     _l2Cand = lepPair[1];
 
@@ -649,29 +727,29 @@ WZsynchro::ssLeptonSelection() {
     _idxL1 = _tightLepsVeto10Idx[0];
     _idxL2 = _fakableLepsVeto10Idx[_idxL2];
     
-    // _l1Cand = _tightLepsVeto10[0];
-    // _l2Cand = _fakableLepsVeto10[0];
+    _l1Cand = _tightLepsVeto10[0];
+    _l2Cand = _fakableLepsVeto10[0];
       
-    // if(_l1Cand==nullptr || _l2Cand==nullptr) return false;
+    if(_l1Cand==nullptr || _l2Cand==nullptr) return false;
       
     //    if(!genMatchedToFake(_idxL1) && !genMatchedToFake(_idxL2) ) return false;
     //if(genMatchedToFake(_idxL1) && genMatchedToFake(_idxL2) ) return false;
 
     if( _l1Cand->charge()*_l2Cand->charge()<0) return false;
-    if(!_wzMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
-//    if(!makeCut( _l1Cand->charge()*_l2Cand->charge()>0, "same sign" ) ) return false;
-//    if(!makeCut(_wzMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false), "mll veto") ) return false;
-    
+    if(!_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
+
     return true;
   }
 
   // 0Tight any loose ====================================
   if(_tightLepsVeto10.size()==0 && _fakableLepsVeto10.size()>=2) {
-
+    _isFake=true;
+    _isOS=false;
+    _dFake=true;
     
-    CandList lepPair=_wzMod->bestSSPair( (&_fakableLepsVeto10), true, false, 10, _idxL1, _idxL2);
+    CandList lepPair=_susyMod->bestSSPair( (&_fakableLepsVeto10), true, false, 10, _idxL1, _idxL2);
     if(lepPair.size()<2) return false;
-    //cout<<lepPair.size()<<endl;
+
     _l1Cand = lepPair[0];
     _l2Cand = lepPair[1];
 
@@ -683,7 +761,7 @@ WZsynchro::ssLeptonSelection() {
     //    if(!genMatchedToFake(_idxL1) || !genMatchedToFake(_idxL2) ) return false;
 
     if(!makeCut( _l1Cand->charge()*_l2Cand->charge()>0, "same sign" ) ) return false;
-    if(!makeCut(_wzMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false), "mll veto") ) return false;
+    if(!makeCut(_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false), "mll veto") ) return false;
 
     return true;
 
@@ -711,8 +789,8 @@ WZsynchro::ssLeptonSelection() {
   //   _idxL2 = _fakableObjectsIdx[0];
 
   //   //check the vetos MM: to be fixed
-  //   if(!_wzMod->mllLMGVeto(_l1Cand, _l2Cand) ) return false;
-  //   if(!_wzMod->mllZVeto(_l1Cand, _l2Cand) ) return false;
+  //   if(!_susyMod->mllLMGVeto(_l1Cand, _l2Cand) ) return false;
+  //   if(!_susyMod->mllZVeto(_l1Cand, _l2Cand) ) return false;
 
   //   if(!makeCut( _l1Cand->charge()*_l2Cand->charge()>0, "same sign" ) ) return false;
     
@@ -1544,7 +1622,15 @@ WZsynchro::getFR(Candidate* cand, int idx) {
 }
 
 
+void
+SSDL2015::chargeFlipProb() {
 
+  float p1=_dbm->getDBValue("chargeMId", std::abs(_l1Cand->eta()), _l1Cand->pt());
+  float p2=_dbm->getDBValue("chargeMId", std::abs(_l2Cand->eta()), _l2Cand->pt());
+  float w=p1+p2-2*p1*p2;
+
+  _weight *= w;
+}
 
 //===============================================================
 //===============================================================
