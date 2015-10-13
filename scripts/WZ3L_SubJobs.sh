@@ -4,12 +4,12 @@
 #templateCFG=template_fakeEstim.cfg
 templateCFG=template_WZ3l.cfg
 
-NAME="WZ3L"
+NAME="WZ3L1file"
 FLAVs=( "all" "eee" "eem" "mme" "mmm" )
 #FLAVs=( "all" )
 #FLAVs=( "eee" "eem" "mme" "mmm" )
 #WZSTEPs=( "4" "3" "2" "1" "0" )
-WZSTEPs=( "0" "1" "2" "3" "4" "5" "6" )
+WZSTEPs=( "6" )
 
 QSQRs=( "1001" )
 #QSQRs=( "1001" "1002" "1003" "1004" "1005" "1006" "1007" "1008" "1009" )
