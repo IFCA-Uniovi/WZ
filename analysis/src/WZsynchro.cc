@@ -958,7 +958,19 @@ WZsynchro::WZ3lSelection() {
   //step 0 only 3 leptons with pt > 10 GeV
   if(!makeCut(_tightLeps10.size()==3,"Three leptons")) return;
   //if (_WZstep == 0) fillWZhistos(0.0, 0.0);
+  CandList l3 =_wzMod->ThreeLeps( (&_tightLeps10));
+  
+  int munumber = 0;
+  if(std::abs(l3[0]->pdgId())==13 ) munumber++;
+  if(std::abs(l3[1]->pdgId())==13 ) munumber++;
+  if(std::abs(l3[2]->pdgId())==13 ) munumber++;
+  if (_lepflav=="eee" && munumber!=0) return;
+  if (_lepflav=="eem" && munumber!=1) return;
+  if (_lepflav=="mme" && munumber!=2) return;
+  if (_lepflav=="mmm" && munumber!=3) return;
+  
   setWorkflow(kWZSM_3l); fillWZhistos(0.,0.,"WZSMstep0"); setWorkflow(kWZSM);
+
 
   CandList candWZ =_wzMod->bestWZ( (&_tightLeps10), _idxLZ1, _idxLZ2, _idxLW);
   

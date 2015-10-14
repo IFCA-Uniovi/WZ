@@ -81,14 +81,14 @@ SusyModule::defineLeptonWPS() {
 
   //el mva id ======================
   //Phys14 50ns?
-  // _elMvaIdWP[kEBC][kLoose] = -0.11;
-  // _elMvaIdWP[kEBF][kLoose] = -0.35;
-  // _elMvaIdWP[kEE ][kLoose] = -0.55;
+   _elMvaIdWP[kEBC][kLoose] = -0.11;
+   _elMvaIdWP[kEBF][kLoose] = -0.35;
+   _elMvaIdWP[kEE ][kLoose] = -0.55;
 
-  // _elMvaIdWP[kEBC][kTight] = 0.73;
-  // _elMvaIdWP[kEBF][kTight] = 0.57;
-  // _elMvaIdWP[kEE ][kTight] = 0.05;
-
+   _elMvaIdWP[kEBC][kTight] = 0.73;
+   _elMvaIdWP[kEBF][kTight] = 0.57;
+   _elMvaIdWP[kEE ][kTight] = 0.05;
+/*
   _elMvaIdWP[kEBC][kLoose] = -0.38;
   _elMvaIdWP[kEBF][kLoose] = -0.49;
   _elMvaIdWP[kEE ][kLoose] = -0.49;
@@ -96,7 +96,7 @@ SusyModule::defineLeptonWPS() {
   _elMvaIdWP[kEBC][kTight] = 0.87;
   _elMvaIdWP[kEBF][kTight] = 0.60;
   _elMvaIdWP[kEE ][kTight] = 0.17;
-
+*/
   //multiIso =======================
   _multiIsoWP[kMiniIso][kDenom]      = 0.4 ; _multiIsoWP[kPtRatio][kDenom]      = 0   ; _multiIsoWP[kPtRel][kDenom]      = 0  ;
   _multiIsoWP[kMiniIso][kVLoose]     = 0.25; _multiIsoWP[kPtRatio][kVLoose]     = 0.67; _multiIsoWP[kPtRel][kVLoose]     = 6.0;
@@ -151,7 +151,7 @@ SusyModule::elMvaSel(int idx, int wp) const {
   else if(std::abs(_vc->get("LepGood_eta", idx)) < 1.479) etaBin=1;
   else if(std::abs(_vc->get("LepGood_eta", idx)) < 2.5  ) etaBin=2;
 
-  if(_vc->get("LepGood_mvaIdSpring15", idx) <  _elMvaIdWP[etaBin][wp]  ) return false;
+  if(_vc->get("LepGood_mvaIdPhys14", idx) <  _elMvaIdWP[etaBin][wp]  ) return false;
     
   return true;
 }
