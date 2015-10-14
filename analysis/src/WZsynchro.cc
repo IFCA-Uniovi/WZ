@@ -234,7 +234,7 @@ WZsynchro::initialize(){
   }
 
   //chargeflip DB
-  _dbm->loadDb("chargeMId","superDB.db");
+  //_dbm->loadDb("chargeMId","superDB.db");
   
   
   int ilhe = (int)atoi(_LHESYS.c_str());
@@ -262,7 +262,7 @@ WZsynchro::modifyWeight() {
 
 
 double
-SSDL2015::lheWeight() {
+WZsynchro::lheWeight() {
 
 
   int tmp_nlhe = _vc->get("nLHEweight");
@@ -549,7 +549,7 @@ WZsynchro::oneIsoSel() {
 }
 
 bool
-SSDL2015::twoIsoSel() {
+WZsynchro::twoIsoSel() {
   
   if( _fakableLepsVeto10.size()!=2 ) return false;
 
@@ -670,7 +670,7 @@ WZsynchro::ssLeptonSelection() {
   if(_tightLepsVeto10.size()>=2) { //main
     _isFake=false;
 
-    CandList lepPair=_susyMod->bestSSPair( (&_tightLepsVeto10), true, false, 10, _idxL1, _idxL2);
+    CandList lepPair=_wzMod->bestSSPair( (&_tightLepsVeto10), true, false, 10, _idxL1, _idxL2);
     if(lepPair.size()<2) return false;
     _l1Cand = lepPair[0];
     _l2Cand = lepPair[1];
@@ -681,7 +681,7 @@ WZsynchro::ssLeptonSelection() {
     _idxL2 = _tightLepsVeto10Idx[_idxL2];
  
     if( _l1Cand->charge()*_l2Cand->charge()<0) return false;
-    if(!_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
+    if(!_wzMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
    
     return true;
   } //MM: validated 2T selection -> sync with CB
@@ -692,7 +692,7 @@ WZsynchro::ssLeptonSelection() {
     _isFake=false;
     _isOS=false;
 
-    CandList lepPair=_susyMod->bestSSPair( (&_tightLepsVeto10), true, false, 10, _idxL1, _idxL2);
+    CandList lepPair=_wzMod->bestSSPair( (&_tightLepsVeto10), true, false, 10, _idxL1, _idxL2);
     if(lepPair.size()<2) return false;
     _l1Cand = lepPair[0];
     _l2Cand = lepPair[1];
@@ -703,7 +703,7 @@ WZsynchro::ssLeptonSelection() {
     _idxL2 = _tightLepsVeto10Idx[_idxL2];
   
     if( _l1Cand->charge()*_l2Cand->charge()>0) return false;
-    if(!_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
+    if(!_wzMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
    
     return true;
   }
@@ -717,7 +717,7 @@ WZsynchro::ssLeptonSelection() {
     _isOS=false;
     _dFake=false;
 
-    CandList lepPair=_susyMod->bestSSPair(_tightLepsVeto10[0], (&_fakableLepsVeto10), true, false, 10, _idxL1, _idxL2);
+    CandList lepPair=_wzMod->bestSSPair(_tightLepsVeto10[0], (&_fakableLepsVeto10), true, false, 10, _idxL1, _idxL2);
     
     if(lepPair.size()<2) return false;
     _l1Cand = lepPair[0];
@@ -736,7 +736,7 @@ WZsynchro::ssLeptonSelection() {
     //if(genMatchedToFake(_idxL1) && genMatchedToFake(_idxL2) ) return false;
 
     if( _l1Cand->charge()*_l2Cand->charge()<0) return false;
-    if(!_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
+    if(!_wzMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
 
     return true;
   }
@@ -747,7 +747,7 @@ WZsynchro::ssLeptonSelection() {
     _isOS=false;
     _dFake=true;
     
-    CandList lepPair=_susyMod->bestSSPair( (&_fakableLepsVeto10), true, false, 10, _idxL1, _idxL2);
+    CandList lepPair=_wzMod->bestSSPair( (&_fakableLepsVeto10), true, false, 10, _idxL1, _idxL2);
     if(lepPair.size()<2) return false;
 
     _l1Cand = lepPair[0];
@@ -761,7 +761,7 @@ WZsynchro::ssLeptonSelection() {
     //    if(!genMatchedToFake(_idxL1) || !genMatchedToFake(_idxL2) ) return false;
 
     if(!makeCut( _l1Cand->charge()*_l2Cand->charge()>0, "same sign" ) ) return false;
-    if(!makeCut(_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false), "mll veto") ) return false;
+    if(!makeCut(_wzMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false), "mll veto") ) return false;
 
     return true;
 
@@ -789,8 +789,8 @@ WZsynchro::ssLeptonSelection() {
   //   _idxL2 = _fakableObjectsIdx[0];
 
   //   //check the vetos MM: to be fixed
-  //   if(!_susyMod->mllLMGVeto(_l1Cand, _l2Cand) ) return false;
-  //   if(!_susyMod->mllZVeto(_l1Cand, _l2Cand) ) return false;
+  //   if(!_wzMod->mllLMGVeto(_l1Cand, _l2Cand) ) return false;
+  //   if(!_wzMod->mllZVeto(_l1Cand, _l2Cand) ) return false;
 
   //   if(!makeCut( _l1Cand->charge()*_l2Cand->charge()>0, "same sign" ) ) return false;
     
@@ -1623,13 +1623,13 @@ WZsynchro::getFR(Candidate* cand, int idx) {
 
 
 void
-SSDL2015::chargeFlipProb() {
-
+WZsynchro::chargeFlipProb() {
+/*
   float p1=_dbm->getDBValue("chargeMId", std::abs(_l1Cand->eta()), _l1Cand->pt());
   float p2=_dbm->getDBValue("chargeMId", std::abs(_l2Cand->eta()), _l2Cand->pt());
   float w=p1+p2-2*p1*p2;
 
-  _weight *= w;
+  _weight *= w;*/
 }
 
 //===============================================================

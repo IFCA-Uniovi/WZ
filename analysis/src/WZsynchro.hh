@@ -156,6 +156,7 @@ private:
 
   //fakes
   bool _isFake;
+  bool _dFake;
   int _idxFake;
 
   CandList _looseLeps;
