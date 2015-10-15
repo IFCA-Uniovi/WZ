@@ -22,6 +22,7 @@ private:
   void run();
   void defineOutput();
   void modifyWeight();
+  double lheWeight();
   void writeOutput();
 
   void modifySkimming();
@@ -29,6 +30,7 @@ private:
   //============================
   bool noIsoSel();
   bool oneIsoSel();
+  bool twoIsoSel();
   float getProbAtLeastNIso(CandList fObjs, vector<unsigned int> idxs, int nIso);
   bool genMatchedMisCharge();
   int genMatchCateg(const Candidate* cand);
@@ -37,6 +39,8 @@ private:
   bool passGenSelection();
   
   float getFR(Candidate* cand, int idx);
+  
+  void chargeFlipProb();
   
   TVector2 varyMET();
 
@@ -77,7 +81,7 @@ private:
   //counter categories, 0 is ALWAYS global (even if not specified later
   //enum {kGlobal=0,kLowMETMT,kGenFake,kGenMisCharge,kOneIso,kNoIso, kSelId};
   enum {kGlobal=0,
-	
+	/*
 	kSR1A, kSR2A, kSR3A, kSR4A, kSR5A, kSR6A, kSR7A, kSR8A,
 	kSR9A, kSR10A, kSR11A, kSR12A, kSR13A, kSR14A, kSR15A, kSR16A,
 	kSR17A, kSR18A, kSR19A, kSR20A, kSR21A, kSR22A, kSR23A, kSR24A,
@@ -113,10 +117,19 @@ private:
 	kBR10H_Fake, kBR10M_Fake, kBR10L_Fake,
 	kBR20H_Fake, kBR20M_Fake, kBR20L_Fake,
 	kBR30H_Fake, kBR30M_Fake, kBR30L_Fake,
-
+*/
 	kGlobalFake,
+	//kGlobalmId,	
+	kWZCR,
 	
-	kWZCR
+	kWZSM,
+	kWZSM_3l,
+	kWZSM_3lwz,
+	kWZSM_3lwzZsel,
+	kWZSM_3lwzZselWsel,
+	kWZSM_3lwzZselWselM3l,
+	kWZSM_3lwzZselWselM3lNbj1,
+	kWZSM_3lwzZselWselM3lNbj0
   };
 
   enum {kNoGenMatch=0, kMisMatchPdgId,
@@ -137,9 +150,13 @@ private:
 
   //MM ugly
   std::map<std::string, std::vector<std::vector<std::vector<std::string> > > > _sels;
+  
+  //charge misId
+  bool _isOS;
 
   //fakes
   bool _isFake;
+  bool _dFake;
   int _idxFake;
 
   CandList _looseLeps;
@@ -202,6 +219,7 @@ private:
   string _leptl;
   string _SR;
   string _FR;
+  string _LHESYS;
 
   int _fakeEl;
   int _fakeMu;
@@ -228,7 +246,7 @@ private:
   
   void fillhistos();
   void fillValidationHistos(std::string reg);
-  void fillWZhistos(double mt, double mtmin, bool doPlots);
+  void fillWZhistos(double mt, double mtmin, std::string reg);
 };
 
 

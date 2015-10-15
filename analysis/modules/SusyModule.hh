@@ -4,6 +4,7 @@
 #include "analysis/core/VarClass.hh"
 #include "analysis/tools/Candidate.hh"
 #include "analysis/utils/KineUtils.hh"
+#include "analysis/utils/mt2_bisect.h"
 
 #include "tools/src/DataBaseManager.hh"
 
@@ -52,9 +53,11 @@ public:
   void applySingleLepSF(const Candidate* cand, float& weight);
 
   enum {kDenom=0,
+	kVLoose,
 	kLoose,
 	kMedium,
 	kTight,
+	kVTight,
 	kSpecFakeEl,
 	kSpecFakeMu,
 	kNWPs};

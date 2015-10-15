@@ -1,11 +1,11 @@
  #!/bin/bash
 
-#Run to generate rootfiles to be used for creating WZ validation plots, with Sub_SynchroPlots_WZ25.sh
+#Run to generate rootfiles to be used for creating WZ validation plots with 200pb-1, with Sub_SynchroPlots_WZ25.sh
 #usage from MPAF folder: source scripts/phys14exerc_SubJobs.sh
 #templateCFG=template_fakeEstim.cfg
-templateCFG=template_WZ25_plots.cfg
+templateCFG=template_WZ25plots_200pb.cfg
 
-NAME="WZ3Lplots"
+NAME="WZ3Lplots200"
 #FLAVs=( "all" "eee" "eem" "mme" "mmm" )
 FLAVs=( "all" )
 #FLAVs=( "eee" "eem" "mme" "mmm" )

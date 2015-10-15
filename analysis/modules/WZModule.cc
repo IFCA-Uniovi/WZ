@@ -88,3 +88,11 @@ CandList WZModule::bestZ(const CandList* leps, int& idxZ1, int& idxZ2) {
   return clist;
 }
 
+
+CandList WZModule::ThreeLeps(const CandList* leps) {
+  CandList clist(3,NULL);
+  clist[0] = leps->at(0);
+  clist[1] = leps->at(1);
+  clist[2] = leps->at(2);
+  return clist;
+}

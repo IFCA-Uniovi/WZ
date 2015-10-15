@@ -50,7 +50,9 @@ WZsynchro::initialize(){
   _vc->registerVar("LepGood_relIso04"             );
   _vc->registerVar("LepGood_jetPtRatio"           );
   _vc->registerVar("LepGood_jetPtRatio_LepAwareJEC");
+  _vc->registerVar("LepGood_jetPtRatiov2"         );
   _vc->registerVar("LepGood_jetPtRel"             );
+  _vc->registerVar("LepGood_jetPtRelv2"           );
   _vc->registerVar("LepGood_jetBTagCSV"           );
   _vc->registerVar("LepGood_miniRelIso"           );
   _vc->registerVar("LepGood_dxy"                  );
@@ -99,6 +101,11 @@ WZsynchro::initialize(){
   _vc->registerVar("GenPart_phi"                  );
   _vc->registerVar("GenPart_pdgId"                );
   _vc->registerVar("GenPart_motherId"             );
+
+  //LHE gen level weights
+  _vc->registerVar("nLHEweight"                   );
+  _vc->registerVar("LHEweight_id"                 );
+  _vc->registerVar("LHEweight_wgt"                );
 
   //bjets
   _vc->registerVar("nBJetLoose25"                 );
@@ -184,11 +191,20 @@ WZsynchro::initialize(){
   for(size_t ic=0;ic< _categs.size();ic++) {
     _SR = _categs[ic];
     setSignalRegions();
-    addWorkflow( ic+1, _categs[ic] );
+    //addWorkflow( ic+1, _categs[ic] );
   }
 
   addWorkflow( kGlobalFake, "Fake" );
   addWorkflow( kWZCR, "WZCR");
+  //addWorkflow( kGlobalmId, "mId" );  
+  addWorkflow( kWZSM, "WZSM");
+  addWorkflow( kWZSM_3l, "WZSMstep0");
+  addWorkflow( kWZSM_3lwz, "WZSMstep1");
+  addWorkflow( kWZSM_3lwzZsel, "WZSMstep2");
+  addWorkflow( kWZSM_3lwzZselWsel, "WZSMstep3");
+  addWorkflow( kWZSM_3lwzZselWselM3l, "WZSMstep4");
+  addWorkflow( kWZSM_3lwzZselWselM3lNbj1, "WZSMstep5");
+  addWorkflow( kWZSM_3lwzZselWselM3lNbj0, "WZSMstep6");  
   
   //extra input variables
   _lepflav = getCfgVarS("LEPFLAV");
@@ -217,6 +233,18 @@ WZsynchro::initialize(){
     _dbm->loadDb("Mu","MaySync/CH_FRFile_090615.root","tt/nosel/FRISisofo4RMuPtMIso2");
   }
 
+  //chargeflip DB
+  //_dbm->loadDb("chargeMId","superDB.db");
+  
+  
+  int ilhe = (int)atoi(_LHESYS.c_str());
+  bool tmp_ismux = ilhe >= 1001 && ilhe <= 1009;
+  bool tmp_ispdf = ilhe >= 2001 && ilhe <= 2100;
+  
+  if (!tmp_ismux && !tmp_ispdf) {
+    _LHESYS = "0";
+  }
+
 }
 
 void
@@ -224,12 +252,40 @@ WZsynchro::modifyWeight() {
 
   if (_vc->get("isData") != 1) {
     //generator weights
-    _weight *= _vc->get("genWeight");
+    if (_LHESYS == "0") {_weight *= _vc->get("genWeight");}
+    else {_weight *= lheWeight();}
     //pileup weights
     _weight *= _vc->get("puWeight");
   }
 
 }
+
+
+double
+WZsynchro::lheWeight() {
+
+
+  int tmp_nlhe = _vc->get("nLHEweight");
+  //std::cout << "tmp_nlhe=" << tmp_nlhe << std::endl;
+  
+  for (int i = 0; i < tmp_nlhe; i++) {
+        int tmp_lhe_id = _vc->get("LHEweight_id", i);
+	
+      
+        if (tmp_lhe_id == (int)atoi(_LHESYS.c_str())) {
+	  double tmp_lhe_wgt = _vc->get("LHEweight_wgt", i);
+	  
+	  
+          //std::cout << "using weight LHEid[" << i << "]="  << tmp_lhe_id << " LHEvalue=" << tmp_lhe_wgt  <<  std::endl;
+		
+          return tmp_lhe_wgt;
+        }
+      
+  }
+  return 1.0;
+
+}
+
 
 void
 WZsynchro::modifySkimming() {
@@ -242,59 +298,66 @@ WZsynchro::defineOutput() {
   ///////////////////////////////////////////////////////////////////////////
   // GLOBAL PLOTS:  These plots are drawn for every SR
   ///////////////////////////////////////////////////////////////////////////
-  _hm->addVariable("l1Pt"  , 150, 0.,  150, "p_{T}(l_{1}) [GeV]"                 );
-  _hm->addVariable("l2Pt"  , 150, 0.,  150, "p_{T}(l_{2}) [GeV]"                 );
-  _hm->addVariable("MET"   , 500, 0. , 500, "#slash{E}_{T} [GeV]"                );
-  _hm->addVariable("HT"    , 800, 0. , 800, "H_{T} [GeV]"                        );
-  _hm->addVariable("MT"    , 200, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]"        );
-  _hm->addVariable("NBJets",   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)");
-  _hm->addVariable("NJets" ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)"          );
-  _hm->addVariable("M3l"   , 250, 0.,  500, "M_{3l} [GeV]"            );
+  _hm->addVariable("l1Pt_"  , 150, 0.,  150, "p_{T}(l_{1}) [GeV]"                 );
+  _hm->addVariable("l2Pt_"  , 150, 0.,  150, "p_{T}(l_{2}) [GeV]"                 );
+  _hm->addVariable("MET_"   , 500, 0. , 500, "#slash{E}_{T} [GeV]"                );
+  _hm->addVariable("HT_"    , 800, 0. , 800, "H_{T} [GeV]"                        );
+  _hm->addVariable("MT_"    , 200, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]"        );
+  _hm->addVariable("NBJets_",   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)");
+  _hm->addVariable("NJets_" ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)"          );
+  _hm->addVariable("M3l_"   , 3000, 0.,  3000, "M_{3l} [GeV]"            );
+
+
+  vector<string> reg;
+  //reg.push_back("WZSM");
+  reg.push_back("WZSMstep0");
+  reg.push_back("WZSMstep1");
+  reg.push_back("WZSMstep2");
+  reg.push_back("WZSMstep3");
+  reg.push_back("WZSMstep4");
+  reg.push_back("WZSMstep5");
+  reg.push_back("WZSMstep6");
+
+    
+  for (size_t r=0; r<reg.size(); r++) {
+    // lepton variables
+    _hm->addVariable("lepZ1_jetPtRatio_"+reg[r], 100, 0., 1.2, "Z Leading Lepton Jet p_{T} Ratio [GeV]", false);
+    _hm->addVariable("lepZ1_jetPtRel_"+reg[r]  , 100, 0., 80., "Z Leading Lepton Jet p_{T} Rel   [GeV]", false);
+    _hm->addVariable("lepZ1_miniRelIso_"+reg[r], 100, 0., 0.4, "Z Leading Lepton Isolation", false);
+    _hm->addVariable("lepZ1_Pt_"+reg[r]        , 300, 0., 300, "Z Leading Lepton p_{T} [GeV]", false);
+    _hm->addVariable("lepZ1_Eta_"+reg[r]       , 100, 0., 2.5, "Z Leading Lepton #eta", false);
+    _hm->addVariable("lepZ1_SIP3D_"+reg[r]     , 100, 0., 5.0, "Z Leading Lepton SIP_{3D}", false);
+    _hm->addVariable("lepZ2_jetPtRatio_"+reg[r], 100, 0., 1.2, "Z Subleading Lepton Jet p_{T} Ratio [GeV]", false);
+    _hm->addVariable("lepZ2_jetPtRel_"+reg[r]  , 100, 0., 80., "Z Subleading Lepton Jet p_{T} Rel   [GeV]", false);
+    _hm->addVariable("lepZ2_miniRelIso_"+reg[r], 100, 0., 0.4, "Z Subleading Lepton Isolation", false);
+    _hm->addVariable("lepZ2_Pt_"+reg[r]        , 300, 0., 300, "Z Subleading Lepton p_{T} [GeV]", false);
+    _hm->addVariable("lepZ2_Eta_"+reg[r]       , 100, 0., 2.5, "Z Subleading Lepton #eta", false);
+    _hm->addVariable("lepZ2_SIP3D_"+reg[r]     , 100, 0., 5.0, "Z Subleading Lepton SIP_{3D}", false);
+    _hm->addVariable("lepW_jetPtRatio_"+reg[r], 100, 0., 1.2, "W Lepton Jet p_{T} Ratio [GeV]", false);
+    _hm->addVariable("lepW_jetPtRel_"+reg[r]  , 100, 0., 80., "W Lepton Jet p_{T} Rel   [GeV]", false);
+    _hm->addVariable("lepW_miniRelIso_"+reg[r], 100, 0., 0.4, "W Lepton Isolation", false);
+    _hm->addVariable("lepW_Pt_"+reg[r]        , 300, 0., 300, "W Lepton p_{T} [GeV]", false);
+    _hm->addVariable("lepW_Eta_"+reg[r]       , 100, 0., 2.5, "W Lepton #eta", false);
+    _hm->addVariable("lepW_SIP3D_"+reg[r]     , 100, 0., 5.0, "W Lepton SIP_{3D}", false);
+    
+    // event variables 
+    //_hm->addVariable("MET"            , 500, 0. , 500, "#slash{E}_{T} [GeV]", false);
+    _hm->addVariable("htJet40j_"+reg[r]       , 800, 0. , 800, "H_{T} [GeV]", false);
+    _hm->addVariable("mZ1_"+reg[r]            , 800, 0. , 800, "best m_{l^{+}l^{-}} [GeV]", false);
+    _hm->addVariable("MTmin_"+reg[r]          ,  20, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]", false);
+    _hm->addVariable("NBJetsLoose25_"+reg[r]  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, loose)", false);
+    _hm->addVariable("NBJetsMedium25_"+reg[r] ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)", false);
+    _hm->addVariable("NBJetsTight40_"+reg[r]  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)", false);
+    _hm->addVariable("NJets40_"+reg[r]        ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)", false);
+    //_hm->addVariable("m3l"             , 250, 0.,  500, "M_{3l} [GeV]", false);
+  }
 
   if(!_DoValidationPlots) return; 
   ///////////////////////////////////////////////////////////////////////////
   // VALIDATION PLOTS:  plotting these varibles for a general SS selection //
   ///////////////////////////////////////////////////////////////////////////
-  /*
-  vector<string> reg;
-  reg.push_back("ttbar");
-  reg.push_back("ZMuMu");
-  reg.push_back("ZEE");
-  reg.push_back("Zl");
-  reg.push_back("Wl");
-  */
-  //for (size_t r=0; r<reg.size(); r++) {
-    // lepton variables
-    _hm->addVariable("lepZ1_jetPtRatio", 100, 0., 1.2, "Z Leading Lepton Jet p_{T} Ratio [GeV]", false);
-    _hm->addVariable("lepZ1_jetPtRel"  , 100, 0., 40., "Z Leading Lepton Jet p_{T} Rel   [GeV]", false);
-    _hm->addVariable("lepZ1_miniRelIso", 100, 0., 0.4, "Z Leading Lepton Isolation", false);
-    _hm->addVariable("lepZ1_Pt"        , 100, 0., 100, "Z Leading Lepton p_{T} [GeV]", false);
-    _hm->addVariable("lepZ1_Eta"       , 100, 0., 2.5, "Z Leading Lepton #eta", false);
-    _hm->addVariable("lepZ1_SIP3D"     , 100, 0., 5.0, "Z Leading Lepton SIP_{3D}", false);
-    _hm->addVariable("lepZ2_jetPtRatio", 100, 0., 1.2, "Z Subleading Lepton Jet p_{T} Ratio [GeV]", false);
-    _hm->addVariable("lepZ2_jetPtRel"  , 100, 0., 40., "Z Subleading Lepton Jet p_{T} Rel   [GeV]", false);
-    _hm->addVariable("lepZ2_miniRelIso", 100, 0., 0.4, "Z Subleading Lepton Isolation", false);
-    _hm->addVariable("lepZ2_Pt"        , 100, 0., 100, "Z Subleading Lepton p_{T} [GeV]", false);
-    _hm->addVariable("lepZ2_Eta"       , 100, 0., 2.5, "Z Subleading Lepton #eta", false);
-    _hm->addVariable("lepZ2_SIP3D"     , 100, 0., 5.0, "Z Subleading Lepton SIP_{3D}", false);
-    _hm->addVariable("lepW_jetPtRatio", 100, 0., 1.2, "W Lepton Jet p_{T} Ratio [GeV]", false);
-    _hm->addVariable("lepW_jetPtRel"  , 100, 0., 40., "W Lepton Jet p_{T} Rel   [GeV]", false);
-    _hm->addVariable("lepW_miniRelIso", 100, 0., 0.4, "W Lepton Isolation", false);
-    _hm->addVariable("lepW_Pt"        , 100, 0., 100, "W Lepton p_{T} [GeV]", false);
-    _hm->addVariable("lepW_Eta"       , 100, 0., 2.5, "W Lepton #eta", false);
-    _hm->addVariable("lepW_SIP3D"     , 100, 0., 5.0, "W Lepton SIP_{3D}", false);
-    
-    // event variables 
-    //_hm->addVariable("MET"            , 500, 0. , 500, "#slash{E}_{T} [GeV]", false);
-    _hm->addVariable("htJet40j"       , 800, 0. , 800, "H_{T} [GeV]", false);
-    _hm->addVariable("mZ1"            , 300, 0. , 300, "best m_{l^{+}l^{-}} [GeV]", false);
-    _hm->addVariable("MTmin"          ,  20, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]", false);
-    _hm->addVariable("NBJetsLoose25"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, loose)", false);
-    _hm->addVariable("NBJetsMedium25" ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)", false);
-    _hm->addVariable("NBJetsTight40"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)", false);
-    _hm->addVariable("NJets40"        ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)", false);
-    _hm->addVariable("m3l"             , 250, 0.,  500, "M_{3l} [GeV]", false);
-  //}
+  
+
 
 
   
@@ -326,7 +389,7 @@ WZsynchro::run() {
     WZ3lSelection();
     return;
   }
-
+/*
   if(_DoValidationPlots) {
     if (ttbarSelection())   fillValidationHistos("ttbar");
     if (ZlSelection())      fillValidationHistos("Zl");
@@ -334,7 +397,7 @@ WZsynchro::run() {
     if (ZMuMuSelection())   fillValidationHistos("ZMuMu");
     if (ZEESelection())     fillValidationHistos("ZEE");
   }
-  
+  */
   //  return;
 
   if(!makeCut(ssLeptonSelection(),"SS Selection")) {
@@ -377,7 +440,7 @@ WZsynchro::run() {
   }
   else setWorkflow(kGlobalFake);
   
-  
+  /*
   counter("lepton baseline");
 
   //default cuts for baseline
@@ -436,7 +499,7 @@ WZsynchro::run() {
   if(_categorization) {
     fillhistos();//fill histos for SR and BR  (and the SR_Fake and BR_Fake)
   }
-  
+  */
   if( getCurrentWorkflow()==0) return; //getCurrentWorkflow()==100 ||
 
   //cout<<_vc->get("evt")<<"   "<<_jets[0]->pt()<<endl;
@@ -480,6 +543,17 @@ WZsynchro::oneIsoSel() {
   if( _fakableLepsVeto10.size()!=1 ) return false;
 
   float p=getProbAtLeastNIso( _fakableLepsVeto10 ,_fakableLepsVeto10Idx , 1);
+  _weight *= p/(1-p);
+
+  return true;
+}
+
+bool
+WZsynchro::twoIsoSel() {
+  
+  if( _fakableLepsVeto10.size()!=2 ) return false;
+
+  float p=getProbAtLeastNIso( _fakableLepsVeto10 ,_fakableLepsVeto10Idx , 2);
   _weight *= p/(1-p);
 
   return true;
@@ -605,9 +679,6 @@ WZsynchro::ssLeptonSelection() {
 
     _idxL1 = _tightLepsVeto10Idx[_idxL1];
     _idxL2 = _tightLepsVeto10Idx[_idxL2];
-    
-//    if(!makeCut( _l1Cand->charge()*_l2Cand->charge()>0, "same sign" ) ) return false;
-//    if(!makeCut(_wzMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false), "mll veto") ) return false;
  
     if( _l1Cand->charge()*_l2Cand->charge()<0) return false;
     if(!_wzMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
@@ -615,14 +686,40 @@ WZsynchro::ssLeptonSelection() {
     return true;
   } //MM: validated 2T selection -> sync with CB
    
+  // 2Tight, opposite charge ===================
+
+  if(_tightLepsVeto10.size()>=2) { //main
+    _isFake=false;
+    _isOS=false;
+
+    CandList lepPair=_wzMod->bestSSPair( (&_tightLepsVeto10), true, false, 10, _idxL1, _idxL2);
+    if(lepPair.size()<2) return false;
+    _l1Cand = lepPair[0];
+    _l2Cand = lepPair[1];
+
+    if(_l1Cand==nullptr || _l2Cand==nullptr) return false; //case with less than two leptons or no valid pair
+
+    _idxL1 = _tightLepsVeto10Idx[_idxL1];
+    _idxL2 = _tightLepsVeto10Idx[_idxL2];
+  
+    if( _l1Cand->charge()*_l2Cand->charge()>0) return false;
+    if(!_wzMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
+   
+    return true;
+  }
+   
+
+  //fake stuff==========================================================================================
+
   // 1Tight 1Loose ====================================
   if(_tightLepsVeto10.size()==1 && _fakableLepsVeto10.size()>=1) { // && _fakableLepsVeto10.size()>=1
     _isFake=true;
+    _isOS=false;
+    _dFake=false;
 
     CandList lepPair=_wzMod->bestSSPair(_tightLepsVeto10[0], (&_fakableLepsVeto10), true, false, 10, _idxL1, _idxL2);
     
     if(lepPair.size()<2) return false;
-    //cout<<lepPair.size()<<endl;
     _l1Cand = lepPair[0];
     _l2Cand = lepPair[1];
 
@@ -630,29 +727,29 @@ WZsynchro::ssLeptonSelection() {
     _idxL1 = _tightLepsVeto10Idx[0];
     _idxL2 = _fakableLepsVeto10Idx[_idxL2];
     
-    // _l1Cand = _tightLepsVeto10[0];
-    // _l2Cand = _fakableLepsVeto10[0];
+    _l1Cand = _tightLepsVeto10[0];
+    _l2Cand = _fakableLepsVeto10[0];
       
-    // if(_l1Cand==nullptr || _l2Cand==nullptr) return false;
+    if(_l1Cand==nullptr || _l2Cand==nullptr) return false;
       
     //    if(!genMatchedToFake(_idxL1) && !genMatchedToFake(_idxL2) ) return false;
     //if(genMatchedToFake(_idxL1) && genMatchedToFake(_idxL2) ) return false;
 
     if( _l1Cand->charge()*_l2Cand->charge()<0) return false;
     if(!_wzMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
-//    if(!makeCut( _l1Cand->charge()*_l2Cand->charge()>0, "same sign" ) ) return false;
-//    if(!makeCut(_wzMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false), "mll veto") ) return false;
-    
+
     return true;
   }
 
   // 0Tight any loose ====================================
   if(_tightLepsVeto10.size()==0 && _fakableLepsVeto10.size()>=2) {
-
+    _isFake=true;
+    _isOS=false;
+    _dFake=true;
     
     CandList lepPair=_wzMod->bestSSPair( (&_fakableLepsVeto10), true, false, 10, _idxL1, _idxL2);
     if(lepPair.size()<2) return false;
-    //cout<<lepPair.size()<<endl;
+
     _l1Cand = lepPair[0];
     _l2Cand = lepPair[1];
 
@@ -855,13 +952,26 @@ WZsynchro::ssLeptonSelection() {
 
 void 
 WZsynchro::WZ3lSelection() {
-  setWorkflow(kWZCR);
+  setWorkflow(kWZSM);
   
   
   //step 0 only 3 leptons with pt > 10 GeV
   if(!makeCut(_tightLeps10.size()==3,"Three leptons")) return;
-  if (_WZstep == 0) fillWZhistos(0.0, 0.0,_DoValidationPlots);
+  //if (_WZstep == 0) fillWZhistos(0.0, 0.0);
+  CandList l3 =_wzMod->ThreeLeps( (&_tightLeps10));
   
+  int munumber = 0;
+  if(std::abs(l3[0]->pdgId())==13 ) munumber++;
+  if(std::abs(l3[1]->pdgId())==13 ) munumber++;
+  if(std::abs(l3[2]->pdgId())==13 ) munumber++;
+  if (_lepflav=="eee" && munumber!=0) return;
+  if (_lepflav=="eem" && munumber!=1) return;
+  if (_lepflav=="mme" && munumber!=2) return;
+  if (_lepflav=="mmm" && munumber!=3) return;
+  
+  setWorkflow(kWZSM_3l); fillWZhistos(0.,0.,"WZSMstep0"); setWorkflow(kWZSM);
+
+
   CandList candWZ =_wzMod->bestWZ( (&_tightLeps10), _idxLZ1, _idxLZ2, _idxLW);
   
   if (candWZ.size() < 3) return;
@@ -898,34 +1008,38 @@ WZsynchro::WZ3lSelection() {
   
   
   if(!makeCut( 1>0, "WZ candidate" ) ) return;
-  if (_WZstep == 1) fillWZhistos(0.0, 0.0,_DoValidationPlots);
+  //if (_WZstep == 1) fillWZhistos(0.0, 0.0);
+  setWorkflow(kWZSM_3lwz); fillWZhistos(0.,0.,"WZSMstep1"); setWorkflow(kWZSM);
   
   float MllZ = Candidate::create(_lZ1Cand, _lZ2Cand)->mass();
   if (std::fabs(MllZ - 90) > 30) return;
   
   if(!makeCut( _lZ1Cand->pt()>20, "Z sel" ) ) return;
-  if (_WZstep == 2) fillWZhistos(0.0, 0.0,_DoValidationPlots);
+  //if (_WZstep == 2) fillWZhistos(0.0, 0.0);
+  setWorkflow(kWZSM_3lwzZsel); fillWZhistos(0.,0.,"WZSMstep2"); setWorkflow(kWZSM);
   
   if (_met->pt() < 30) return;
   
   if (
-      (_lZ1Cand->dR(_lZ2Cand) < 0.1) ||
       (_lZ1Cand->dR(_lWCand) < 0.1) ||
       (_lWCand->dR(_lZ2Cand) < 0.1) 
      ) return;
   if(!makeCut( _lWCand->pt()>20, "W sel" ) ) return;
-  if (_WZstep == 3) fillWZhistos(0.0, 0.0,_DoValidationPlots);
+  //if (_WZstep == 3) fillWZhistos(0.0, 0.0);
+  setWorkflow(kWZSM_3lwzZselWsel); fillWZhistos(0.,0.,"WZSMstep3"); setWorkflow(kWZSM);
   
   
   if(!makeCut(_m3l > 100, "M(3l) > 100 GeV" )) return;
-  if (_WZstep == 4) fillWZhistos(0.0, 0.0,_DoValidationPlots);
-  
+  //if (_WZstep == 4) fillWZhistos(0.0, 0.0);
+  setWorkflow(kWZSM_3lwzZselWselM3l); fillWZhistos(0.,0.,"WZSMstep4"); setWorkflow(kWZSM);
   
   if(!makeCut(_nBJets<=1,"1 or 0 b-jets")) return;
-  if (_WZstep == 5) fillWZhistos(0.0, 0.0,_DoValidationPlots);
+  //if (_WZstep == 5) fillWZhistos(0.0, 0.0);
+  setWorkflow(kWZSM_3lwzZselWselM3lNbj1); fillWZhistos(0.,0.,"WZSMstep5"); setWorkflow(kWZSM);
   
   if(!makeCut(_nBJets==0,"0 b-jets")) return;
-  if (_WZstep == 6) fillWZhistos(0.0, 0.0,_DoValidationPlots);
+  //if (_WZstep == 6) fillWZhistos(0.0, 0.0);
+  setWorkflow(kWZSM_3lwzZselWselM3lNbj0); fillWZhistos(0.,0.,"WZSMstep6"); setWorkflow(kWZSM);
   
   
   
@@ -946,7 +1060,7 @@ void
 WZsynchro::wzCRSelection() {
   
   setWorkflow(kWZCR);
-  
+  /*
   if(!makeCut(_tightLeps10.size()>=2,"Two leptons")) return;
   _isFake=false;
     
@@ -968,7 +1082,7 @@ WZsynchro::wzCRSelection() {
   if(_wzMod->passMllMultiVeto( _l1Cand, &_looseLeps, 76, 106, true) &&
      _wzMod->passMllMultiVeto( _l2Cand, &_looseLeps, 76, 106, true) ) return;
   counter("Z selection");
-/*    
+    
   // now apply tighter requirements on MET, HT, MT... 
   if(!makeCut(_HT > 80., "H_{T} > 80 GeV")) return;
   if(!makeCut(_nJets>=2, "n_{jets} >= 2")) return;
@@ -978,7 +1092,7 @@ WZsynchro::wzCRSelection() {
   //  if(!makeCut((_HT<200 && _met->pt()>50 && _met->pt()<100) ||
   //	      (_HT>200 && _met->pt()<50),"MET cut  ")) return;
   if(!makeCut(_met->pt()>50, "MET > 50 GeV")) return;
-*/
+
 
   //Scale factors =======================
   _wzMod->applySingleLepSF(_l1Cand, _weight);
@@ -1000,30 +1114,30 @@ WZsynchro::wzCRSelection() {
   
 
 
-  if (_WZstep == 0) fillWZhistos(MT, _mTmin,_DoValidationPlots);
+  //if (_WZstep == 0) fillWZhistos(MT, _mTmin);
   
   // now apply tighter requirements on MET, HT, MT... 
   if(!makeCut(_HT > 80., "H_{T} > 80 GeV")) return;
 
-  if (_WZstep == 1) fillWZhistos(MT, _mTmin,_DoValidationPlots);
+  //if (_WZstep == 1) fillWZhistos(MT, _mTmin);
 
 
   if(!makeCut(_nJets>=2, "n_{jets} >= 2")) return;
 
-  if (_WZstep == 2) fillWZhistos(MT, _mTmin,_DoValidationPlots);
+  //if (_WZstep == 2) fillWZhistos(MT, _mTmin);
 
   if(!makeCut(_nBJets==0,"n_{bjets} = 0")) return;
 
-  if (_WZstep == 3) fillWZhistos(MT, _mTmin,_DoValidationPlots);
+  //if (_WZstep == 3) fillWZhistos(MT, _mTmin);
 
   // for the moment is not fully exclusive with 3L but can be easily done by uncommenting these
   //  if(!makeCut((_HT<200 && _met->pt()>50 && _met->pt()<100) ||
   //	      (_HT>200 && _met->pt()<50),"MET cut  ")) return;
   if(!makeCut(_met->pt()>50, "MET > 50 GeV")) return;
   
-  if (_WZstep == 4 || _WZstep == -1) fillWZhistos(MT, _mTmin,_DoValidationPlots);
+ // if (_WZstep == 4 || _WZstep == -1) fillWZhistos(MT, _mTmin);
 
-    
+    */
   setWorkflow(kGlobal); 
 }
 
@@ -1520,7 +1634,15 @@ WZsynchro::getFR(Candidate* cand, int idx) {
 }
 
 
+void
+WZsynchro::chargeFlipProb() {
+/*
+  float p1=_dbm->getDBValue("chargeMId", std::abs(_l1Cand->eta()), _l1Cand->pt());
+  float p2=_dbm->getDBValue("chargeMId", std::abs(_l2Cand->eta()), _l2Cand->pt());
+  float w=p1+p2-2*p1*p2;
 
+  _weight *= w;*/
+}
 
 //===============================================================
 //===============================================================
@@ -2065,14 +2187,14 @@ void WZsynchro::fillhistos() {
 void WZsynchro::fillValidationHistos(string reg){
   
   fill(reg+"_lep1_jetPtRatio", _vc->get("LepGood_jetPtRatio_LepAwareJEC", _idxL1) , _weight);
-  fill(reg+"_lep1_jetPtRel"  , _vc->get("LepGood_jetPtRel", _idxL1)               , _weight);
+  fill(reg+"_lep1_jetPtRel"  , _vc->get("LepGood_jetPtRelv2", _idxL1)               , _weight);
   fill(reg+"_lep1_miniRelIso", _vc->get("LepGood_miniRelIso", _idxL1)             , _weight);
   fill(reg+"_lep1_Pt"        , _vc->get("LepGood_pt", _idxL1)                     , _weight);
   fill(reg+"_lep1_Eta"       , fabs(_vc->get("LepGood_eta", _idxL1))              , _weight);
   fill(reg+"_lep1_SIP3D"     , _vc->get("LepGood_sip3d", _idxL1)                  , _weight);
   
   fill(reg+"_lep2_jetPtRatio", _vc->get("LepGood_jetPtRatio_LepAwareJEC", _idxL2) , _weight);
-  fill(reg+"_lep2_jetPtRel"  , _vc->get("LepGood_jetPtRel", _idxL2)               , _weight);
+  fill(reg+"_lep2_jetPtRel"  , _vc->get("LepGood_jetPtRelv2", _idxL2)               , _weight);
   fill(reg+"_lep2_miniRelIso", _vc->get("LepGood_miniRelIso", _idxL2)             , _weight);
   fill(reg+"_lep2_Pt"        , _vc->get("LepGood_pt", _idxL2)                     , _weight);
   fill(reg+"_lep2_Eta"       , fabs(_vc->get("LepGood_eta", _idxL2))              , _weight);
@@ -2088,47 +2210,47 @@ void WZsynchro::fillValidationHistos(string reg){
   fill(reg+"_NJets40"        , _vc->get("nJet40")        , _weight);
 }  
 
-void WZsynchro::fillWZhistos(double mt, double mtmin, bool doPlots) {
+void WZsynchro::fillWZhistos(double mt, double mtmin, string reg) {
   //fill("l1Pt", (_idxFake==_idxL2)?(_l1Cand->pt()):_l2Cand->pt(), _weight );
   //fill("l2Pt", (_idxFake==_idxL2)?(_l2Cand->pt()):_l1Cand->pt(), _weight );
-  fill("HT"    , _HT       , _weight);
-  fill("MET"   , _met->pt(), _weight);
+  fill("HT_"    , _HT       , _weight);
+  fill("MET_"   , _met->pt(), _weight);
   //fill("MT"    , mt        , _weight);
   //fill("MTmin"    , mtmin        , _weight);
-  fill("NBJets", _nBJets   , _weight);
-  fill("NJets" , _nJets    , _weight);
-  fill("M3l"   , _m3l      , _weight);
-  if (doPlots) {
-      if (_WZstep > 0) {
-        fill("lepZ1_jetPtRatio", _vc->get("LepGood_jetPtRatio_LepAwareJEC", _idxLZ1) , _weight);
-        fill("lepZ1_jetPtRel"  , _vc->get("LepGood_jetPtRel", _idxLZ1)               , _weight);
-        fill("lepZ1_miniRelIso", _vc->get("LepGood_miniRelIso", _idxLZ1)             , _weight);
-        fill("lepZ1_Pt"        , _vc->get("LepGood_pt", _idxLZ1)                     , _weight);
-        fill("lepZ1_Eta"       , fabs(_vc->get("LepGood_eta", _idxLZ1))              , _weight);
-        fill("lepZ1_SIP3D"     , _vc->get("LepGood_sip3d", _idxLZ1)                  , _weight);
+  fill("NBJets_", _nBJets   , _weight);
+  fill("NJets_" , _nJets    , _weight);
+  fill("M3l_"   , _m3l      , _weight);
+  if (_DoValidationPlots) {
+      if (reg.find("0")==std::string::npos) {
+        fill("lepZ1_jetPtRatio_"+reg, _vc->get("LepGood_jetPtRatiov2", _idxLZ1) , _weight);
+        fill("lepZ1_jetPtRel_"+reg  , _vc->get("LepGood_jetPtRelv2", _idxLZ1)               , _weight);
+        fill("lepZ1_miniRelIso_"+reg, _vc->get("LepGood_miniRelIso", _idxLZ1)             , _weight);
+        fill("lepZ1_Pt_"+reg        , _vc->get("LepGood_pt", _idxLZ1)                     , _weight);
+        fill("lepZ1_Eta_"+reg       , fabs(_vc->get("LepGood_eta", _idxLZ1))              , _weight);
+        fill("lepZ1_SIP3D_"+reg     , _vc->get("LepGood_sip3d", _idxLZ1)                  , _weight);
   
-        fill("lepZ2_jetPtRatio", _vc->get("LepGood_jetPtRatio_LepAwareJEC", _idxLZ2) , _weight);
-        fill("lepZ2_jetPtRel"  , _vc->get("LepGood_jetPtRel", _idxLZ2)               , _weight);
-        fill("lepZ2_miniRelIso", _vc->get("LepGood_miniRelIso", _idxLZ2)             , _weight);
-        fill("lepZ2_Pt"        , _vc->get("LepGood_pt", _idxLZ2)                     , _weight);
-        fill("lepZ2_Eta"       , fabs(_vc->get("LepGood_eta", _idxLZ2))              , _weight);
-        fill("lepZ2_SIP3D"     , _vc->get("LepGood_sip3d", _idxLZ2)                  , _weight);
+        fill("lepZ2_jetPtRatio_"+reg, _vc->get("LepGood_jetPtRatiov2", _idxLZ2) , _weight);
+        fill("lepZ2_jetPtRel_"+reg  , _vc->get("LepGood_jetPtRelv2", _idxLZ2)               , _weight);
+        fill("lepZ2_miniRelIso_"+reg, _vc->get("LepGood_miniRelIso", _idxLZ2)             , _weight);
+        fill("lepZ2_Pt_"+reg        , _vc->get("LepGood_pt", _idxLZ2)                     , _weight);
+        fill("lepZ2_Eta_"+reg       , fabs(_vc->get("LepGood_eta", _idxLZ2))              , _weight);
+        fill("lepZ2_SIP3D_"+reg     , _vc->get("LepGood_sip3d", _idxLZ2)                  , _weight);
   
-        fill("lepW_jetPtRatio", _vc->get("LepGood_jetPtRatio_LepAwareJEC", _idxLW) , _weight);
-        fill("lepW_jetPtRel"  , _vc->get("LepGood_jetPtRel", _idxLW)               , _weight);
-        fill("lepW_miniRelIso", _vc->get("LepGood_miniRelIso", _idxLW)             , _weight);
-        fill("lepW_Pt"        , _vc->get("LepGood_pt", _idxLW)                     , _weight);
-        fill("lepW_Eta"       , fabs(_vc->get("LepGood_eta", _idxLW))              , _weight);
-        fill("lepW_SIP3D"     , _vc->get("LepGood_sip3d", _idxLW)                  , _weight);
+        fill("lepW_jetPtRatio_"+reg, _vc->get("LepGood_jetPtRatiov2", _idxLW) , _weight);
+        fill("lepW_jetPtRel_"+reg  , _vc->get("LepGood_jetPtRelv2", _idxLW)               , _weight);
+        fill("lepW_miniRelIso_"+reg, _vc->get("LepGood_miniRelIso", _idxLW)             , _weight);
+        fill("lepW_Pt_"+reg        , _vc->get("LepGood_pt", _idxLW)                     , _weight);
+        fill("lepW_Eta_"+reg       , fabs(_vc->get("LepGood_eta", _idxLW))              , _weight);
+        fill("lepW_SIP3D_"+reg     , _vc->get("LepGood_sip3d", _idxLW)                  , _weight);
       }
       //fill("MET"            , _vc->get("met_pt")        , _weight);
-      fill("htJet40j"       , _vc->get("htJet40j")      , _weight);
-      fill("mZ1"            , _vc->get("mZ1")           , _weight);
-      fill("MTmin"          , _mTmin                    , _weight);
-      fill("NBJetsLoose25"  , _vc->get("nBJetLoose25")  , _weight);
-      fill("NBJetsMedium25" , _vc->get("nBJetMedium25") , _weight);
-      fill("NBJetsTight40"  , _vc->get("nBJetTight40")  , _weight);
-      fill("NJets40"        , _vc->get("nJet40")        , _weight);
+      fill("htJet40j_"+reg       , _vc->get("htJet40j")      , _weight);
+      fill("mZ1_"+reg            , _vc->get("mZ1")           , _weight);
+      fill("MTmin_"+reg          , _mTmin                    , _weight);
+      fill("NBJetsLoose25_"+reg  , _vc->get("nBJetLoose25")  , _weight);
+      fill("NBJetsMedium25_"+reg , _vc->get("nBJetMedium25") , _weight);
+      fill("NBJetsTight40_"+reg  , _vc->get("nBJetTight40")  , _weight);
+      fill("NJets40_"+reg        , _vc->get("nJet40")        , _weight);
   }
 }
 
