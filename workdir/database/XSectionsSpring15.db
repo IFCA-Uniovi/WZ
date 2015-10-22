@@ -42,7 +42,7 @@ TTJets_LO	831.76
 TT_pow	831.76
 TT_pow_50ns	831.76
 TTLep_pow	87.31483776
-TToLeptons_tch	70.31448
+TToLeptons_tch	44.07
 TToLeptons_tch_50ns	70.31448
 TToLeptons_sch	3.68064
 TBar_tWch	35.6
@@ -110,5 +110,12 @@ QCD_Pt1400to1800_50ns	0.84265
 QCD_Pt1800to2400_50ns	0.114943
 QCD_Pt2400to3200_50ns	0.00682981
 QCD_Pt3200toInf_50ns	0.000165445
-TTWToLNu                0.2043
-TTZToLLNuNu             0.2529
+TTWToLNu    0.2043
+TTZToLLNuNu 0.2529
+WZTo3LNu    4.43
+ZZTo4L  1.256
+GGHZZ4L 0.01212
+TbarToLeptons_tch   26.23
+TToLeptons_sch_amcatnlo	3.68064
+TTGJets 3.697
+TTLLJets_m1to10 0.0283

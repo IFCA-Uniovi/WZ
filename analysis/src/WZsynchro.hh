@@ -232,6 +232,7 @@ private:
   vector<string> _categs;
   bool _categorization;
   bool _DoValidationPlots;
+  bool _DoCheckPlots;
   int _WZstep;
   string _WZstepname [7]= {"Three leptons",
 	"WZ candidate",

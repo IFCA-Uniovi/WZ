@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Run this to get validation plots for WZ selection, from rootfiles created with Sub_AnalysisWZ25_plots_200pb.sh
+# Run this to get validation plots for WZ selection, from rootfiles created with Sub_AnalysisWZ25_plots_850pb.sh
 
 #REGS=( "ttbar" "ZMuMu" "ZEE" "Zl" "Wl" )
-NAME="WZ3Lplots200"
+NAME="WZ3Lplots850"
 DIR="workdir/root/WZsynchro/"
-#FLAVs=( "all" "eee" "eem" "mme" "mmm" )
-FLAVs=( "all" )
+FLAVs=( "all" "eee" "eem" "mme" "mmm" )
+#FLAVs=( "all" )
 #FLAVs=( "eee" "eem" "mme" "mmm" )
 #WZSTEPs=( "0" )
 WZSTEPs=( "0" "1" "2" "3" "4" "5" "6" )
@@ -58,7 +58,7 @@ VARS=( "lepZ1_jetPtRatio"
        "NBJetsLoose25" 
        "NBJetsMedium25"
        "NBJetsTight40" 
-       "NJets40"       )
+       "NJets40"        )
 
 
 #TODAY="150910" #$(date +"%y%m%d")
@@ -101,9 +101,11 @@ for iwzstep in ${WZSTEPs[@]}; do
   	            fi
   	            filename=${NAME}_WZSTEP6_LEPFLAV${flav}_${LHESYS}${lhe}
   		        for var in ${VARS[@]}; do
-		        	#plot=${reg}_${var}
+		        	if [[ "$var" == "lep"* ]] && [[ "$iwzstep" == "0" ]]; then
+		        	  continue
+		        	fi
 		        	plot=${var}_WZSMstep${wzstep}
-		        	root -l -b -q cards/template_plotsWZ200_25ns.C\(\"${plot}\",\"${filename}\"\) 
+		        	root -l -b -q cards/template_plotsWZ850_25ns.C\(\"${plot}\",\"${filename}\"\) 
 		
 		        	mv $DIR/png/${plot}.png   $DIR/WZstep${wzstep}/${flav}/${var}.png
 		        	mv $DIR/pdf/${plot}.pdf   $DIR/WZstep${wzstep}/${flav}/${var}.pdf
