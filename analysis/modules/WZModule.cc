@@ -40,7 +40,7 @@ CandList WZModule::bestWZ(const CandList* leps, int& idxZ1, int& idxZ2, int& idx
     if(!passMllSingleVeto(c1, cands->at(il), mllm, mllM, ossf)) return false;
   }
 */
-  for(unsigned int il1=0;il1<leps->size()-1;il1++) {
+  for(unsigned int il1=0;il1<leps->size();il1++) {
     if (clist[0] == leps->at(il1)) continue;
     if (clist[1] == leps->at(il1)) continue;
     

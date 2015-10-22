@@ -2964,7 +2964,7 @@ DisplayClass::getLegendCoordinate(TH1*h, float& pxd, float& pyd, float& pxu, flo
   float Dy = 0.051;  
   float dy = nObj*Dy;
   
-  float dx=0.291;
+  float dx=0.381;
   
   vector<float> out(4,0);
 

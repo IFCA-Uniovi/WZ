@@ -1,15 +1,16 @@
  #!/bin/bash
-#Run over flavors and selection steps, producing rootfiles from which yields will be extracted with yieldsWZ25_table.sh
+
+#Run to generate rootfiles to be used for creating WZ validation plots with 200pb-1, with Sub_SynchroPlots_WZ25.sh
 #usage from MPAF folder: source scripts/phys14exerc_SubJobs.sh
 #templateCFG=template_fakeEstim.cfg
-templateCFG=template_WZ3l.cfg
+templateCFG=template_WZ25plots_850pb.cfg
 
-NAME="WZ3L1file"
-FLAVs=( "all" "eee" "eem" "mme" "mmm" )
+NAME="WZ3Lplots850"
+#FLAVs=( "all" "eee" "eem" "mme" "mmm" )
 #FLAVs=( "all" )
-#FLAVs=( "eee" "eem" "mme" "mmm" )
-#WZSTEPs=( "4" "3" "2" "1" "0" )
+FLAVs=( "eee" "eem" "mme" "mmm" )
 WZSTEPs=( "6" )
+#WZSTEPs=( "0" "1" "2" "3" "4" "5" "6" )
 
 QSQRs=( "1001" )
 #QSQRs=( "1001" "1002" "1003" "1004" "1005" "1006" "1007" "1008" "1009" )
