@@ -46,12 +46,9 @@ private:
 
   //============================
   void retrieveObjects();
-  bool ssLeptonSelection();
-  void selectLeptons();
   void selectLeptons3l();
 
   //==============================
-  void wzCRSelection();
   void WZ3lSelection();
   void setSignalRegions();
   void setSelLine(string str);
@@ -159,17 +156,6 @@ private:
   bool _dFake;
   int _idxFake;
 
-  CandList _looseLeps;
-  std::vector<unsigned int>  _looseLepsIdx;
-
-  CandList _looseLeps10;
-  std::vector<unsigned int>  _looseLeps10Idx;
-
-  CandList _looseLepsVeto;
-  std::vector<unsigned int>  _looseLepsVetoIdx;
-
-  CandList _looseLepsVeto10;
-  std::vector<unsigned int>  _looseLepsVeto10Idx;
 
   CandList _fakableLeps10;
   std::vector<unsigned int>  _fakableLeps10Idx;
