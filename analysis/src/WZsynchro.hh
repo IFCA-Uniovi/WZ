@@ -46,12 +46,9 @@ private:
 
   //============================
   void retrieveObjects();
-  bool ssLeptonSelection();
-  void selectLeptons();
   void selectLeptons3l();
 
   //==============================
-  void wzCRSelection();
   void WZ3lSelection();
   void setSignalRegions();
   void setSelLine(string str);
