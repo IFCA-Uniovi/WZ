@@ -400,7 +400,7 @@ WZsynchro::run() {
   // int run=_vc->get("run");
   // int lumi=_vc->get("lumi");
   // int event=_vc->get("evt");
-  // int nLep = _looseLepsVeto.size();//_vc->get("nLepGood_Mini");
+  // int nLep = _tightLeps10.size();//_vc->get("nLepGood_Mini");
   // // cout<<" <====> "<<_vc->get("nLepGood_Mini")<<"  "<<_looseLepsVeto.size()<<"  "<<_looseLeps.size()<<endl;
   // int id1 = _l1Cand->pdgId();
   // double pt1 = _l1Cand->pt();
@@ -504,18 +504,6 @@ WZsynchro::retrieveObjects(){
   _lZ2Cand=nullptr;
   _lWCand=nullptr; 
   
-  _looseLeps.clear();
-  _looseLepsIdx.clear();
-
-  _looseLeps10.clear();
-  _looseLeps10Idx.clear();
-
-  _looseLepsVeto.clear();
-  _looseLepsVetoIdx.clear();
-
-  _looseLepsVeto10.clear();
-  _looseLepsVeto10Idx.clear();
-
   _fakableLeps10.clear();
   _fakableLeps10Idx.clear();
 
