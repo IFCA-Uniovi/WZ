@@ -569,7 +569,7 @@ WZsynchro::WZ3lSelection() {
   int munumber = 0;
   if(std::abs(l3[0]->pdgId())==13 ) munumber++;
   if(std::abs(l3[1]->pdgId())==13 ) munumber++;
-  if(std::abs(l3[2]->pdgId())==13 ) munumber++;  
+  if(std::abs(l3[2]->pdgId())==13 ) munumber++;
   if (_lepflav=="eee" && munumber!=0) return;
   if (_lepflav=="eem" && munumber!=1) return;
   if (_lepflav=="mme" && munumber!=2) return;
