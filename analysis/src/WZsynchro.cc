@@ -40,6 +40,8 @@ WZsynchro::initialize(){
   _vc->registerVar("nLepGood"                     );
   _vc->registerVar("LepGood_pt"                   );
   _vc->registerVar("LepGood_eta"                  );
+  _vc->registerVar("LepGood_etaSc"               );
+  _vc->registerVar("LepGood_tightId"                );
   _vc->registerVar("LepGood_phi"                  );
   _vc->registerVar("LepGood_charge"               );
   _vc->registerVar("LepGood_tightCharge"          );
@@ -114,6 +116,17 @@ WZsynchro::initialize(){
   _vc->registerVar("nBJetMedium25"                );
   _vc->registerVar("nBJetTight40"                 );
   _vc->registerVar("nSoftBJetMedium25"            );
+
+  //Discarded (they don't pass the cleaning at Heppy level) jets
+  _vc->registerVar("nDiscJet"                     );
+  _vc->registerVar("DiscJet_id"                   );
+  _vc->registerVar("DiscJet_pt"                   );
+  _vc->registerVar("DiscJet_rawPt"                );
+  _vc->registerVar("DiscJet_eta"                  );
+  _vc->registerVar("DiscJet_phi"                  );
+  _vc->registerVar("DiscJet_mass"                 );
+  _vc->registerVar("DiscJet_btagCSV"              );
+  
 
   //minitree variables
   _vc->registerVar("iL1TV_Mini" );
@@ -556,7 +569,7 @@ WZsynchro::WZ3lSelection() {
   int munumber = 0;
   if(std::abs(l3[0]->pdgId())==13 ) munumber++;
   if(std::abs(l3[1]->pdgId())==13 ) munumber++;
-  if(std::abs(l3[2]->pdgId())==13 ) munumber++;
+  if(std::abs(l3[2]->pdgId())==13 ) munumber++;  
   if (_lepflav=="eee" && munumber!=0) return;
   if (_lepflav=="eem" && munumber!=1) return;
   if (_lepflav=="mme" && munumber!=2) return;
@@ -1201,7 +1214,8 @@ WZsynchro::categorize() {
 
 bool 
 WZsynchro::looseLepton(int idx, int pdgId) {
-/*
+
+  /*
   if(abs(pdgId)==13) {//mu case
     if(!_wzMod->muIdSel(idx, SusyModule::kLoose) ) return false;
     if(!_wzMod->multiIsoSel(idx, SusyModule::kLoose) ) return false;
@@ -1210,12 +1224,32 @@ WZsynchro::looseLepton(int idx, int pdgId) {
     if(!_wzMod->elIdSel(idx, SusyModule::kLoose, SusyModule::kLoose) ) return false;
     if(!_wzMod->multiIsoSel(idx, SusyModule::kLoose) ) return false;
   }
-*/
+
+  return true;
+  */
   return true;
 }
 
 bool 
 WZsynchro::tightLepton(int idx, int pdgId) {
+
+  if (abs(pdgId) == 13) {//muons
+    if (_vc->get("LepGood_relIso04", idx) < 0.12 && _vc->get("LepGood_tightId", idx) == 1) return true;
+    else return false;
+  }
+  else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) < 1.479) { //barrel electron
+    if (_vc->get("LepGood_relIso03", idx) < 0.0766 && _vc->get("LepGood_tightId", idx) >= 2 && _vc->get("LepGood_convVeto", idx) == 1 && abs(_vc->get("LepGood_dxy", idx)) < 0.0118 && abs(_vc->get("LepGood_dz", idx)) < 0.373 && _vc->get("LepGood_lostHits", idx) <= 2 ) return true;
+    else return false;
+  }
+  else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) >= 1.479 && abs(_vc->get("LepGood_etaSc", idx)) < 2.5) { //endcap electron
+    if (_vc->get("LepGood_relIso03", idx) < 0.0678  && _vc->get("LepGood_tightId", idx) >= 2 && _vc->get("LepGood_convVeto", idx) == 1 && abs(_vc->get("LepGood_dxy", idx)) < 0.0739 && abs(_vc->get("LepGood_dz", idx)) < 0.602 && _vc->get("LepGood_lostHits", idx) <= 1) return true;
+    else return false;
+  }
+  else {
+    std::cout << "WARNING [WZsynchro::tightLepton](" << idx << ", " << pdgId << ", idx) not valid lepton candidate, with LepGood_etaSc=" << _vc->get("LepGood_etaSc", idx) << std::endl;
+  }
+  return false;
+  
 /*
   if(abs(pdgId)==13) {//mu case
     if(!_wzMod->muIdSel(idx, SusyModule::kTight) ) return false;
@@ -1226,7 +1260,6 @@ WZsynchro::tightLepton(int idx, int pdgId) {
     if(!_wzMod->multiIsoSel(idx, SusyModule::kTight) ) return false;
   }
 */
-  return true;
 }
 
 
@@ -1476,8 +1509,10 @@ WZsynchro::selectLeptons3l() {
 				      _vc->get("LepGood_charge", il),
 				      isMu?0.105:0.0005);
 
-    // cout<<" pt: "<<cand->pt()<<"  eta: "<<cand->eta()<<"   phi: "<<cand->phi()<<"  pdgId: "<<_vc->get("LepGood_pdgId", il)<<"   dxy: "<<_vc->get("LepGood_dxy",il)<<"  dz: "<<_vc->get("LepGood_dz",il)<<endl;
-
+    //cout<<" pt: "<<cand->pt()<<"  eta: "<<cand->eta()<<"   phi: "<<cand->phi()<<"  pdgId: "<<_vc->get("LepGood_pdgId", il)<<"   dxy: "<<_vc->get("LepGood_dxy",il)<<"  dz: "<<_vc->get("LepGood_dz",il)<<endl;
+    //cout<<" LepGood_pdgId: "<<_vc->get("LepGood_pdgId", il)<<" cand->pdgId()=" << cand->pdgId() << std::endl;
+    if(!tightLepton(il, cand->pdgId() ) ) continue;
+    
     if(cand->pt()<10) continue;
     _tightLeps10.push_back(cand);
     _tightLeps10Idx.push_back(il);
@@ -1610,12 +1645,18 @@ void WZsynchro::fillWZhistos(double mt, double mtmin, string reg) {
       fill("NJets40_"+reg        , _vc->get("nJet40")        , _weight);
   }
   if (_DoCheckPlots && reg.find("0")==std::string::npos) {
-    fill("lepZ1_mediumMuonId_"+reg, _vc->get("LepGood_mediumMuonId", _idxLZ1)          , _weight);
-    fill("lepZ2_mediumMuonId_"+reg, _vc->get("LepGood_mediumMuonId", _idxLZ2)          , _weight);
-    fill("lepW_mediumMuonId_"+reg , _vc->get("LepGood_mediumMuonId", _idxLW)           , _weight);    
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("lepZ1_mediumMuonId_"+reg, _vc->get("LepGood_mediumMuonId", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ2))==13) fill("lepZ2_mediumMuonId_"+reg, _vc->get("LepGood_mediumMuonId", _idxLZ2)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLW))==13) fill("lepW_mediumMuonId_"+reg , _vc->get("LepGood_mediumMuonId", _idxLW)           , _weight);    
+    
+    //if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muZ1_tightId_"+reg, _vc->get("LepGood_tightId", _idxLZ1)          , _weight);
+    //if (abs(_vc->get("LepGood_pdgId",_idxLZ2))==13) fill("muZ2_tightId_"+reg, _vc->get("LepGood_tightId", _idxLZ2)          , _weight);
+    //if (abs(_vc->get("LepGood_pdgId",_idxLW))==13) fill("muW_tightId_"+reg , _vc->get("LepGood_tightId", _idxLW)           , _weight);    
+    
     fill("lepZ1_mvaIdPhys14_"+reg , _vc->get("LepGood_mvaIdPhys14" , _idxLZ1)          , _weight);
     fill("lepZ2_mvaIdPhys14_"+reg , _vc->get("LepGood_mvaIdPhys14" , _idxLZ2)          , _weight);
     fill("lepW_mvaIdPhys14_"+reg  , _vc->get("LepGood_mvaIdPhys14" , _idxLW)           , _weight);
+
   }
 }
 
