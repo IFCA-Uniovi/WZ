@@ -1614,22 +1614,22 @@ void WZsynchro::fillWZhistos(double mt, double mtmin, string reg) {
   fill("M3l_"   , _m3l      , _weight);
   if (_DoValidationPlots) {
       if (reg.find("0")==std::string::npos) {
-        fill("lepZ1_jetPtRatio_"+reg, _vc->get("LepGood_jetPtRatio", _idxLZ1)           , _weight);
-        fill("lepZ1_jetPtRel_"+reg  , _vc->get("LepGood_jetPtRel", _idxLZ1)             , _weight);
+        //fill("lepZ1_jetPtRatio_"+reg, _vc->get("LepGood_jetPtRatio", _idxLZ1)           , _weight);
+        //fill("lepZ1_jetPtRel_"+reg  , _vc->get("LepGood_jetPtRel", _idxLZ1)             , _weight);
         fill("lepZ1_miniRelIso_"+reg, _vc->get("LepGood_miniRelIso", _idxLZ1)             , _weight);
         fill("lepZ1_Pt_"+reg        , _vc->get("LepGood_pt", _idxLZ1)                     , _weight);
         fill("lepZ1_Eta_"+reg       , fabs(_vc->get("LepGood_eta", _idxLZ1))              , _weight);
         fill("lepZ1_SIP3D_"+reg     , _vc->get("LepGood_sip3d", _idxLZ1)                  , _weight);
   
-        fill("lepZ2_jetPtRatio_"+reg, _vc->get("LepGood_jetPtRatio", _idxLZ2)           , _weight);
-        fill("lepZ2_jetPtRel_"+reg  , _vc->get("LepGood_jetPtRel", _idxLZ2)             , _weight);
+        //fill("lepZ2_jetPtRatio_"+reg, _vc->get("LepGood_jetPtRatio", _idxLZ2)           , _weight);
+        //fill("lepZ2_jetPtRel_"+reg  , _vc->get("LepGood_jetPtRel", _idxLZ2)             , _weight);
         fill("lepZ2_miniRelIso_"+reg, _vc->get("LepGood_miniRelIso", _idxLZ2)             , _weight);
         fill("lepZ2_Pt_"+reg        , _vc->get("LepGood_pt", _idxLZ2)                     , _weight);
         fill("lepZ2_Eta_"+reg       , fabs(_vc->get("LepGood_eta", _idxLZ2))              , _weight);
         fill("lepZ2_SIP3D_"+reg     , _vc->get("LepGood_sip3d", _idxLZ2)                  , _weight);
   
-        fill("lepW_jetPtRatio_"+reg, _vc->get("LepGood_jetPtRatio", _idxLW)           , _weight);
-        fill("lepW_jetPtRel_"+reg  , _vc->get("LepGood_jetPtRel", _idxLW)             , _weight);
+        //fill("lepW_jetPtRatio_"+reg, _vc->get("LepGood_jetPtRatio", _idxLW)           , _weight);
+        //fill("lepW_jetPtRel_"+reg  , _vc->get("LepGood_jetPtRel", _idxLW)             , _weight);
         fill("lepW_miniRelIso_"+reg, _vc->get("LepGood_miniRelIso", _idxLW)             , _weight);
         fill("lepW_Pt_"+reg        , _vc->get("LepGood_pt", _idxLW)                     , _weight);
         fill("lepW_Eta_"+reg       , fabs(_vc->get("LepGood_eta", _idxLW))              , _weight);
