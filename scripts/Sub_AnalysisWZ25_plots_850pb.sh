@@ -7,8 +7,8 @@ templateCFG=template_WZ25plots_850pb.cfg
 
 NAME="WZ3Lplots850"
 #FLAVs=( "all" "eee" "eem" "mme" "mmm" )
-#FLAVs=( "all" )
-FLAVs=( "eee" "eem" "mme" "mmm" )
+FLAVs=( "all" )
+#FLAVs=( "eee" "eem" "mme" "mmm" )
 WZSTEPs=( "6" )
 #WZSTEPs=( "0" "1" "2" "3" "4" "5" "6" )
 

@@ -35,11 +35,11 @@ void template_plotsWZ850_25ns(std::string var,std::string fileName){
       ) {
     logYScale = true;
   }
-  if (var.find("M3l") != std::string::npos){
+  /*if (var.find("M3l") != std::string::npos){
       logYScale = true;
       rangeY[0]={0.01};
       rangeY[1]={100000.};
-  }
+  }*/
   
   bool overFlowBin=true;
   bool underFlowBin=false;

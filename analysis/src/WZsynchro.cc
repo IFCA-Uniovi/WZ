@@ -575,7 +575,7 @@ WZsynchro::WZ3lSelection() {
   if (_lepflav=="mme" && munumber!=2) return;
   if (_lepflav=="mmm" && munumber!=3) return;
   
-  setWorkflow(kWZSM_3l); fillWZhistos(0.,0.,"WZSMstep0"); setWorkflow(kWZSM);
+  setWorkflow(kWZSM_3l); fillWZhistos(&l3,"WZSMstep0",0.0); setWorkflow(kWZSM);
 
 
   CandList candWZ =_wzMod->bestWZ( (&_tightLeps10), _idxLZ1, _idxLZ2, _idxLW);
@@ -615,14 +615,15 @@ WZsynchro::WZ3lSelection() {
   
   if(!makeCut( 1>0, "WZ candidate" ) ) return;
   //if (_WZstep == 1) fillWZhistos(0.0, 0.0);
-  setWorkflow(kWZSM_3lwz); fillWZhistos(0.,0.,"WZSMstep1"); setWorkflow(kWZSM);
-  
   float MllZ = Candidate::create(_lZ1Cand, _lZ2Cand)->mass();
+  setWorkflow(kWZSM_3lwz); fillWZhistos(&candWZ,"WZSMstep1",MllZ); setWorkflow(kWZSM);
+  
+
   if (std::fabs(MllZ - 90) > 30) return;
   
   if(!makeCut( _lZ1Cand->pt()>20, "Z sel" ) ) return;
   //if (_WZstep == 2) fillWZhistos(0.0, 0.0);
-  setWorkflow(kWZSM_3lwzZsel); fillWZhistos(0.,0.,"WZSMstep2"); setWorkflow(kWZSM);
+  setWorkflow(kWZSM_3lwzZsel); fillWZhistos(&candWZ,"WZSMstep2",MllZ); setWorkflow(kWZSM);
   
   if (_met->pt() < 30) return;
   
@@ -632,20 +633,20 @@ WZsynchro::WZ3lSelection() {
      ) return;
   if(!makeCut( _lWCand->pt()>20, "W sel" ) ) return;
   //if (_WZstep == 3) fillWZhistos(0.0, 0.0);
-  setWorkflow(kWZSM_3lwzZselWsel); fillWZhistos(0.,0.,"WZSMstep3"); setWorkflow(kWZSM);
+  setWorkflow(kWZSM_3lwzZselWsel); fillWZhistos(&candWZ,"WZSMstep3",MllZ); setWorkflow(kWZSM);
   
   
   if(!makeCut(_m3l > 100, "M(3l) > 100 GeV" )) return;
   //if (_WZstep == 4) fillWZhistos(0.0, 0.0);
-  setWorkflow(kWZSM_3lwzZselWselM3l); fillWZhistos(0.,0.,"WZSMstep4"); setWorkflow(kWZSM);
+  setWorkflow(kWZSM_3lwzZselWselM3l); fillWZhistos(&candWZ,"WZSMstep4",MllZ); setWorkflow(kWZSM);
   
   if(!makeCut(_nBJets<=1,"1 or 0 b-jets")) return;
   //if (_WZstep == 5) fillWZhistos(0.0, 0.0);
-  setWorkflow(kWZSM_3lwzZselWselM3lNbj1); fillWZhistos(0.,0.,"WZSMstep5"); setWorkflow(kWZSM);
+  setWorkflow(kWZSM_3lwzZselWselM3lNbj1); fillWZhistos(&candWZ,"WZSMstep5",MllZ); setWorkflow(kWZSM);
   
   if(!makeCut(_nBJets==0,"0 b-jets")) return;
   //if (_WZstep == 6) fillWZhistos(0.0, 0.0);
-  setWorkflow(kWZSM_3lwzZselWselM3lNbj0); fillWZhistos(0.,0.,"WZSMstep6"); setWorkflow(kWZSM);
+  setWorkflow(kWZSM_3lwzZselWselM3lNbj0); fillWZhistos(&candWZ,"WZSMstep6",MllZ); setWorkflow(kWZSM);
   
    
   setWorkflow(kGlobal); 
@@ -1602,7 +1603,7 @@ void WZsynchro::fillValidationHistos(string reg){
   fill(reg+"_NJets40"        , _vc->get("nJet40")        , _weight);
 }  
 
-void WZsynchro::fillWZhistos(double mt, double mtmin, string reg) {
+void WZsynchro::fillWZhistos(CandList* leps, string reg, float MllZ) {
   //fill("l1Pt", (_idxFake==_idxL2)?(_l1Cand->pt()):_l2Cand->pt(), _weight );
   //fill("l2Pt", (_idxFake==_idxL2)?(_l2Cand->pt()):_l1Cand->pt(), _weight );
   fill("HT_"    , _HT       , _weight);
@@ -1611,7 +1612,7 @@ void WZsynchro::fillWZhistos(double mt, double mtmin, string reg) {
   //fill("MTmin"    , mtmin        , _weight);
   fill("NBJets_", _nBJets   , _weight);
   fill("NJets_" , _nJets    , _weight);
-  fill("M3l_"   , _m3l      , _weight);
+  fill("M3l_"   , _wzMod->m3lTight(leps), _weight); // avoiding cases such as [tight, tight, loose, tight]
   if (_DoValidationPlots) {
       if (reg.find("0")==std::string::npos) {
         //fill("lepZ1_jetPtRatio_"+reg, _vc->get("LepGood_jetPtRatio", _idxLZ1)           , _weight);
@@ -1636,13 +1637,16 @@ void WZsynchro::fillWZhistos(double mt, double mtmin, string reg) {
         fill("lepW_SIP3D_"+reg     , _vc->get("LepGood_sip3d", _idxLW)                  , _weight);
       }
       //fill("MET"            , _vc->get("met_pt")        , _weight);
-      fill("htJet40j_"+reg       , _vc->get("htJet40j")      , _weight);
-      fill("mZ1_"+reg            , _vc->get("mZ1")           , _weight);
-      fill("MTmin_"+reg          , _mTmin                    , _weight);
-      fill("NBJetsLoose25_"+reg  , _vc->get("nBJetLoose25")  , _weight);
-      fill("NBJetsMedium25_"+reg , _vc->get("nBJetMedium25") , _weight);
-      fill("NBJetsTight40_"+reg  , _vc->get("nBJetTight40")  , _weight);
-      fill("NJets40_"+reg        , _vc->get("nJet40")        , _weight);
+      //fill("htJet40j_"+reg       , _vc->get("htJet40j")      , _weight); // not present in MiniAODv2 Heppy Trees
+      //fill("mZ1_"+reg            , _vc->get("mZ1")           , _weight);
+      if (reg.find("0")!=std::string::npos) fill("mZ1_"+reg            , _wzMod->bestmZ(leps)      , _weight); // avoiding cases such as [tight, tight, loose, tight]
+      else fill("mZ1_"+reg            , MllZ      , _weight); // consult WZModule.cc for explanation of this if-else
+      //fill("MTmin_"+reg          , _mTmin                    , _weight);
+      //fill("NBJetsLoose25_"+reg  , _vc->get("nBJetLoose25")  , _weight); // not present in MiniAODv2 Heppy Trees
+      //fill("NBJetsMedium25_"+reg , _vc->get("nBJetMedium25") , _weight); // not present in MiniAODv2 Heppy Trees
+      //fill("NBJetsTight40_"+reg  , _vc->get("nBJetTight40")  , _weight); // not present in MiniAODv2 Heppy Trees
+      //fill("NJets40_"+reg        , _vc->get("nJet40")        , _weight); // not present in MiniAODv2 Heppy Trees
+
   }
   if (_DoCheckPlots && reg.find("0")==std::string::npos) {
     if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("lepZ1_mediumMuonId_"+reg, _vc->get("LepGood_mediumMuonId", _idxLZ1)          , _weight);

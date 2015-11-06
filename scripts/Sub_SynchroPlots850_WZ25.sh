@@ -32,20 +32,14 @@ if [ ! -z "${PDFrange[0]}" ]; then
 fi
 
 
-VARS=( "lepZ1_jetPtRatio"
-       "lepZ1_jetPtRel"   
-       "lepZ1_miniRelIso" 
+VARS=( "lepZ1_miniRelIso" 
        "lepZ1_Pt"         
        "lepZ1_Eta"        
-       "lepZ1_SIP3D"      
-       "lepZ2_jetPtRatio" 
-       "lepZ2_jetPtRel"   
+       "lepZ1_SIP3D"
        "lepZ2_miniRelIso" 
        "lepZ2_Pt"         
        "lepZ2_Eta"        
        "lepZ2_SIP3D"      
-       "lepW_jetPtRatio" 
-       "lepW_jetPtRel"   
        "lepW_miniRelIso" 
        "lepW_Pt"         
        "lepW_Eta"        
@@ -58,7 +52,7 @@ VARS=( "lepZ1_jetPtRatio"
        "NBJetsLoose25" 
        "NBJetsMedium25"
        "NBJetsTight40" 
-       "NJets40"        )
+       "NJets40"       )
 
 
 #TODAY="150910" #$(date +"%y%m%d")
@@ -107,10 +101,10 @@ for iwzstep in ${WZSTEPs[@]}; do
 		        	plot=${var}_WZSMstep${wzstep}
 		        	root -l -b -q cards/template_plotsWZ850_25ns.C\(\"${plot}\",\"${filename}\"\) 
 		
-		        	mv $DIR/png/${plot}.png   $DIR/WZstep${wzstep}/${flav}/${var}.png
-		        	mv $DIR/pdf/${plot}.pdf   $DIR/WZstep${wzstep}/${flav}/${var}.pdf
-		        	mv $DIR/eps/${plot}.eps   $DIR/WZstep${wzstep}/${flav}/${var}.eps
-		        	mv $DIR/root/${plot}.root $DIR/WZstep${wzstep}/${flav}/${var}.root
+		        	mv $DIR/png/${plot}.png   $DIR/WZstep${wzstep}/${flav}/${var}_Log.png
+		        	mv $DIR/pdf/${plot}.pdf   $DIR/WZstep${wzstep}/${flav}/${var}_Log.pdf
+		        	mv $DIR/eps/${plot}.eps   $DIR/WZstep${wzstep}/${flav}/${var}_Log.eps
+		        	mv $DIR/root/${plot}.root $DIR/WZstep${wzstep}/${flav}/${var}_Log.root
 
 	            done
 	      done

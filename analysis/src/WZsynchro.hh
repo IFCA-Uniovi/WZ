@@ -233,7 +233,7 @@ private:
   
   void fillhistos();
   void fillValidationHistos(std::string reg);
-  void fillWZhistos(double mt, double mtmin, std::string reg);
+  void fillWZhistos(CandList* leps, std::string reg, float MllZ);
 };
 
 

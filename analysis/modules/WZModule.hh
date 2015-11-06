@@ -18,6 +18,8 @@ public:
   CandList bestWZ(const CandList* leps, int& idxZ1, int& idxZ2, int& idxW);
   CandList bestZ(const CandList* leps, int& idxZ1, int& idxZ2);
   CandList ThreeLeps(const CandList* leps);
+  float bestmZ(const CandList* leps);
+  float m3lTight(const CandList* leps);
 
 protected:
   //const
