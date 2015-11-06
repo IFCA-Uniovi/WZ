@@ -1,13 +1,13 @@
  #!/bin/bash
 
-#Run to generate rootfiles to be used for creating WZ validation plots with 200pb-1, with Sub_SynchroPlots_WZ25.sh
+#Run to generate rootfiles to be used for creating WZ validation plots with 1200pb-1, with Sub_SynchroPlots_WZ25.sh
 #usage from MPAF folder: source scripts/phys14exerc_SubJobs.sh
 #templateCFG=template_fakeEstim.cfg
-templateCFG=template_WZ25plots_850pb.cfg
+templateCFG=template_WZ25plots_1200pb.cfg
 
-NAME="WZ3Lplots850"
-#FLAVs=( "all" "eee" "eem" "mme" "mmm" )
-FLAVs=( "all" )
+NAME="WZ3Lplots1200"
+FLAVs=( "all" "eee" "eem" "mme" "mmm" )
+#FLAVs=( "all" )
 #FLAVs=( "eee" "eem" "mme" "mmm" )
 WZSTEPs=( "6" )
 #WZSTEPs=( "0" "1" "2" "3" "4" "5" "6" )

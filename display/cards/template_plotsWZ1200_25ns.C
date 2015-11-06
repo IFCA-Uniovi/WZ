@@ -1,7 +1,7 @@
 MPAFDisplay md;
 // template plot producer for WZ validation plots, called by Sub_SynchroPlots850_WZ25.sh
 //string today = "150910";
-void template_plotsWZ850_25ns(std::string var,std::string fileName){
+void template_plotsWZ1200_25ns(std::string var,std::string fileName){
   gStyle->SetOptStat(0);
 
   md.refresh();
@@ -37,7 +37,7 @@ void template_plotsWZ850_25ns(std::string var,std::string fileName){
   }
   /*if (var.find("M3l") != std::string::npos){
       logYScale = true;
-      rangeY[0]={0.01};
+      rangeY[0]={0.1};
       rangeY[1]={100000.};
   }*/
   
@@ -69,7 +69,7 @@ void template_plotsWZ850_25ns(std::string var,std::string fileName){
   //Lumis( or XSections ) pb-1 & KFactors ************************************
   string Norm="";
   
-  float lumi=832.31; //pb-1 19470
+  float lumi=1280.22; //pb-1 19470 // 16.34 2015C + 1263.88 2015D
   float energy=13; //TeV
 
   bool useXS=true;
@@ -118,30 +118,40 @@ void template_plotsWZ850_25ns(std::string var,std::string fileName){
   
   // the order MATTERS!!!
   
+  md.anConf.addSample( "DoubleEG_Run2015C_v1_runs_254231_254914"              , "data", kBlack);
   md.anConf.addSample( "DoubleEG_Run2015D_v3_run_256926"                      , "data", kBlack);
   md.anConf.addSample( "DoubleEG_Run2015D_v3_runs_256630_257599"              , "data", kBlack);
   md.anConf.addSample( "DoubleEG_Run2015D_v3_runs_257600_258158"              , "data", kBlack);
-  md.anConf.addSample( "DoubleEG_Run2015D_v4_runs_258159_258714"              , "data", kBlack);
+  md.anConf.addSample( "DoubleEG_Run2015D_v4_runs_258159_258714_excl"         , "data", kBlack);
+  md.anConf.addSample( "DoubleEG_Run2015D_v4_runs_258211_258750"              , "data", kBlack);
 
+  md.anConf.addSample( "DoubleMuon_Run2015C_v1_runs_254231_254914"            , "data", kBlack);
   md.anConf.addSample( "DoubleMuon_Run2015D_v3_run_256926"                    , "data", kBlack);
   md.anConf.addSample( "DoubleMuon_Run2015D_v3_runs_256630_257599"            , "data", kBlack);
   md.anConf.addSample( "DoubleMuon_Run2015D_v3_runs_257600_258158"            , "data", kBlack);
-  md.anConf.addSample( "DoubleMuon_Run2015D_v4_runs_258159_258714"            , "data", kBlack);
+  md.anConf.addSample( "DoubleMuon_Run2015D_v4_runs_258159_258714_excl"       , "data", kBlack);
+  md.anConf.addSample( "DoubleMuon_Run2015D_v4_runs_258211_258750"            , "data", kBlack);
 
+  md.anConf.addSample( "MuonEG_Run2015C_v1_runs_254231_254914"                , "data", kBlack);
   md.anConf.addSample( "MuonEG_Run2015D_v3_run_256926"                        , "data", kBlack);
   md.anConf.addSample( "MuonEG_Run2015D_v3_runs_256630_257599"                , "data", kBlack);
   md.anConf.addSample( "MuonEG_Run2015D_v3_runs_257600_258158"                , "data", kBlack);
-  md.anConf.addSample( "MuonEG_Run2015D_v4_runs_258159_258714"                , "data", kBlack);
+  md.anConf.addSample( "MuonEG_Run2015D_v4_runs_258159_258714_excl"           , "data", kBlack);
+  md.anConf.addSample( "MuonEG_Run2015D_v4_runs_258211_258750"                , "data", kBlack);
 
+  md.anConf.addSample( "SingleElectron_Run2015C_v1_runs_254231_254914"        , "data", kBlack);
   md.anConf.addSample( "SingleElectron_Run2015D_v3_run_256926"                , "data", kBlack);
   md.anConf.addSample( "SingleElectron_Run2015D_v3_runs_256630_257599"        , "data", kBlack);
   md.anConf.addSample( "SingleElectron_Run2015D_v3_runs_257600_258158"        , "data", kBlack);
-  md.anConf.addSample( "SingleElectron_Run2015D_v4_runs_258159_258714"        , "data", kBlack);
+  md.anConf.addSample( "SingleElectron_Run2015D_v4_runs_258159_258714_excl"   , "data", kBlack);
+  md.anConf.addSample( "SingleElectron_Run2015D_v4_runs_258211_258750"        , "data", kBlack);
 
+  md.anConf.addSample( "SingleMuon_Run2015C_v1_runs_254231_254914"            , "data", kBlack);
   md.anConf.addSample( "SingleMuon_Run2015D_v3_run_256926"                    , "data", kBlack);
   md.anConf.addSample( "SingleMuon_Run2015D_v3_runs_256630_257599"            , "data", kBlack);
   md.anConf.addSample( "SingleMuon_Run2015D_v3_runs_257600_258158"            , "data", kBlack);
-  md.anConf.addSample( "SingleMuon_Run2015D_v4_runs_258159_258714"            , "data", kBlack);  
+  md.anConf.addSample( "SingleMuon_Run2015D_v4_runs_258159_258714_excl"       , "data", kBlack);  
+  md.anConf.addSample( "SingleMuon_Run2015D_v4_runs_258211_258750"            , "data", kBlack);  
 
 //  //===============================================================
   

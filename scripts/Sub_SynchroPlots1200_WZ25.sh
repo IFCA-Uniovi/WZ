@@ -3,7 +3,7 @@
 # Run this to get validation plots for WZ selection, from rootfiles created with Sub_AnalysisWZ25_plots_850pb.sh
 
 #REGS=( "ttbar" "ZMuMu" "ZEE" "Zl" "Wl" )
-NAME="WZ3Lplots850"
+NAME="WZ3Lplots1200"
 DIR="workdir/root/WZsynchro/"
 FLAVs=( "all" "eee" "eem" "mme" "mmm" )
 #FLAVs=( "all" )
@@ -99,12 +99,12 @@ for iwzstep in ${WZSTEPs[@]}; do
 		        	  continue
 		        	fi
 		        	plot=${var}_WZSMstep${wzstep}
-		        	root -l -b -q cards/template_plotsWZ850_25ns.C\(\"${plot}\",\"${filename}\"\) 
+		        	root -l -b -q cards/template_plotsWZ1200_25ns.C\(\"${plot}\",\"${filename}\"\) 
 		
-		        	mv $DIR/png/${plot}.png   $DIR/WZstep${wzstep}/${flav}/${var}_Log.png
-		        	mv $DIR/pdf/${plot}.pdf   $DIR/WZstep${wzstep}/${flav}/${var}_Log.pdf
-		        	mv $DIR/eps/${plot}.eps   $DIR/WZstep${wzstep}/${flav}/${var}_Log.eps
-		        	mv $DIR/root/${plot}.root $DIR/WZstep${wzstep}/${flav}/${var}_Log.root
+		        	mv $DIR/png/${plot}.png   $DIR/WZstep${wzstep}/${flav}/${var}.png
+		        	mv $DIR/pdf/${plot}.pdf   $DIR/WZstep${wzstep}/${flav}/${var}.pdf
+		        	mv $DIR/eps/${plot}.eps   $DIR/WZstep${wzstep}/${flav}/${var}.eps
+		        	mv $DIR/root/${plot}.root $DIR/WZstep${wzstep}/${flav}/${var}.root
 
 	            done
 	      done
