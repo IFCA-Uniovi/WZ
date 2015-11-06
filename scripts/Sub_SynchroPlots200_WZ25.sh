@@ -32,33 +32,24 @@ if [ ! -z "${PDFrange[0]}" ]; then
 fi
 
 
-VARS=( "lepZ1_jetPtRatio"
-       "lepZ1_jetPtRel"   
-       "lepZ1_miniRelIso" 
+VARS=( "lepZ1_miniRelIso" 
        "lepZ1_Pt"         
        "lepZ1_Eta"        
-       "lepZ1_SIP3D"      
-       "lepZ2_jetPtRatio" 
-       "lepZ2_jetPtRel"   
+       "lepZ1_SIP3D"   
        "lepZ2_miniRelIso" 
        "lepZ2_Pt"         
        "lepZ2_Eta"        
-       "lepZ2_SIP3D"      
-       "lepW_jetPtRatio" 
-       "lepW_jetPtRel"   
+       "lepZ2_SIP3D"  
        "lepW_miniRelIso" 
        "lepW_Pt"         
        "lepW_Eta"        
        "lepW_SIP3D" 
        "MET"
        "M3l"         
-       "HT"         
-       "htJet40j"        
-       "mZ1"                        
-       "NBJetsLoose25" 
-       "NBJetsMedium25"
-       "NBJetsTight40" 
-       "NJets40"       )
+       "HT"       
+       "mZ1"
+       "NBJets"                         
+       "NJets"       )
 
 
 #TODAY="150910" #$(date +"%y%m%d")
