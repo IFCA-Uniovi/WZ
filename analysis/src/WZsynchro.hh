@@ -73,6 +73,12 @@ private:
   //  bool WOSlSelection(){return false;};
   bool ZlSelection();
   
+  void fillhistos();
+  void fillValidationHistos(std::string reg);
+  void fillWZhistos(CandList* leps, std::string reg, float MllZ);
+  
+  bool checkDoubleCount();
+  
 private: 
 
   //counter categories, 0 is ALWAYS global (even if not specified later
@@ -229,11 +235,27 @@ private:
 	"0 b-jets"};
 
   vector<TVector2> _uncleanJets;
+  vector<TVector2> _uncleanDiscJets;
   vector<TVector2> _uncleanFwdJets;
   
-  void fillhistos();
-  void fillValidationHistos(std::string reg);
-  void fillWZhistos(CandList* leps, std::string reg, float MllZ);
+
+  float _btagW;
+
+  //background pairs===============
+  vector<CandList> _auxPairs;
+  vector<int> _auxFlags;
+  vector<vector<int> > _auxIdxs;
+
+  // vector<unsigned int> _events;
+  // void fillEvents();
+
+  //double counting====
+  map< std::pair<int,std::pair<int,unsigned long int> > , std::pair<string,int> > _events;
+  map< std::pair<int,std::pair<int,unsigned long int> > , std::pair<string,int> >::iterator _itEvt;
+
+
+  vector<float> _jetLepACorFactor;
+
 };
 
 

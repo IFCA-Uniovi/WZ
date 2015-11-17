@@ -19,3 +19,4 @@ FILES += FRinSitu
 FILES += SSDL2015
 FILES += UncertaintyTest
 FILES += WZsynchro
+FILES += Comissioning
