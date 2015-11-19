@@ -1422,8 +1422,8 @@ SSDL2015::getFR(Candidate* cand, int idx) {
 
   ptVal=std::max(ptVal, ptM);
   
-  return _dbm->getDBValue(db, std::min( ptVal,(float)69.9),
-			  std::min(etaVal,(float)(std::abs(cand->pdgId())==11)?2.49:2.39) );
+    return _dbm->getDBValue(db, std::min( ptVal,(float)69.9),
+			  std::min(etaVal,(float)((std::abs(cand->pdgId())==11)?2.49:2.39) ) );
 }
 
 

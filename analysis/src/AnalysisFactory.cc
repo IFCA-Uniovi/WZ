@@ -20,7 +20,7 @@ using namespace std;
 #include "analysis/src/SSDL2015.hh"
 #include "analysis/src/UncertaintyTest.hh"
 #include "analysis/src/WZsynchro.hh"
-#include "analysis/src/Comissioning.hh"
+//#include "analysis/src/Comissioning.hh"
 
 
 MPAF*
@@ -76,8 +76,8 @@ AnalysisFactory::get(const string& analysis, const string& cfg) {
   if(analysis=="WZsynchro") {
     return new WZsynchro(cfg);
   }
-  if(analysis=="Comissioning") {
-    return new Comissioning(cfg);
-  }
+  //if(analysis=="Comissioning") {
+    //return new Comissioning(cfg);
+  //}
   return 0;
 }

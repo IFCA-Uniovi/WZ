@@ -221,14 +221,14 @@ WZsynchro::initialize(){
   addWorkflow( kWZSM_3lwzZselWselM3lNbj0, "WZSMstep6");  
   
   //extra input variables
-  _lepflav = getCfgVarS("LEPFLAV");
-  _leppt   = getCfgVarS("LEPPT"  );
-  _SR      = getCfgVarS("SR"     );
-  _FR      = getCfgVarS("FR"     );
-  _categorization = getCfgVarI("categorization");
-  _DoValidationPlots = getCfgVarI("ValidationPlots");
-  _WZstep = getCfgVarI("WZstep");
-  _DoCheckPlots = getCfgVarI("CheckPlots");
+  _lepflav = getCfgVarS("LEPFLAV","all");
+  _leppt   = getCfgVarS("LEPPT"  ,"all");
+  _SR      = getCfgVarS("SR"     ,"SRFLAG");
+  _FR      = getCfgVarS("FR"     ,"FO2C");
+  _categorization = getCfgVarI("categorization",1);
+  _DoValidationPlots = getCfgVarI("ValidationPlots",1);
+  _WZstep = getCfgVarI("WZstep",6);
+  _DoCheckPlots = getCfgVarI("CheckPlots",0);
   if (_WZstep != -1 ){
     cout << endl <<" WZ selection step = " << _WZstep << " : " << _WZstepname[_WZstep] << endl << endl;
   }
@@ -532,7 +532,8 @@ WZsynchro::retrieveObjects(){
   selectLeptons3l();
 
   
-  _wzMod->cleanJets( &_tightLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx);
+  _wzMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
+		       _lepJets, _lepJetsIdx, (float)40., (float)15., getUncName()=="JES", getUncDir() );
   _nJets=_jets.size();
   _nBJets=_bJets.size();
   _HT=_wzMod->HT( &(_jets) );
@@ -1113,7 +1114,7 @@ WZsynchro::getFR(Candidate* cand, int idx) {
 
   int wp=std::abs(cand->pdgId()==11)?SusyModule::kTight:SusyModule::kMedium;
 
-  if(_FR.find("C")!=string::npos) ptVal=std::max(_susyMod->conePt(idx,wp), (float)ptM);
+  if(_FR.find("C")!=string::npos) ptVal=std::max(_wzMod->conePt(idx,wp), (float)ptM);
   if(_FR.find("J")!=string::npos) ptVal/=_vc->get("LepGood_jetPtRatiov2", idx);
 
   ptVal=std::max(ptVal, ptM);
@@ -1200,7 +1201,7 @@ WZsynchro::categorize() {
     if(testRegion() ) {setWorkflow(ic+offset); return;}
   }
   std::cout << "WARNING: WZsynchro::categorize() did not find any workflow that matches this event. The workflow returns to kGlobal what may cause problems with the histograms" << std::endl;
-  std::cout<<"====> "<<_looseLepsPtCut.size()<<" / "<<_tightLepsPtCut.size()<<" / "<<_nJets<<" / "<<_nBJets<<" / "<<hltSelection()<<" / "<<_met->pt()<<" / "<<_HT<<" / "<<_vc->get("evt")<<" / "<<_vc->get("lumi")<<std::endl;
+  //std::cout<<"====> "<<_looseLepsPtCut.size()<<" / "<<_tightLepsPtCut.size()<<" / "<<_nJets<<" / "<<_nBJets<<" / "<<hltSelection()<<" / "<<_met->pt()<<" / "<<_HT<<" / "<<_vc->get("evt")<<" / "<<_vc->get("lumi")<<std::endl;
   setWorkflow(kGlobal);
 }
 
@@ -1258,21 +1259,26 @@ WZsynchro::tightLepton(int idx, int pdgId) {
 
 bool 
 WZsynchro::fakableLepton(int idx, int pdgId) {
-
+/*
   if(abs(pdgId)==13) {//mu case
-    if(!_wzMod->muIdSel(idx, SusyModule::kTight) ) return false;
-    if(!_wzMod->multiIsoSel(idx, SusyModule::kLoose) ) return false;
+    if(!_wzMod->muIdSel(c, idx, SusyModule::kTight) ) return false;
+    if(!_wzMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
     
     if(_FR.find("FO4")!=string::npos && !_wzMod->invMultiIsoSel(idx, SusyModule::kSpecFakeMu) ) return false;
   }
   else {
-    if(_FR.find("FO2")==string::npos && !_wzMod->elIdSel(idx, SusyModule::kTight, SusyModule::kTight )) return false;
-    if(_FR.find("FO2")!=string::npos && !_wzMod->elIdSel(idx, SusyModule::kTight, SusyModule::kLoose )) return false;
-    if(!_wzMod->multiIsoSel(idx, SusyModule::kLoose) ) return false;
+    int elMva=(_HT<300)?SusyModule::kLooseHT:SusyModule::kLoose;
+    if(bypass) elMva=SusyModule::kLoose;
+    bool hltDLHT=bypass?false:(_HT<300);
+    
+    if(_FR.find("FO2")==string::npos && !_wzMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kTight )) return false;
+    if(_FR.find("FO2")!=string::npos && !_wzMod->elIdSel(c, idx, SusyModule::kTight, elMva )) return false;
+    if(!_wzMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
+     if(!_wzMod->elHLTEmulSel(idx, hltDLHT ) ) return false; 
     
     if(_FR.find("FO4")!=string::npos && !_wzMod->invMultiIsoSel(idx, SusyModule::kSpecFakeEl) ) return false;
   }
-
+*/
   return true;
 }
 
@@ -1706,7 +1712,7 @@ void WZsynchro::fillWZhistos(CandList* leps, string reg, float MllZ) {
 
 
 bool
-SSDL2015::checkDoubleCount() {
+WZsynchro::checkDoubleCount() {
   int run=_vc->get("run");
   int lumi=_vc->get("lumi");
   unsigned long int evt=(unsigned long int)_vc->get("evt");

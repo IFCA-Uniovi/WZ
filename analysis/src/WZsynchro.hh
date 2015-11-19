@@ -31,6 +31,9 @@ private:
   bool noIsoSel();
   bool oneIsoSel();
   bool twoIsoSel();
+  void getFRProb();
+  void getFRProb(int flag, float fr);
+  std::vector<float> getFRs();
   float getProbAtLeastNIso(CandList fObjs, vector<unsigned int> idxs, int nIso);
   bool genMatchedMisCharge();
   int genMatchCateg(const Candidate* cand);
@@ -80,6 +83,8 @@ private:
   bool checkDoubleCount();
   
 private: 
+
+  enum {kIsOS=0,kIsFake, kIsDFake};
 
   //counter categories, 0 is ALWAYS global (even if not specified later
   //enum {kGlobal=0,kLowMETMT,kGenFake,kGenMisCharge,kOneIso,kNoIso, kSelId};
@@ -150,9 +155,14 @@ private:
   float _nJets;
   float _HT;
   float _m3l;
+  
+  int _flav;
 
   //MM ugly
   std::map<std::string, std::vector<std::vector<std::vector<std::string> > > > _sels;
+  
+  //HLT
+  bool _hltDLHT;
   
   //charge misId
   bool _isOS;
@@ -179,10 +189,16 @@ private:
   std::vector<unsigned int>  _tightLepsVeto10Idx;
 
   CandList _jets;
-  std::vector<unsigned int>  _jetsIdx;
+  std::vector<std::pair<std::string, unsigned int> >  _jetsIdx;
   
   CandList _bJets;
-  std::vector<unsigned int>  _bJetsIdx;
+  std::vector<std::pair<std::string, unsigned int> >  _bJetsIdx;
+  
+  CandList _lepJets;
+  std::vector<std::pair<std::string, unsigned int> >  _lepJetsIdx;
+  
+  CandList _jetCleanLeps10;
+  std::vector<unsigned int>  _jetCleanLeps10Idx;
   
   unsigned int _nLooseLeps;
  
