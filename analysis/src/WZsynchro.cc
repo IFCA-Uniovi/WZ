@@ -1764,7 +1764,7 @@ void WZsynchro::EventDump(){
 			      _vc->get("LepGood_relIso04", i),
 			      1);
 
-      else if (abs(_vc->get("LepGood_pdgId",i))==11){
+      }else if (abs(_vc->get("LepGood_pdgId",i))==11){
       
         txt_eventdump << Form("%.0f:%d:%f:%f:%f:%d",
 			      _vc->get("evt"),
