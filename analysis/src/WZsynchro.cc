@@ -229,6 +229,7 @@ WZsynchro::initialize(){
   _DoValidationPlots = getCfgVarI("ValidationPlots",1);
   _WZstep = getCfgVarI("WZstep",6);
   _DoCheckPlots = getCfgVarI("CheckPlots",0);
+  _DoEventDump = getCfgVarI("EventDump",0);
   if (_WZstep != -1 ){
     cout << endl <<" WZ selection step = " << _WZstep << " : " << _WZstepname[_WZstep] << endl << endl;
   }
@@ -401,6 +402,9 @@ void
 WZsynchro::run() {
   
   if(_vc->get("isData") && !checkDoubleCount()) return;
+
+  if (_DoEventDump) txt_eventdump.open("workdir/logs/WZTo3LNu_eventdump.txt",std::ios_base::app);
+
   
   counter("denominator");
   
@@ -430,7 +434,7 @@ WZsynchro::run() {
   // 	       id1, pt1, id2, pt2,
   // 	       njet, nbjet, met, HT,
   // 	       sr ) << endl;
-
+  if (_DoEventDump) txt_eventdump.close();
 }
 
 bool
@@ -564,6 +568,9 @@ WZsynchro::WZ3lSelection() {
   
   //step 0 only 3 leptons with pt > 10 GeV
   if(!makeCut(_tightLeps10.size()==3,"Three leptons")) return;
+  
+  if(_DoEventDump) EventDump();
+  
   //if (_WZstep == 0) fillWZhistos(0.0, 0.0);
   CandList l3 =_wzMod->ThreeLeps( (&_tightLeps10));
   
@@ -1240,7 +1247,7 @@ WZsynchro::tightLepton(int idx, int pdgId) {
     else return false;
   }
   else {
-    std::cout << "WARNING [WZsynchro::tightLepton](" << idx << ", " << pdgId << ", idx) not valid lepton candidate, with LepGood_etaSc=" << _vc->get("LepGood_etaSc", idx) << std::endl;
+    //std::cout << "WARNING [WZsynchro::tightLepton](" << idx << ", " << pdgId << ", idx) not valid lepton candidate, with LepGood_etaSc=" << _vc->get("LepGood_etaSc", idx) << std::endl;
   }
   return false;
   
@@ -1741,4 +1748,40 @@ WZsynchro::checkDoubleCount() {
   //_evtsInFile.push_back(event);
    
   return true;
+}
+
+void WZsynchro::EventDump(){
+  //if (!(_wzMod->IsDumpable(_vc->get("evt")))) return;
+
+  for (int i=0; i<3; i++){
+      //int index = AnalysisLeptons[i].index;
+      if (abs(_vc->get("LepGood_pdgId",i))==13){
+        txt_eventdump << Form("%.0f:%d:%f:%f:%f:%d",
+			      _vc->get("evt"),
+			      (int)_vc->get("LepGood_pdgId", i),
+			      _vc->get("LepGood_pt", i),
+			      _vc->get("LepGood_eta", i),
+			      _vc->get("LepGood_relIso04", i),
+			      1);
+
+      else if (abs(_vc->get("LepGood_pdgId",i))==11){
+      
+        txt_eventdump << Form("%.0f:%d:%f:%f:%f:%d",
+			      _vc->get("evt"),
+			      (int)_vc->get("LepGood_pdgId", i),
+			      _vc->get("LepGood_pt", i),
+			      _vc->get("LepGood_eta", i),
+			      _vc->get("LepGood_relIso03", i),
+			      1);
+      
+	    txt_eventdump << Form(":%f:%.0f:%f:%f:%.0f",
+				    _vc->get("LepGood_etaSc", i),
+				    _vc->get("LepGood_convVeto", i),
+				    _vc->get("LepGood_dxy", i),
+				    _vc->get("LepGood_dz", i),
+				    _vc->get("LepGood_lostHits", i));
+	  }
+      
+      txt_eventdump << Form("\n");
+  }
 }

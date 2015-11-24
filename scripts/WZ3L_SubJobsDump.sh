@@ -1,16 +1,15 @@
  #!/bin/bash
-
-# get WZ synchronization table
+#Run over flavors and selection steps, producing rootfiles from which yields will be extracted with yieldsWZ25_table.sh
+#usage from MPAF folder: source scripts/phys14exerc_SubJobs.sh
 #templateCFG=template_fakeEstim.cfg
-#templateCFG=template_WZ3l.cfg
+templateCFG=template_WZ3lDump.cfg
 
-NAME="WZ3Lyieldsv2"
-DIR="workdir/root/WZsynchro/"
-FLAVs=( "all" "eee" "eem" "mme" "mmm" )
-#FLAVs=( "all" )
+NAME="WZ3Lfordump"
+#FLAVs=( "all" "eee" "eem" "mme" "mmm" )
+FLAVs=( "all" )
 #FLAVs=( "eee" "eem" "mme" "mmm" )
 #WZSTEPs=( "4" "3" "2" "1" "0" )
-WZSTEPs=( "0" "1" "2" "3" "4" "5" "6" )
+WZSTEPs=( "6" )
 
 QSQRs=( "1001" )
 #QSQRs=( "1001" "1002" "1003" "1004" "1005" "1006" "1007" "1008" "1009" )
@@ -32,15 +31,15 @@ if [ ! -z "${PDFrange[0]}" ]; then
 fi
 
 
-#if [ ! -d "cfg/tmpFiles" ]; then
-  #mkdir cfg/tmpFiles
-#fi
+if [ ! -d "cfg/tmpFiles" ]; then
+  mkdir cfg/tmpFiles
+fi
 
 if [ ! -d "workdir/logs" ]; then
   mkdir workdir/logs
 fi
 
-> workdir/logs/yieldsWZ25yieldsv2.txt
+
 for iwzstep in ${WZSTEPs[@]}; do
 
       wzstep=$iwzstep
@@ -64,19 +63,18 @@ for iwzstep in ${WZSTEPs[@]}; do
 	         replaceLHESYS="replaceLHESYS"
               fi
 
-              #cp cfg/$templateCFG cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg
-              #sed -i 's|replaceLEPPT|'all'|' cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg
-              #sed -i 's|replaceWZstep|'$wzstep'|' cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg
-              #sed -i 's|replaceLEPFLAV|'$flav'|' cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg
+              cp cfg/$templateCFG cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg
+              sed -i 's|replaceLEPPT|'all'|' cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg
+              sed -i 's|replaceWZstep|'$wzstep'|' cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg
+              sed -i 's|replaceLEPFLAV|'$flav'|' cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg
               #sed -i 's|replaceQsqr|'$lhe'|' cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg
-              #sed -i 's|'$replaceLHESYS'|'$lhe'|' cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg
+              sed -i 's|'$replaceLHESYS'|'$lhe'|' cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg
    	
-              #echo running: ${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg
-              file=${DIR}${NAME}_WZSTEP6_LEPFLAV${flav}_${LHESYS}${lhe}.root
-	      #echo $FILE
+              echo running: ${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg
+
 	      #qsub -q all.q -N MPAFjob -o $MPAF/workdir/logs/log_${sr}_${pt}_${mva}_${btag}_${flav}_${LHESYS}${lhe}.out -e $MPAF/workdir/logs/log_${sr}_${pt}_${mva}_${btag}_${flav}_${LHESYS}${lhe}.err $MPAF/scripts/submit.sh $MPAF/cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg              
-	      #analysis -c cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg >& $MPAF/workdir/logs/log_${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.log
-	      root -q -l -b display/cards/listyieldsWZ25.C\(\"${file}\",${wzstep}\) >> workdir/logs/yieldsWZ25yieldsv2.txt
+	      analysis -c cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg >& $MPAF/workdir/logs/log_${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.log
+
               ilhe=`echo $ilhe +1 | bc`
 
               #ii=`echo $ii +1 | bc`
@@ -84,7 +82,4 @@ for iwzstep in ${WZSTEPs[@]}; do
           done
 	done
 done
-
-sed -i '/Processing/d' workdir/logs/yieldsWZ25yieldsv2.txt
-sed -i '/^$/d' workdir/logs/yieldsWZ25yieldsv2.txt
 

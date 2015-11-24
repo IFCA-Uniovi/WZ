@@ -1,14 +1,14 @@
  #!/bin/bash
 
-#Run to generate rootfiles to be used for creating WZ validation plots with MiniAODv2 Heppy trees (832pb-1), with Sub_SynchroPlotsv2_WZ25.sh
+#Run to generate rootfiles to be used for creating WZ validation plots with MiniAODv2 Heppy trees (???? pb-1), with Sub_SynchroPlotsv2_WZ25.sh
 
 
 templateCFG=template_WZ25plots_v2.cfg
 
 NAME="WZ3Lplotsv2"
 #FLAVs=( "all" "eee" "eem" "mme" "mmm" )
-FLAVs=( "all" )
-#FLAVs=( "eee" "eem" "mme" "mmm" )
+#FLAVs=( "all" )
+FLAVs=( "eee" "eem" "mme" "mmm" )
 WZSTEPs=( "6" )
 #WZSTEPs=( "0" "1" "2" "3" "4" "5" "6" )
 

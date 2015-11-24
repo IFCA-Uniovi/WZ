@@ -82,6 +82,11 @@ private:
   
   bool checkDoubleCount();
   
+  
+  ofstream txt_eventdump;
+  void EventDump();  
+  
+  
 private: 
 
   enum {kIsOS=0,kIsFake, kIsDFake};
@@ -241,6 +246,7 @@ private:
   bool _categorization;
   bool _DoValidationPlots;
   bool _DoCheckPlots;
+  bool _DoEventDump;
   int _WZstep;
   string _WZstepname [7]= {"Three leptons",
 	"WZ candidate",
@@ -271,6 +277,9 @@ private:
 
 
   vector<float> _jetLepACorFactor;
+
+
+
 
 };
 

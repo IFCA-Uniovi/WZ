@@ -125,3 +125,34 @@ float WZModule::bestmZ(const CandList* leps){
   
   return mll; 
 }
+
+
+
+bool WZModule::IsDumpable(int evt){
+
+  string search = std::to_string(evt);
+  ifstream inFile;
+  string line;
+  bool dumpable = false;
+
+  inFile.open("workdir/data/dumpables.txt");
+
+  if(!inFile){
+    cout << "Unable to open file" << endl;
+    exit(1);
+  }
+
+
+  
+  while(inFile.good())
+  {
+      getline(inFile,line); // get line from file
+      if(line.find(search)!=string::npos) // string::npos is returned if string is not found
+        {
+            //cout <<"Found!";
+            dumpable = true;
+            break;
+        }
+  }
+  return dumpable;
+}

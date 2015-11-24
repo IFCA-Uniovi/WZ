@@ -20,11 +20,14 @@ public:
   CandList ThreeLeps(const CandList* leps);
   float bestmZ(const CandList* leps);
   float m3lTight(const CandList* leps);
+  
+  bool IsDumpable(int evt);
 
 protected:
   //const
   VarClass* _vc;
   DataBaseManager* _dbm;
+
 
 };
 

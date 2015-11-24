@@ -69,14 +69,14 @@ void template_plotsWZv2_25ns(std::string var,std::string fileName){
   //Lumis( or XSections ) pb-1 & KFactors ************************************
   string Norm="";
   
-  float lumi=832.31; //pb-1 19470 // runs 
+  float lumi=2090.; //pb-1 19470 // runs 
   float energy=13; //TeV
 
   bool useXS=true;
   map<string,float> LumisXS;
   map<string,float> KFactors;
 
-  md.anConf.loadXSDB("XSectionsSpring15.db");
+  md.anConf.loadXSDB("XSectionsSpring15_UO.db");
   //md.anConf.loadKFDB("kFactorsSpring15.db");
   md.anConf.configureLumi( LumisXS, KFactors, lumi, useXS );
 
@@ -104,39 +104,36 @@ void template_plotsWZv2_25ns(std::string var,std::string fileName){
   md.anConf.addSample( "TTGJets"                 , "t#bar{t}#gamma"    ,  kOrange-1  );
   */
 
-  md.anConf.addSample( "Tree_WZ_0"               , "WZ"         ,  kGreen+3);
-  md.anConf.addSample("Tree_DYJetsToLL_M10to50_0", "DY"         ,  kCyan  );
-  md.anConf.addSample( "Tree_DYJetsToLL_M50_0"   , "DY"         ,  kCyan  );
-  md.anConf.addSample( "Tree_DYJetsToLL_M50_1"   , "DY"         ,  kCyan  );
-  md.anConf.addSample( "Tree_DYJetsToLL_M50_2"   , "DY"         ,  kCyan  );
-  md.anConf.addSample( "Tree_TbarW_0"            , "Single top" ,  kGray+2); 
+  md.anConf.addSample( "Tree_WZTo3LNu_0"         , "WZ"         ,  kGreen+3);
+  md.anConf.addSample( "Tree_DYJetsToLL_M10to50_aMCatNLO_0","DY",  kCyan  );
+  md.anConf.addSample( "Tree_DYJetsToLL_M50_aMCatNLO"      ,"DY",  kCyan  );
   md.anConf.addSample( "Tree_TW_0"               , "Single top" ,  kGray+2);
-  md.anConf.addSample( "Tree_WJetsToLNu_0"       , "W+jets"     ,  kCyan+2);
+  md.anConf.addSample( "Tree_TbarW_0"            , "Single top" ,  kGray+2); 
+  md.anConf.addSample( "Tree_TToLeptons_sch_0"   , "Single top" ,  kGray+2); 
+  md.anConf.addSample( "Tree_TToLeptons_tch_0"   , "Single top" ,  kGray+2); 
+  md.anConf.addSample( "Tree_TbarToLeptons_tch_0", "Single top" ,  kGray+2); 
+  md.anConf.addSample( "Tree_WJetsToLNu_aMCatNLO_0"       , "W+jets"     ,  kCyan+2);
   //md.anConf.addSample( "Tree_WWTo2L2Nu_0"        , "WW"         ,  kSpring+10);
   md.anConf.addSample( "Tree_WW_0"               , "WW"         ,  kSpring+10);
   md.anConf.addSample( "Tree_ZZ_0"               , "ZZ"         ,  kViolet-5);
-  md.anConf.addSample( "Tree_TTJets_0"           , "t#bar{t}"   ,  kRed   );
-  md.anConf.addSample( "Tree_TTJets_1"           , "t#bar{t}"   ,  kRed   );
-  md.anConf.addSample( "Tree_TTJets_2"           , "t#bar{t}"   ,  kRed   );
-  md.anConf.addSample( "Tree_TTJets_3"           , "t#bar{t}"   ,  kRed   );
-  md.anConf.addSample( "Tree_TTJets_4"           , "t#bar{t}"   ,  kRed   );
-  md.anConf.addSample( "Tree_TTJets_5"           , "t#bar{t}"   ,  kRed   );
-  md.anConf.addSample( "Tree_TTJets_6"           , "t#bar{t}"   ,  kRed   );
+  md.anConf.addSample( "Tree_GGHZZ4L_0"          , "ZZ"         ,  kViolet-5);
+  md.anConf.addSample( "Tree_TTJets"             , "t#bar{t}"   ,  kRed   );
   //md.anConf.addSample( "Tree_TTLep_pow_0"        , "t#bar{t}"   ,  kRed   );
   //md.anConf.addSample( "Tree_TTLep_pow_1"        , "t#bar{t}"   ,  kRed   );
   md.anConf.addSample( "Tree_TTWToLNu_0"         , "t#bar{t}W"  ,  kMagenta-10);
-  md.anConf.addSample( "Tree_TTWToQQ_0"          , "t#bar{t}W"  ,  kMagenta-10);
-  md.anConf.addSample( "Tree_TTZToQQ_0"          , "t#bar{t}Z"  ,  kBlue  );
+  md.anConf.addSample( "Tree_TTZToLLNuNu_0"      , "t#bar{t}Z"  ,  kBlue  );
+  md.anConf.addSample( "Tree_TTHnobb_0"          , "t#bar{t}H"  ,  kOrange+3  );
+  md.anConf.addSample( "Tree_TTGJets_0"          , "t#bar{t}#gamma"    ,  kOrange-1  );
 
   
   // the order MATTERS!!!
   
   md.anConf.addSample( "Tree_DoubleEG_Run2015D_05Oct_0"              , "data", kBlack);
-  md.anConf.addSample( "Tree_DoubleEG_Run2015D_v4_0"                      , "data", kBlack);
+  md.anConf.addSample( "Tree_DoubleEG_Run2015D_v4Full_0"                      , "data", kBlack);
   md.anConf.addSample( "Tree_DoubleMuon_Run2015D_05Oct_0"              , "data", kBlack);
-  md.anConf.addSample( "Tree_DoubleMuon_Run2015D_v4_0"              , "data", kBlack);
+  md.anConf.addSample( "Tree_DoubleMuon_Run2015D_v4Full_0"              , "data", kBlack);
   md.anConf.addSample( "Tree_MuonEG_Run2015D_05Oct_0"         , "data", kBlack);
-  md.anConf.addSample( "Tree_MuonEG_Run2015D_v4_0"              , "data", kBlack); 
+  md.anConf.addSample( "Tree_MuonEG_Run2015D_v4Full_0"              , "data", kBlack); 
 
 //  //===============================================================
   
