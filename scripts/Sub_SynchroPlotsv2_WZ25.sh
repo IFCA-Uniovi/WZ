@@ -5,12 +5,12 @@
 #REGS=( "ttbar" "ZMuMu" "ZEE" "Zl" "Wl" )
 NAME="WZ3Lplotsv2"
 DIR="workdir/root/WZsynchro/"
-#FLAVs=( "all" "eee" "eem" "mme" "mmm" )
-FLAVs=( "all" )
+FLAVs=( "all" "eee" "eem" "mme" "mmm" )
+#FLAVs=( "all" )
 #FLAVs=( "eee" "eem" "mme" "mmm" )
 #WZSTEPs=( "0" )
-#WZSTEPs=( "0" "1" "2" "3" "4" "5" "6" )
-WZSTEPs=( "6" )
+WZSTEPs=( "0" "1" "2" "3" "4" "5" "6" )
+#WZSTEPs=( "6" )
 
 QSQRs=( "1001" )
 #QSQRs=( "1001" "1002" "1003" "1004" "1005" "1006" "1007" "1008" "1009" )

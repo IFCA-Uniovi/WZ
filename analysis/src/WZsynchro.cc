@@ -221,14 +221,15 @@ WZsynchro::initialize(){
   addWorkflow( kWZSM_3lwzZselWselM3lNbj0, "WZSMstep6");  
   
   //extra input variables
-  _lepflav = getCfgVarS("LEPFLAV");
-  _leppt   = getCfgVarS("LEPPT"  );
-  _SR      = getCfgVarS("SR"     );
-  _FR      = getCfgVarS("FR"     );
-  _categorization = getCfgVarI("categorization");
-  _DoValidationPlots = getCfgVarI("ValidationPlots");
-  _WZstep = getCfgVarI("WZstep");
-  _DoCheckPlots = getCfgVarI("CheckPlots");
+  _lepflav = getCfgVarS("LEPFLAV","all");
+  _leppt   = getCfgVarS("LEPPT"  ,"all");
+  _SR      = getCfgVarS("SR"     ,"SRFLAG");
+  _FR      = getCfgVarS("FR"     ,"FO2C");
+  _categorization = getCfgVarI("categorization",1);
+  _DoValidationPlots = getCfgVarI("ValidationPlots",1);
+  _WZstep = getCfgVarI("WZstep",6);
+  _DoCheckPlots = getCfgVarI("CheckPlots",0);
+  _DoEventDump = getCfgVarI("EventDump",0);
   if (_WZstep != -1 ){
     cout << endl <<" WZ selection step = " << _WZstep << " : " << _WZstepname[_WZstep] << endl << endl;
   }
@@ -400,8 +401,11 @@ WZsynchro::writeOutput() {
 void
 WZsynchro::run() {
   
-  //if(_vc->get("evt")!=72688 && _vc->get("evt")!=49205) return;
-  //cout<<" =================================="<< _sampleName <<endl;
+  if(_vc->get("isData") && !checkDoubleCount()) return;
+
+  if (_DoEventDump) txt_eventdump.open("workdir/logs/WZTo3LNu_eventdump.txt",std::ios_base::app);
+
+  
   counter("denominator");
   
   retrieveObjects();
@@ -430,7 +434,7 @@ WZsynchro::run() {
   // 	       id1, pt1, id2, pt2,
   // 	       njet, nbjet, met, HT,
   // 	       sr ) << endl;
-
+  if (_DoEventDump) txt_eventdump.close();
 }
 
 bool
@@ -532,7 +536,8 @@ WZsynchro::retrieveObjects(){
   selectLeptons3l();
 
   
-  _wzMod->cleanJets( &_tightLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx);
+  _wzMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
+		       _lepJets, _lepJetsIdx, (float)40., (float)15., getUncName()=="JES", getUncDir() );
   _nJets=_jets.size();
   _nBJets=_bJets.size();
   _HT=_wzMod->HT( &(_jets) );
@@ -563,6 +568,9 @@ WZsynchro::WZ3lSelection() {
   
   //step 0 only 3 leptons with pt > 10 GeV
   if(!makeCut(_tightLeps10.size()==3,"Three leptons")) return;
+  
+  if(_DoEventDump) EventDump();
+  
   //if (_WZstep == 0) fillWZhistos(0.0, 0.0);
   CandList l3 =_wzMod->ThreeLeps( (&_tightLeps10));
   
@@ -1022,7 +1030,7 @@ WZsynchro::genMatchedToFake(int idx) {
   if (_vc->get("isData") == 1) return false;
 
   int id1  = _vc->get("LepGood_mcMatchId" ,idx); 
-  if(id1==0) return true;
+  if(id1==0 || id1==100) return true;
 
   return false;
 }
@@ -1030,27 +1038,21 @@ WZsynchro::genMatchedToFake(int idx) {
 bool
 WZsynchro::genMatchedMisCharge() {
 
-  if (_vc->get("isData") == 1) return false;
-    
-  int nGenL=_vc->get("nGenPart");
-  int pdgId1=0;
-  int pdgId2=0;
+
+  if (_vc->get("isData")==1) return false;
   
-  for(int ig=0;ig<nGenL;++ig) {
-    
-    if(pdgId1==0 && KineUtils::dR(_vc->get("LepGood_eta",_idxL1), _vc->get("GenPart_eta", ig),
-		     _vc->get("LepGood_phi",_idxL1), _vc->get("GenPart_phi", ig))<0.05) { 
-      pdgId1 = _vc->get("GenPart_pdgId",ig);
-    }
-    if(pdgId2==0 &&KineUtils::dR(_vc->get("LepGood_eta",_idxL2), _vc->get("GenPart_eta", ig),
-		     _vc->get("LepGood_phi",_idxL2), _vc->get("GenPart_phi", ig))<0.05) { 
-      pdgId2 = _vc->get("GenPart_pdgId",ig);
-    }
-    
-    if(pdgId1!=0 && pdgId2!=0)
-      break;
+  int mid1=_vc->get("LepGood_mcMatchId" ,_idxL1);
+  int mid2=_vc->get("LepGood_mcMatchId" ,_idxL2);
+  
+  //DY case
+  if(mid1==23 && mid2==23 && 
+     _l1Cand->pdgId()*_l2Cand->pdgId()>0 ) {
+    return true;
   }
-  if(pdgId1*pdgId2<0) return true;
+  if(std::abs(mid1)==24 && std::abs(mid2)==24 &&
+     _l1Cand->pdgId()*_l2Cand->pdgId()>0 ) {
+    return true;
+  }
   
   return false;
 }
@@ -1080,39 +1082,20 @@ WZsynchro::genMatchCateg(const Candidate* cand) {
 bool
 WZsynchro::passGenSelection() {
 
+
   if( _sampleName.find("DYJets")!=(size_t)-1 || _sampleName.find("TTJets")!=(size_t)-1 ) {
-    //ugly
-    int lep1Id=genMatchCateg(_l1Cand);
-    int lep2Id=genMatchCateg(_l1Cand);
     
     if(_sampleName.find("charge")!=(size_t)-1) {
       if( !genMatchedMisCharge() )
-	  //( (lep1Id == kMisChargePdgId && lep2Id >= kMisChargePdgId) || 
-	  //  (lep2Id == kMisChargePdgId && lep1Id >= kMisChargePdgId) ) ) 
 	return false;
     }
     else if(_sampleName.find("fake")!=(size_t)-1) {
-      // if( lep1Id > kMisMatchPdgId &&
-      // 	  lep2Id > kMisMatchPdgId ) return false;
       if(!genMatchedToFake(_idxL1) && !genMatchedToFake(_idxL2) ) return false;
-
     }
     else {
-      if( (!genMatchedToFake(_idxL1) && !genMatchedToFake(_idxL2) ) && !genMatchedMisCharge() ) {
-	// // cout<<" coincoin "<<"  "<<genMatchedMisCharge()<<endl;
-	// // cout<<_vc->get("LepGood_mcMatchId" ,_idxL1)<<"  "<<_vc->get("LepGood_mcMatchId" ,_idxL2)<<" --> "<<endl;
-	// int nGenL=_vc->get("nGenPart");
-	// for(int ig=0;ig<nGenL;++ig) {
-	//   cout<<_vc->get("GenPart_pdgId",ig)<<"   "<<_vc->get("LepGood_eta",_idxL1)<<" <> "<<_vc->get("LepGood_eta",_idxL2)<<" <> "<<_vc->get("GenPart_eta", ig)<<" : "<<_vc->get("GenPart_pt", ig)<<" -> "<<_vc->get("GenPart_motherId", ig)<<endl;
-	// }
-      }
+      //if( genMatchedToFake(_idxL1) || genMatchedToFake(_idxL2) ) return false;
     }
-    // if(_sampleName.find("prompt")!=(size_t)-1) {
-    //   if( lep1Id != kGenMatched ||
-    // 	  lep2Id != kGenMatched ) return false;
-    // }
   }
-
   return true;
 }
 
@@ -1120,26 +1103,29 @@ WZsynchro::passGenSelection() {
 float 
 WZsynchro::getFR(Candidate* cand, int idx) {
   string db;
-  //int wp=SusyModule::kTight;
-  
+  float ptM=10;
   if( std::abs(cand->pdgId())==13) db="Mu";
-  else  db="El";
+  else { db="El"; ptM=15;}
   
+  if(_HT<300) db+= "Iso";
+  else db += "NIso";
+
+  if(_vc->get("isData")!=1) db +="MC";
+
+
+  if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kUp ) db+="Up";
+  if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kDown ) db+="Do";
 
   float ptVal=cand->pt();
   float etaVal=std::abs(cand->eta());
-  
-  if(_FR.find("C")!=string::npos) ptVal=std::max(_wzMod->conePt(idx), (float)10.);
-  if(_FR.find("J")!=string::npos) ptVal/=_vc->get("LepGood_jetPtRatio", idx);
 
-  ptVal=std::max(ptVal, (float)10.);
-  // cout<<" ====> "<<cand->pt()<<" / "<<cand->eta()<<" => "<<_dbm->getDBValue(db, std::min( ptVal,(float)69.9),
-  // 									    std::min(std::abs(cand->eta()),(float)2.49) )<<endl;
+  int wp=std::abs(cand->pdgId()==11)?SusyModule::kTight:SusyModule::kMedium;
 
-  // if(_dbm->getDBValue(db, std::min( ptVal,(float)69.9),
-  // 		      std::min(std::abs(cand->eta()),(float)2.49) ) == 1)
-  //   cout<<cand->pt()<<"  "<<ptVal<<"   "<<_dbm->getDBValue(db, std::min( ptVal,(float)69.9),
-  // 							   std::min(std::abs(cand->eta()),(float)2.49) )<<endl;
+  if(_FR.find("C")!=string::npos) ptVal=std::max(_wzMod->conePt(idx,wp), (float)ptM);
+  if(_FR.find("J")!=string::npos) ptVal/=_vc->get("LepGood_jetPtRatiov2", idx);
+
+  ptVal=std::max(ptVal, ptM);
+
   return 0.000001;
   //return _dbm->getDBValue(db, std::min( ptVal,(float)69.9),
 //			  std::min(etaVal,(float)2.49) );
@@ -1148,12 +1134,25 @@ WZsynchro::getFR(Candidate* cand, int idx) {
 
 void
 WZsynchro::chargeFlipProb() {
-/*
-  float p1=_dbm->getDBValue("chargeMId", std::abs(_l1Cand->eta()), _l1Cand->pt());
-  float p2=_dbm->getDBValue("chargeMId", std::abs(_l2Cand->eta()), _l2Cand->pt());
-  float w=p1+p2-2*p1*p2;
 
-  _weight *= w;*/
+  string db="chargeMId";
+  if(!_vc->get("isData") ) db="chargeMIdMC";
+
+  float w=0;
+  for(unsigned int i=0;i<_auxPairs.size();i++) {
+
+    if(_auxFlags[i]!=kIsOS) continue;
+
+    float p1=_dbm->getDBValue(db, _auxPairs[i][0]->pt(), std::abs(_auxPairs[i][0]->eta()));
+    float p2=_dbm->getDBValue(db, _auxPairs[i][1]->pt(), std::abs(_auxPairs[i][1]->eta()));
+
+    if(p1>0.01) p1=0.0005;
+    if(p2>0.01) p2=0.0005;
+
+    w += (p1+p2-2*p1*p2)/(p1*p2+(1-p1)*(1-p2) );
+  }
+  
+  _weight *= w;
 }
 
 //===============================================================
@@ -1209,6 +1208,7 @@ WZsynchro::categorize() {
     if(testRegion() ) {setWorkflow(ic+offset); return;}
   }
   std::cout << "WARNING: WZsynchro::categorize() did not find any workflow that matches this event. The workflow returns to kGlobal what may cause problems with the histograms" << std::endl;
+  //std::cout<<"====> "<<_looseLepsPtCut.size()<<" / "<<_tightLepsPtCut.size()<<" / "<<_nJets<<" / "<<_nBJets<<" / "<<hltSelection()<<" / "<<_met->pt()<<" / "<<_HT<<" / "<<_vc->get("evt")<<" / "<<_vc->get("lumi")<<std::endl;
   setWorkflow(kGlobal);
 }
 
@@ -1247,7 +1247,7 @@ WZsynchro::tightLepton(int idx, int pdgId) {
     else return false;
   }
   else {
-    std::cout << "WARNING [WZsynchro::tightLepton](" << idx << ", " << pdgId << ", idx) not valid lepton candidate, with LepGood_etaSc=" << _vc->get("LepGood_etaSc", idx) << std::endl;
+    //std::cout << "WARNING [WZsynchro::tightLepton](" << idx << ", " << pdgId << ", idx) not valid lepton candidate, with LepGood_etaSc=" << _vc->get("LepGood_etaSc", idx) << std::endl;
   }
   return false;
   
@@ -1266,21 +1266,26 @@ WZsynchro::tightLepton(int idx, int pdgId) {
 
 bool 
 WZsynchro::fakableLepton(int idx, int pdgId) {
-
+/*
   if(abs(pdgId)==13) {//mu case
-    if(!_wzMod->muIdSel(idx, SusyModule::kTight) ) return false;
-    if(!_wzMod->multiIsoSel(idx, SusyModule::kLoose) ) return false;
+    if(!_wzMod->muIdSel(c, idx, SusyModule::kTight) ) return false;
+    if(!_wzMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
     
     if(_FR.find("FO4")!=string::npos && !_wzMod->invMultiIsoSel(idx, SusyModule::kSpecFakeMu) ) return false;
   }
   else {
-    if(_FR.find("FO2")==string::npos && !_wzMod->elIdSel(idx, SusyModule::kTight, SusyModule::kTight )) return false;
-    if(_FR.find("FO2")!=string::npos && !_wzMod->elIdSel(idx, SusyModule::kTight, SusyModule::kLoose )) return false;
-    if(!_wzMod->multiIsoSel(idx, SusyModule::kLoose) ) return false;
+    int elMva=(_HT<300)?SusyModule::kLooseHT:SusyModule::kLoose;
+    if(bypass) elMva=SusyModule::kLoose;
+    bool hltDLHT=bypass?false:(_HT<300);
+    
+    if(_FR.find("FO2")==string::npos && !_wzMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kTight )) return false;
+    if(_FR.find("FO2")!=string::npos && !_wzMod->elIdSel(c, idx, SusyModule::kTight, elMva )) return false;
+    if(!_wzMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
+     if(!_wzMod->elHLTEmulSel(idx, hltDLHT ) ) return false; 
     
     if(_FR.find("FO4")!=string::npos && !_wzMod->invMultiIsoSel(idx, SusyModule::kSpecFakeEl) ) return false;
   }
-
+*/
   return true;
 }
 
@@ -1534,36 +1539,84 @@ TVector2
 WZsynchro::varyMET() {
 
   unsigned int nJets=_vc->get("nJet");
+  unsigned int nDiscJets=_vc->get("nDiscJet");
   unsigned int nFwdJets=_vc->get("nJetFwd");
   if(!isInUncProc() ) {//first, store the jets
     _uncleanJets.clear();
+    _uncleanDiscJets.clear();
     _uncleanFwdJets.clear();
     for(unsigned int ij=0;ij<nJets;ij++) { 
       TVector2 jet; jet.SetMagPhi( _vc->get("Jet_pt", ij), _vc->get("Jet_phi", ij)   );
       _uncleanJets.push_back(jet);
     }
+    for(unsigned int ij=0;ij<nDiscJets;ij++) { 
+      TVector2 jet; jet.SetMagPhi( _vc->get("DiscJet_pt", ij), _vc->get("DiscJet_phi", ij)   );
+      _uncleanDiscJets.push_back(jet);
+    }
     for(unsigned int ij=0;ij<nFwdJets;ij++) { 
       TVector2 jet; jet.SetMagPhi(_vc->get("JetFwd_pt", ij),_vc->get("JetFwd_phi", ij));
       _uncleanFwdJets.push_back(jet);
     }
-  }
   
+    // for(unsigned int ij=0;ij<nJets;ij++) {
+    //   cout<<getUncName()<<" -> "<<_vc->get("Jet_pt", ij)<<" / "<<_vc->get("Jet_eta", ij)<<endl;
+    // }
+    // for(unsigned int ij=0;ij<nDiscJets;ij++) {
+    //   cout<<getUncName()<<" -> "<<_vc->get("DiscJet_pt", ij)<<" / "<<_vc->get("DiscJet_eta", ij)<<endl;
+    // }
+    // for(unsigned int ij=0;ij<nFwdJets;ij++) {
+    //   cout<<getUncName()<<" -> "<<_vc->get("JetFwd_pt", ij)<<" / "<<_vc->get("JetFwd_eta", ij)<<endl;
+    // }
+  }
+
   TVector2 met; met.SetMagPhi(_vc->get("met_pt"), _vc->get("met_phi") );
+  if(!(isInUncProc() &&  getUncName()=="JES") ) return met;
+
   for(unsigned int ij=0;ij<nJets;ij++) { 
+    
+    bool find=false;
+    for(unsigned int iv=0;iv<_lepJetsIdx.size();iv++) {
+      if("Jet"==_lepJetsIdx[iv].first && ij==_lepJetsIdx[iv].second) { find=true; break;}
+    }
+    if(find) continue; //bloody lepton cleaning
+   
     //add back the standard jets
     met += _uncleanJets[ij];
     //JES varied jets
-    TVector2 jet; jet.SetMagPhi( _vc->get("Jet_pt", ij), _vc->get("Jet_phi", ij)   );
+    float scale=_dbm->getDBValue("jes", _vc->get("Jet_eta", ij), _vc->get("Jet_pt", ij));
+    scale = ((SystUtils::kUp==getUncDir())?1:(-1))*scale;
+    TVector2 jet; jet.SetMagPhi( _vc->get("Jet_pt", ij)*(1+scale), _vc->get("Jet_phi", ij)   );
     met -= jet;
+    //cout<<" -> "<<_vc->get("Jet_pt", ij)*(1+scale)<<" / "<<_vc->get("Jet_eta", ij)<<endl;
+  }
+  for(unsigned int ij=0;ij<nDiscJets;ij++) { 
+    
+    bool find=false;
+    for(unsigned int iv=0;iv<_lepJetsIdx.size();iv++) {
+      if("DiscJet"==_lepJetsIdx[iv].first && ij==_lepJetsIdx[iv].second) { find=true; break;}
+    }
+    if(find) continue; //bloody lepton cleaning
+    
+    //add back the standard jets
+    met += _uncleanDiscJets[ij];
+    //JES varied jets
+    float scale=_dbm->getDBValue("jes", _vc->get("DiscJet_eta", ij), _vc->get("DiscJet_pt", ij));
+    scale = ((SystUtils::kUp==getUncDir())?1:(-1))*scale;
+    TVector2 jet; jet.SetMagPhi( _vc->get("DiscJet_pt", ij), _vc->get("DiscJet_phi", ij)   );
+    met -= jet;
+    //cout<<" -> "<<_vc->get("DiscJet_pt", ij)*(1+scale)<<" / "<<_vc->get("DiscJet_eta", ij)<<endl;
   }
   for(unsigned int ij=0;ij<nFwdJets;ij++) { 
     //add back the standard jets
     met += _uncleanFwdJets[ij];
     //JES varied jets
+    float scale=_dbm->getDBValue("jes", _vc->get("JetFwd_eta", ij), _vc->get("JetFwd_pt", ij));
+    scale = ((SystUtils::kUp==getUncDir())?1:(-1))*scale;
     TVector2 jet; jet.SetMagPhi(_vc->get("JetFwd_pt", ij), _vc->get("JetFwd_phi", ij) );
     met -= jet;
+    //cout<<" -> "<<_vc->get("JetFwd_pt", ij)*(1+scale)<<" / "<<_vc->get("JetFwd_eta", ij)<<endl;
   }
-  
+
   return met;
 }
 
@@ -1664,3 +1717,71 @@ void WZsynchro::fillWZhistos(CandList* leps, string reg, float MllZ) {
   }
 }
 
+
+bool
+WZsynchro::checkDoubleCount() {
+  int run=_vc->get("run");
+  int lumi=_vc->get("lumi");
+  unsigned long int evt=(unsigned long int)_vc->get("evt");
+  
+  bool doubleCount=false;
+  std::pair<int,unsigned long int> tmp(lumi,evt);
+  std::pair<int, std::pair<int,unsigned long int> > tmp2(run, tmp);
+  _itEvt = _events.find( tmp2 );
+  if(_itEvt != _events.end() ) {
+    doubleCount=true;
+    //abort(); ?? FIXME -> no abort by default
+  }
+  int nT = 1;
+  if(doubleCount)
+    { 
+      //cout<<" ==> multiple counting "<< _ids<<"  "<<run<<"  "<<event<<"  "<< anConf.getDataset(_ids)->findProcess(_ie)<<endl;
+      nT = _itEvt->second.second +1;
+      return false;
+    }
+  
+ 
+  string t1("");
+  std::pair<string,int> tt( t1, nT );
+	  
+  _events[ tmp2 ] = tt;
+  //_evtsInFile.push_back(event);
+   
+  return true;
+}
+
+void WZsynchro::EventDump(){
+  //if (!(_wzMod->IsDumpable(_vc->get("evt")))) return;
+
+  for (int i=0; i<3; i++){
+      //int index = AnalysisLeptons[i].index;
+      if (abs(_vc->get("LepGood_pdgId",i))==13){
+        txt_eventdump << Form("%.0f:%d:%f:%f:%f:%d",
+			      _vc->get("evt"),
+			      (int)_vc->get("LepGood_pdgId", i),
+			      _vc->get("LepGood_pt", i),
+			      _vc->get("LepGood_eta", i),
+			      _vc->get("LepGood_relIso04", i),
+			      1);
+
+      else if (abs(_vc->get("LepGood_pdgId",i))==11){
+      
+        txt_eventdump << Form("%.0f:%d:%f:%f:%f:%d",
+			      _vc->get("evt"),
+			      (int)_vc->get("LepGood_pdgId", i),
+			      _vc->get("LepGood_pt", i),
+			      _vc->get("LepGood_eta", i),
+			      _vc->get("LepGood_relIso03", i),
+			      1);
+      
+	    txt_eventdump << Form(":%f:%.0f:%f:%f:%.0f",
+				    _vc->get("LepGood_etaSc", i),
+				    _vc->get("LepGood_convVeto", i),
+				    _vc->get("LepGood_dxy", i),
+				    _vc->get("LepGood_dz", i),
+				    _vc->get("LepGood_lostHits", i));
+	  }
+      
+      txt_eventdump << Form("\n");
+  }
+}

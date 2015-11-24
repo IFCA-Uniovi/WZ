@@ -31,6 +31,9 @@ private:
   bool noIsoSel();
   bool oneIsoSel();
   bool twoIsoSel();
+  void getFRProb();
+  void getFRProb(int flag, float fr);
+  std::vector<float> getFRs();
   float getProbAtLeastNIso(CandList fObjs, vector<unsigned int> idxs, int nIso);
   bool genMatchedMisCharge();
   int genMatchCateg(const Candidate* cand);
@@ -73,7 +76,20 @@ private:
   //  bool WOSlSelection(){return false;};
   bool ZlSelection();
   
+  void fillhistos();
+  void fillValidationHistos(std::string reg);
+  void fillWZhistos(CandList* leps, std::string reg, float MllZ);
+  
+  bool checkDoubleCount();
+  
+  
+  ofstream txt_eventdump;
+  void EventDump();  
+  
+  
 private: 
+
+  enum {kIsOS=0,kIsFake, kIsDFake};
 
   //counter categories, 0 is ALWAYS global (even if not specified later
   //enum {kGlobal=0,kLowMETMT,kGenFake,kGenMisCharge,kOneIso,kNoIso, kSelId};
@@ -144,9 +160,14 @@ private:
   float _nJets;
   float _HT;
   float _m3l;
+  
+  int _flav;
 
   //MM ugly
   std::map<std::string, std::vector<std::vector<std::vector<std::string> > > > _sels;
+  
+  //HLT
+  bool _hltDLHT;
   
   //charge misId
   bool _isOS;
@@ -173,10 +194,16 @@ private:
   std::vector<unsigned int>  _tightLepsVeto10Idx;
 
   CandList _jets;
-  std::vector<unsigned int>  _jetsIdx;
+  std::vector<std::pair<std::string, unsigned int> >  _jetsIdx;
   
   CandList _bJets;
-  std::vector<unsigned int>  _bJetsIdx;
+  std::vector<std::pair<std::string, unsigned int> >  _bJetsIdx;
+  
+  CandList _lepJets;
+  std::vector<std::pair<std::string, unsigned int> >  _lepJetsIdx;
+  
+  CandList _jetCleanLeps10;
+  std::vector<unsigned int>  _jetCleanLeps10Idx;
   
   unsigned int _nLooseLeps;
  
@@ -219,6 +246,7 @@ private:
   bool _categorization;
   bool _DoValidationPlots;
   bool _DoCheckPlots;
+  bool _DoEventDump;
   int _WZstep;
   string _WZstepname [7]= {"Three leptons",
 	"WZ candidate",
@@ -229,11 +257,30 @@ private:
 	"0 b-jets"};
 
   vector<TVector2> _uncleanJets;
+  vector<TVector2> _uncleanDiscJets;
   vector<TVector2> _uncleanFwdJets;
   
-  void fillhistos();
-  void fillValidationHistos(std::string reg);
-  void fillWZhistos(CandList* leps, std::string reg, float MllZ);
+
+  float _btagW;
+
+  //background pairs===============
+  vector<CandList> _auxPairs;
+  vector<int> _auxFlags;
+  vector<vector<int> > _auxIdxs;
+
+  // vector<unsigned int> _events;
+  // void fillEvents();
+
+  //double counting====
+  map< std::pair<int,std::pair<int,unsigned long int> > , std::pair<string,int> > _events;
+  map< std::pair<int,std::pair<int,unsigned long int> > , std::pair<string,int> >::iterator _itEvt;
+
+
+  vector<float> _jetLepACorFactor;
+
+
+
+
 };
 
 
