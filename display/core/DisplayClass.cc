@@ -2815,7 +2815,7 @@ DisplayClass::cmsPrel() {
       latex.SetTextAlign(31); // align left, right=31
       latex.SetTextSize(textSize*0.6/0.75);
       if(_lumi > 1000 )
-	latex.DrawLatex(0.965,0.96,Form(" %.1f fb^{-1} (%.0f TeV)",_lumi/1000., _energy));
+	latex.DrawLatex(0.965,0.96,Form(" %.2f fb^{-1} (%.0f TeV)",_lumi/1000., _energy));
       else
 	latex.DrawLatex(0.965,0.96,Form(" %.0f pb^{-1} (%.0f TeV)",_lumi, _energy));
     }
@@ -2844,7 +2844,7 @@ DisplayClass::cmsPrel() {
       latex.SetTextAlign(31); // align left, right=31
       latex.SetTextSize(textSize*0.6/0.75);
       if(_lumi > 1000 )
-	latex.DrawLatex(0.922,0.96,Form(" %.1f fb^{-1} (%.0f TeV)",_lumi/1000., _energy) );
+	latex.DrawLatex(0.922,0.96,Form(" %.2f fb^{-1} (%.0f TeV)",_lumi/1000., _energy) );
       else
 	latex.DrawLatex(0.922,0.96,Form(" %.0f pb^{-1} (%.0f TeV)",_lumi, _energy) );
     }

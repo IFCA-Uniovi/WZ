@@ -568,9 +568,7 @@ WZsynchro::WZ3lSelection() {
   
   //step 0 only 3 leptons with pt > 10 GeV
   if(!makeCut(_tightLeps10.size()==3,"Three leptons")) return;
-  
-  if(_DoEventDump) EventDump();
-  
+    
   //if (_WZstep == 0) fillWZhistos(0.0, 0.0);
   CandList l3 =_wzMod->ThreeLeps( (&_tightLeps10));
   
@@ -583,6 +581,13 @@ WZsynchro::WZ3lSelection() {
   if (_lepflav=="mme" && munumber!=2) return;
   if (_lepflav=="mmm" && munumber!=3) return;
   
+  int ossfpair = 0;
+  if ( (l3[0]->pdgId() + l3[1]->pdgId()) == 0 ) ossfpair++;
+  if ( (l3[1]->pdgId() + l3[2]->pdgId()) == 0 ) ossfpair++;
+  if ( (l3[0]->pdgId() + l3[2]->pdgId()) == 0 ) ossfpair++;
+  if ( ossfpair == 0 ) return;
+  
+  if(_DoEventDump) EventDump();
   setWorkflow(kWZSM_3l); fillWZhistos(&l3,"WZSMstep0",0.0); setWorkflow(kWZSM);
 
 
@@ -1752,13 +1757,15 @@ WZsynchro::checkDoubleCount() {
 
 void WZsynchro::EventDump(){
   //if (!(_wzMod->IsDumpable(_vc->get("evt")))) return;
+  if (_vc->get("evt") < 10000 || _vc->get("evt") > 300000) return;
 
   for (int i=0; i<3; i++){
       //int index = AnalysisLeptons[i].index;
       if (abs(_vc->get("LepGood_pdgId",i))==13){
-        txt_eventdump << Form("%.0f:%d:%f:%f:%f:%d",
+        txt_eventdump << Form("%.0f:%d:%d:%f:%f:%f:%d",
 			      _vc->get("evt"),
 			      (int)_vc->get("LepGood_pdgId", i),
+			      (int)_vc->get("LepGood_charge", i),
 			      _vc->get("LepGood_pt", i),
 			      _vc->get("LepGood_eta", i),
 			      _vc->get("LepGood_relIso04", i),
@@ -1766,9 +1773,10 @@ void WZsynchro::EventDump(){
 
       }else if (abs(_vc->get("LepGood_pdgId",i))==11){
       
-        txt_eventdump << Form("%.0f:%d:%f:%f:%f:%d",
+        txt_eventdump << Form("%.0f:%d:%d:%f:%f:%f:%d",
 			      _vc->get("evt"),
 			      (int)_vc->get("LepGood_pdgId", i),
+			      (int)_vc->get("LepGood_charge", i),
 			      _vc->get("LepGood_pt", i),
 			      _vc->get("LepGood_eta", i),
 			      _vc->get("LepGood_relIso03", i),
