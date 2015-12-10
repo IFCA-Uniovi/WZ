@@ -2936,10 +2936,12 @@ DisplayClass::adjustLegend(int iobs, bool skipCoords) {
   }
 
   getLegendCoordinate(_hMC,xd,yd,xu,yu,f,iobs);
+    xd=0.2; yd=0.68; xu=0.7; yu=0.9;
   _leg = new TLegend(xd,yd,xu,yu);
   _leg->SetName("legend");
-  
-  _leg->SetTextSize(0.039*f);
+  _leg->SetNColumns(3);
+  //_leg->SetColumnSeparation(1);
+  _leg->SetTextSize(0.028*f);
   _leg->SetShadowColor(0);
   _leg->SetLineColor(1);
   _leg->SetFillColor(0);
@@ -2958,7 +2960,7 @@ DisplayClass::adjustLegend(int iobs, bool skipCoords) {
     for(size_t i=0;i<_nhmc;i++) {
       string nh = (string)( _hClones[i]->GetName());
       if( nh.find("sig")==(size_t)-1) {
-        _leg->AddEntry(_hClones[_nhmc-i-1],Form("%s (%.1f)",_names[i].c_str(),(_hClones[_nhmc-i-1]->Integral())-integral_prev),"f");
+        _leg->AddEntry(_hClones[_nhmc-i-1],Form("%s (%.0f)",_names[i].c_str(),(_hClones[_nhmc-i-1]->Integral())-integral_prev),"f");
         integral_prev = _hClones[_nhmc-i-1]->Integral();
       }
       else {

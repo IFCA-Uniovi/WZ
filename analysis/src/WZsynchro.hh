@@ -63,9 +63,10 @@ private:
   void categorize();
 
   bool passCERNSelection();
+  //bool looseLepton(int idx, int pdgId);
   bool looseLepton(int idx, int pdgId);
   bool tightLepton(int idx, int pdgId);
-  bool fakableLepton(int idx, int pdgId);
+  bool fakableLepton(const Candidate*c, int idx, int pdgId, bool bypass);
   
   //==============================
   // Validation regions
@@ -183,6 +184,9 @@ private:
 
   CandList _fakableLepsVeto10;
   std::vector<unsigned int>  _fakableLepsVeto10Idx;
+  
+  CandList _looseLeps10;
+  std::vector<unsigned int>  _looseLeps10Idx;
   
   CandList _tightLeps10;
   std::vector<unsigned int>  _tightLeps10Idx;

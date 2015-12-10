@@ -11,7 +11,7 @@ void template_plotsWZv2_25ns(std::string var,std::string fileName){
   //string fileName="template_WZ25";
   //string fileList="template_WZ25";
   string fileList=fileName;
-  bool mcOnly = false;
+  bool mcOnly = true;
 
   //observables **********************
   md.dp.setObservables(var);
@@ -41,9 +41,9 @@ void template_plotsWZv2_25ns(std::string var,std::string fileName){
       rangeY[1]={100000.};
   }*/
   
-  bool overFlowBin=false;
-  bool underFlowBin=false;
-  bool showDMCRatio=true;
+  bool overFlowBin=true;
+  bool underFlowBin=true;
+  bool showDMCRatio=false;
   bool showGrid=false;
   float markerSize=0.8;
   float lineWidth=2;
@@ -57,7 +57,7 @@ void template_plotsWZv2_25ns(std::string var,std::string fileName){
   float st=0.039;
   string addText="";
 
-  string autoBinFile="WZ50binning";
+  string autoBinFile="WZ50binning_rebin1";
   md.dp.loadAutoBinning(autoBinFile);
 
   //Systematic uncertainties ********************************
@@ -69,7 +69,7 @@ void template_plotsWZv2_25ns(std::string var,std::string fileName){
   //Lumis( or XSections ) pb-1 & KFactors ************************************
   string Norm="";
   
-  float lumi=2090.; //pb-1 19470 // runs 
+  float lumi=1263.9; //pb-1 19470 // runs 
   float energy=13; //TeV
 
   bool useXS=true;
@@ -117,24 +117,25 @@ void template_plotsWZv2_25ns(std::string var,std::string fileName){
   md.anConf.addSample( "Tree_WJetsToLNu_aMCatNLO_0","W+jets"    ,  kAzure-9);
   //md.anConf.addSample( "Tree_WWTo2L2Nu_0"        , "WW"         ,  kSpring+10);
   md.anConf.addSample( "Tree_WW_0"               , "WW"         ,  kAzure-7);
+  md.anConf.addSample( "Tree_WGToLNuG_0"         , "W#gamma"    ,  kBlue);
   md.anConf.addSample( "Tree_ZZ_0"               , "ZZ"         ,  kRed+3);
   md.anConf.addSample( "Tree_GGHZZ4L_0"          , "ZZ"         ,  kRed+3);
   md.anConf.addSample( "Tree_TTJets"             , "t#bar{t}"   ,  kYellow  );
   //md.anConf.addSample( "Tree_TTLep_pow_0"        , "t#bar{t}"   ,  kRed   );
   //md.anConf.addSample( "Tree_TTLep_pow_1"        , "t#bar{t}"   ,  kRed   );
   md.anConf.addSample( "Tree_TTWToLNu_0"         , "t#bar{t}W"  ,  kGreen-6);
-  md.anConf.addSample( "Tree_TTZToLLNuNu_0"      , "t#bar{t}Z"  ,  kBlue  );
+  md.anConf.addSample( "Tree_TTZToLLNuNu_0"      , "t#bar{t}Z"  ,  kRed  );
   md.anConf.addSample( "Tree_TTHnobb_0"          , "t#bar{t}H"  ,  kOrange+3  );
   md.anConf.addSample( "Tree_TTGJets_0"          , "t#bar{t}#gamma",kOrange-1 );
   
   // the order MATTERS!!!
   
   md.anConf.addSample( "Tree_DoubleEG_Run2015D_05Oct_0"       , "data", kBlack);
-  md.anConf.addSample( "Tree_DoubleEG_Run2015D_v4Full_0"      , "data", kBlack);
+  md.anConf.addSample( "Tree_DoubleEG_Run2015D_v4_0"      , "data", kBlack);
   md.anConf.addSample( "Tree_DoubleMuon_Run2015D_05Oct_0"     , "data", kBlack);
-  md.anConf.addSample( "Tree_DoubleMuon_Run2015D_v4Full_0"    , "data", kBlack);
+  md.anConf.addSample( "Tree_DoubleMuon_Run2015D_v4_0"    , "data", kBlack);
   md.anConf.addSample( "Tree_MuonEG_Run2015D_05Oct_0"         , "data", kBlack);
-  md.anConf.addSample( "Tree_MuonEG_Run2015D_v4Full_0"        , "data", kBlack); 
+  md.anConf.addSample( "Tree_MuonEG_Run2015D_v4_0"        , "data", kBlack); 
 
 //  //===============================================================
   
