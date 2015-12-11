@@ -22,7 +22,6 @@ private:
   void run();
   void defineOutput();
   void modifyWeight();
-  double lheWeight();
   void writeOutput();
 
   void modifySkimming();
@@ -236,7 +235,7 @@ private:
   string _leptl;
   string _SR;
   string _FR;
-  string _LHESYS;
+  int _LHESYS;
 
   int _fakeEl;
   int _fakeMu;

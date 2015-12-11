@@ -66,6 +66,16 @@ WZsynchro::initialize(){
   _vc->registerVar("LepGood_mvaSusy"              );
   _vc->registerVar("LepGood_mcMatchId"            );
   _vc->registerVar("LepGood_mcMatchAny"           );
+
+  _vc->registerVar("LepGood_ecalPFClusterIso"     );
+  _vc->registerVar("LepGood_hcalPFClusterIso"     );
+  _vc->registerVar("LepGood_dr03TkSumPt"          );
+  _vc->registerVar("LepGood_jetLepAwareJEC_pt"    );
+  _vc->registerVar("LepGood_jetLepAwareJEC_eta"    );
+  _vc->registerVar("LepGood_jetLepAwareJEC_phi"    );
+  _vc->registerVar("LepGood_jetLepAwareJEC_energy"    );
+  _vc->registerVar("LepGood_jetCorrFactor_L1L2L3Res"    );
+  
   _vc->registerVar("met_pt"                       );
   _vc->registerVar("met_eta"                      );
   _vc->registerVar("met_phi"                      );
@@ -74,6 +84,7 @@ WZsynchro::initialize(){
   _vc->registerVar("metNoHF_eta"                  );
   _vc->registerVar("metNoHF_phi"                  );
   _vc->registerVar("metNoHF_mass"                 );
+  
   _vc->registerVar("nJet25"                       );
   _vc->registerVar("nJet40"                       );
   _vc->registerVar("nJet"                         );
@@ -84,11 +95,13 @@ WZsynchro::initialize(){
   _vc->registerVar("Jet_phi"                      );
   _vc->registerVar("Jet_mass"                     );
   _vc->registerVar("Jet_btagCSV"                  );
+  _vc->registerVar("Jet_CorrFactor_L1"            );
+  _vc->registerVar("Jet_CorrFactor_L1L2L3Res"     );
 
   _vc->registerVar("nJetFwd"                      );
   _vc->registerVar("JetFwd_pt"                    );
   _vc->registerVar("JetFwd_phi"                   );
-  
+  _vc->registerVar("JetFwd_eta"                   );
 
   _vc->registerVar("htJet40j"                     );
   _vc->registerVar("minMllAFAS"                   );
@@ -145,11 +158,14 @@ WZsynchro::initialize(){
   
   // FLAGS
   _vc->registerVar("hbheFilterNew25ns"            );
+  _vc->registerVar("hbheFilterIso"                );
   _vc->registerVar("Flag_CSCTightHaloFilter"      );
   _vc->registerVar("Flag_eeBadScFilter"           );
+  _vc->registerVar("Flag_goodVertices"            );
   
   //pileup
   _vc->registerVar("puWeight"                     );
+  _vc->registerVar("vtxWeight"                    );
   
   // for loose leptons used in jet cleaning
   _vc->registerVar("LepGood_sigmaIEtaIEta"        );
@@ -211,7 +227,7 @@ WZsynchro::initialize(){
 
   for(size_t ic=0;ic< _categs.size();ic++) {
     _SR = _categs[ic];
-    setSignalRegions();
+    //setSignalRegions();
     //addWorkflow( ic+1, _categs[ic] );
   }
 
@@ -232,14 +248,13 @@ WZsynchro::initialize(){
   _leppt   = getCfgVarS("LEPPT"  ,"all");
   _SR      = getCfgVarS("SR"     ,"SRFLAG");
   _FR      = getCfgVarS("FR"     ,"FO2C");
+  _LHESYS  = getCfgVarI("LHESYS", 0);
   _categorization = getCfgVarI("categorization",1);
   _DoValidationPlots = getCfgVarI("ValidationPlots",1);
-  _WZstep = getCfgVarI("WZstep",6);
+  //_WZstep = getCfgVarI("WZstep",6);
   _DoCheckPlots = getCfgVarI("CheckPlots",0);
   _DoEventDump = getCfgVarI("EventDump",0);
-  if (_WZstep != -1 ){
-    cout << endl <<" WZ selection step = " << _WZstep << " : " << _WZstepname[_WZstep] << endl << endl;
-  }
+
 
 //  vector<string> jess;
 //  jess.push_back("Jet_pt");
@@ -247,8 +262,35 @@ WZsynchro::initialize(){
   
   //FR databases
   if(_FR=="FO2C") {
-    _dbm->loadDb("El","MaySync/CH_FRFile_090615.root","qcdel/nosel/FRisoidRElPtMIso2");
-    _dbm->loadDb("Mu","MaySync/CH_FRFile_090615.root","qcdmu/nosel/FRisoRMuPtMIso2");
+    _dbm->loadDb("ElNIso"    , "FR_Nov2.root", "FRElPtCorr_UCSX_non");
+    _dbm->loadDb("MuNIso"    , "FR_Nov2.root", "FRMuPtCorr_UCSX_non");
+    _dbm->loadDb("ElIso"     , "FR_Nov2.root", "FRElPtCorr_UCSX_iso");
+    _dbm->loadDb("MuIso"     , "FR_Nov2.root", "FRMuPtCorr_UCSX_iso");
+
+    _dbm->loadDb("ElNIsoMC"  , "FR_Nov2.root", "FRElPtCorr_qcd_non");
+    _dbm->loadDb("MuNIsoMC"  , "FR_Nov2.root", "FRMuPtCorr_qcd_non");
+    _dbm->loadDb("ElIsoMC"   , "FR_Nov2.root", "FRElPtCorr_qcd_iso");
+    _dbm->loadDb("MuIsoMC"   , "FR_Nov2.root", "FRMuPtCorr_qcd_iso");
+
+    _dbm->loadDb("ElNIsoUp"  , "FR_Nov2.root", "FRElPtCorr_UCSX_HI_non");
+    _dbm->loadDb("MuNIsoUp"  , "FR_Nov2.root", "FRMuPtCorr_UCSX_HI_non");
+    _dbm->loadDb("ElIsoUp"   , "FR_Nov2.root", "FRElPtCorr_UCSX_HI_iso");
+    _dbm->loadDb("MuIsoUp"   , "FR_Nov2.root", "FRMuPtCorr_UCSX_HI_iso");
+    
+    _dbm->loadDb("ElNIsoMCUp", "FR_Nov2.root", "FRElPtCorr_qcd_non");
+    _dbm->loadDb("MuNIsoMCUp", "FR_Nov2.root", "FRMuPtCorr_qcd_non");
+    _dbm->loadDb("ElIsoMCUp" , "FR_Nov2.root", "FRElPtCorr_qcd_iso");
+    _dbm->loadDb("MuIsoMCUp" , "FR_Nov2.root", "FRMuPtCorr_qcd_iso");
+    
+    _dbm->loadDb("ElNIsoDo"  , "FR_Nov2.root", "FRElPtCorr_UCSX_LO_non");
+    _dbm->loadDb("MuNIsoDo"  , "FR_Nov2.root", "FRMuPtCorr_UCSX_LO_non");
+    _dbm->loadDb("ElIsoDo"   , "FR_Nov2.root", "FRElPtCorr_UCSX_LO_iso");
+    _dbm->loadDb("MuIsoDo"   , "FR_Nov2.root", "FRMuPtCorr_UCSX_LO_iso");
+
+    _dbm->loadDb("ElNIsoMCDo", "FR_Nov2.root", "FRElPtCorr_qcd_non");
+    _dbm->loadDb("MuNIsoMCDo", "FR_Nov2.root", "FRMuPtCorr_qcd_non");
+    _dbm->loadDb("ElIsoMCDo" , "FR_Nov2.root", "FRElPtCorr_qcd_iso");
+    _dbm->loadDb("MuIsoMCDo" , "FR_Nov2.root", "FRMuPtCorr_qcd_iso");
   }
   if(_FR=="FO4C") {
     _dbm->loadDb("El","MaySync/CH_FRFile_090615.root","tt/nosel/FRISisofo4RElPtMIso2");
@@ -259,13 +301,20 @@ WZsynchro::initialize(){
   //_dbm->loadDb("chargeMId","superDB.db");
   
   
-  int ilhe = (int)atoi(_LHESYS.c_str());
-  bool tmp_ismux = ilhe >= 1001 && ilhe <= 1009;
-  bool tmp_ispdf = ilhe >= 2001 && ilhe <= 2100;
+  //chargeflip DB
+  _dbm->loadDb("chargeMId"  , "flipMapUCSX.root", "flipMapUCSX");
+  _dbm->loadDb("chargeMIdMC", "flipMapUCSX.root", "flipMapUCSX");
   
-  if (!tmp_ismux && !tmp_ispdf) {
-    _LHESYS = "0";
-  }
+  // SF DB
+  _dbm->loadDb("hltSF"      , "hltSF.db"                                           ); 
+  _dbm->loadDb("BTagSF"     , "BTagSFMedium.db"                                    ); 
+  _dbm->loadDb("BTagEffUSDG", "GC_BTagEffs.root", "h2_BTaggingEff_csv_med_Eff_udsg");
+  _dbm->loadDb("BTagEffC"   , "GC_BTagEffs.root", "h2_BTaggingEff_csv_med_Eff_c"   );
+  _dbm->loadDb("BTagEffB"   , "GC_BTagEffs.root", "h2_BTaggingEff_csv_med_Eff_b"   );
+
+  //lepton SF
+  _dbm->loadDb("FastSimElSF", "sf_el_tight_IDEmu_ISOEMu_ra5.root", "histo3D");
+  _dbm->loadDb("FastSimMuSF", "sf_mu_mediumID_multi.root"        , "histo3D");
 
 }
 
@@ -274,40 +323,16 @@ WZsynchro::modifyWeight() {
 
   if (_vc->get("isData") != 1) {
     //generator weights
-    //if (_LHESYS == "0") {_weight *= _vc->get("genWeight");}
-    //else {_weight *= lheWeight();}
-    _weight *= _vc->get("genWeight");
+    if (_LHESYS == 0) {_weight *= _vc->get("genWeight");}
+    else {_weight *= _wzMod->getLHEweight(_LHESYS);}
+    //_weight *= _vc->get("genWeight");
     //pileup weights
+    //_weight *= _vc->get("vtxWeight");
     _weight *= _vc->get("puWeight");
   }
 
 }
 
-
-double
-WZsynchro::lheWeight() {
-
-
-  int tmp_nlhe = _vc->get("nLHEweight");
-  //std::cout << "tmp_nlhe=" << tmp_nlhe << std::endl;
-  
-  for (int i = 0; i < tmp_nlhe; i++) {
-        int tmp_lhe_id = _vc->get("LHEweight_id", i);
-	
-      
-        if (tmp_lhe_id == (int)atoi(_LHESYS.c_str())) {
-	  double tmp_lhe_wgt = _vc->get("LHEweight_wgt", i);
-	  
-	  
-          //std::cout << "using weight LHEid[" << i << "]="  << tmp_lhe_id << " LHEvalue=" << tmp_lhe_wgt  <<  std::endl;
-		
-          return tmp_lhe_wgt;
-        }
-      
-  }
-  return 1.0;
-
-}
 
 
 void
