@@ -40,6 +40,8 @@ private:
 
   bool passGenSelection();
   
+  bool passHLT();
+  
   float getFR(Candidate* cand, int idx);
   
   void chargeFlipProb();

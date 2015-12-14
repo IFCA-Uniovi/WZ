@@ -173,6 +173,14 @@ WZsynchro::initialize(){
   _vc->registerVar("LepGood_dEtaScTrkIn"          );
   _vc->registerVar("LepGood_dPhiScTrkIn"          );
   _vc->registerVar("LepGood_eInvMinusPInv"        );
+  
+  // HLT paths
+  _vc->registerVar("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
+  _vc->registerVar("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+  _vc->registerVar("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+  _vc->registerVar("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
+  _vc->registerVar("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
+  
 
 
   _wzMod = new WZModule(_vc, _dbm);
@@ -656,6 +664,8 @@ void
 WZsynchro::WZ3lSelection() {
   setWorkflow(kWZSM);
   
+  // trigger
+  if (!passHLT()) return;
   
   //step 0 only 3 leptons with pt > 10 GeV
   if(!makeCut(_tightLeps10.size()==3,"Three leptons")) return;
@@ -679,6 +689,14 @@ WZsynchro::WZ3lSelection() {
   if ( ossfpair == 0 ) return;
   
   if(_DoEventDump) EventDump();
+  
+  if (!_isData) {
+    _weight *= _wzMod->GCleptonScaleFactor (l3[0]->pdgId(), l3[0]->pt(), l3[0]->eta(), _HT);
+    _weight *= _wzMod->GCleptonScaleFactor (l3[1]->pdgId(), l3[1]->pt(), l3[1]->eta(), _HT);
+    _weight *= _wzMod->GCleptonScaleFactor (l3[2]->pdgId(), l3[2]->pt(), l3[2]->eta(), _HT);
+  }
+  
+  
   setWorkflow(kWZSM_3l); fillWZhistos(&l3,"WZSMstep0",0.0); setWorkflow(kWZSM);
 
 
@@ -1400,6 +1418,16 @@ WZsynchro::fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass) {
   return true;
 }
 
+
+bool
+WZsynchro::passHLT() {
+  bool passhlt = ( _vc->get("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") || 
+    _vc->get("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") || 
+    _vc->get("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") || 
+    _vc->get("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") || 
+    _vc->get("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") );
+  return passhlt;
+}
 
 
 
