@@ -664,12 +664,12 @@ void
 WZsynchro::WZ3lSelection() {
   setWorkflow(kWZSM);
   
-  // trigger
+  // HLT selection
   if (!passHLT()) return;
   
   //step 0 only 3 leptons with pt > 10 GeV
   if(!makeCut(_tightLeps10.size()==3,"Three leptons")) return;
-    
+
   //if (_WZstep == 0) fillWZhistos(0.0, 0.0);
   CandList l3 =_wzMod->ThreeLeps( (&_tightLeps10));
   
@@ -1426,6 +1426,7 @@ WZsynchro::passHLT() {
     _vc->get("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") || 
     _vc->get("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") || 
     _vc->get("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") );
+
   return passhlt;
 }
 
@@ -1900,10 +1901,9 @@ void WZsynchro::EventDump(){
   for (int i=0; i<3; i++){
       //int index = AnalysisLeptons[i].index;
       if (abs(_vc->get("LepGood_pdgId",i))==13){
-        txt_eventdump << Form("%.0f:%d:%d:%f:%f:%f:%d",
+        txt_eventdump << Form("%.0f:%d:%.4f:%.4f:%.4f:%d",
 			      _vc->get("evt"),
 			      (int)_vc->get("LepGood_pdgId", i),
-			      (int)_vc->get("LepGood_charge", i),
 			      _vc->get("LepGood_pt", i),
 			      _vc->get("LepGood_eta", i),
 			      _vc->get("LepGood_relIso04", i),
@@ -1911,16 +1911,15 @@ void WZsynchro::EventDump(){
 
       }else if (abs(_vc->get("LepGood_pdgId",i))==11){
       
-        txt_eventdump << Form("%.0f:%d:%d:%f:%f:%f:%d",
+        txt_eventdump << Form("%.0f:%d:%.4f:%.4f:%.4f:%d",
 			      _vc->get("evt"),
 			      (int)_vc->get("LepGood_pdgId", i),
-			      (int)_vc->get("LepGood_charge", i),
 			      _vc->get("LepGood_pt", i),
 			      _vc->get("LepGood_eta", i),
 			      _vc->get("LepGood_relIso03", i),
 			      1);
       
-	    txt_eventdump << Form(":%f:%.0f:%f:%f:%.0f",
+	    txt_eventdump << Form(":%.4f:%.0f:%.4f:%.4f:%.0f",
 				    _vc->get("LepGood_etaSc", i),
 				    _vc->get("LepGood_convVeto", i),
 				    _vc->get("LepGood_dxy", i),
