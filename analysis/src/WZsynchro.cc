@@ -66,6 +66,16 @@ WZsynchro::initialize(){
   _vc->registerVar("LepGood_mvaSusy"              );
   _vc->registerVar("LepGood_mcMatchId"            );
   _vc->registerVar("LepGood_mcMatchAny"           );
+
+  _vc->registerVar("LepGood_ecalPFClusterIso"     );
+  _vc->registerVar("LepGood_hcalPFClusterIso"     );
+  _vc->registerVar("LepGood_dr03TkSumPt"          );
+  _vc->registerVar("LepGood_jetLepAwareJEC_pt"    );
+  _vc->registerVar("LepGood_jetLepAwareJEC_eta"    );
+  _vc->registerVar("LepGood_jetLepAwareJEC_phi"    );
+  _vc->registerVar("LepGood_jetLepAwareJEC_energy"    );
+  _vc->registerVar("LepGood_jetCorrFactor_L1L2L3Res"    );
+  
   _vc->registerVar("met_pt"                       );
   _vc->registerVar("met_eta"                      );
   _vc->registerVar("met_phi"                      );
@@ -74,6 +84,7 @@ WZsynchro::initialize(){
   _vc->registerVar("metNoHF_eta"                  );
   _vc->registerVar("metNoHF_phi"                  );
   _vc->registerVar("metNoHF_mass"                 );
+  
   _vc->registerVar("nJet25"                       );
   _vc->registerVar("nJet40"                       );
   _vc->registerVar("nJet"                         );
@@ -84,11 +95,13 @@ WZsynchro::initialize(){
   _vc->registerVar("Jet_phi"                      );
   _vc->registerVar("Jet_mass"                     );
   _vc->registerVar("Jet_btagCSV"                  );
+  _vc->registerVar("Jet_CorrFactor_L1"            );
+  _vc->registerVar("Jet_CorrFactor_L1L2L3Res"     );
 
   _vc->registerVar("nJetFwd"                      );
   _vc->registerVar("JetFwd_pt"                    );
   _vc->registerVar("JetFwd_phi"                   );
-  
+  _vc->registerVar("JetFwd_eta"                   );
 
   _vc->registerVar("htJet40j"                     );
   _vc->registerVar("minMllAFAS"                   );
@@ -145,11 +158,21 @@ WZsynchro::initialize(){
   
   // FLAGS
   _vc->registerVar("hbheFilterNew25ns"            );
+  _vc->registerVar("hbheFilterIso"                );
   _vc->registerVar("Flag_CSCTightHaloFilter"      );
   _vc->registerVar("Flag_eeBadScFilter"           );
+  _vc->registerVar("Flag_goodVertices"            );
   
   //pileup
   _vc->registerVar("puWeight"                     );
+  _vc->registerVar("vtxWeight"                    );
+  
+  // for loose leptons used in jet cleaning
+  _vc->registerVar("LepGood_sigmaIEtaIEta"        );
+  _vc->registerVar("LepGood_hadronicOverEm"       );
+  _vc->registerVar("LepGood_dEtaScTrkIn"          );
+  _vc->registerVar("LepGood_dPhiScTrkIn"          );
+  _vc->registerVar("LepGood_eInvMinusPInv"        );
 
 
   _wzMod = new WZModule(_vc, _dbm);
@@ -204,7 +227,7 @@ WZsynchro::initialize(){
 
   for(size_t ic=0;ic< _categs.size();ic++) {
     _SR = _categs[ic];
-    setSignalRegions();
+    //setSignalRegions();
     //addWorkflow( ic+1, _categs[ic] );
   }
 
@@ -225,14 +248,13 @@ WZsynchro::initialize(){
   _leppt   = getCfgVarS("LEPPT"  ,"all");
   _SR      = getCfgVarS("SR"     ,"SRFLAG");
   _FR      = getCfgVarS("FR"     ,"FO2C");
+  _LHESYS  = getCfgVarI("LHESYS", 0);
   _categorization = getCfgVarI("categorization",1);
   _DoValidationPlots = getCfgVarI("ValidationPlots",1);
-  _WZstep = getCfgVarI("WZstep",6);
+  //_WZstep = getCfgVarI("WZstep",6);
   _DoCheckPlots = getCfgVarI("CheckPlots",0);
   _DoEventDump = getCfgVarI("EventDump",0);
-  if (_WZstep != -1 ){
-    cout << endl <<" WZ selection step = " << _WZstep << " : " << _WZstepname[_WZstep] << endl << endl;
-  }
+
 
 //  vector<string> jess;
 //  jess.push_back("Jet_pt");
@@ -240,8 +262,35 @@ WZsynchro::initialize(){
   
   //FR databases
   if(_FR=="FO2C") {
-    _dbm->loadDb("El","MaySync/CH_FRFile_090615.root","qcdel/nosel/FRisoidRElPtMIso2");
-    _dbm->loadDb("Mu","MaySync/CH_FRFile_090615.root","qcdmu/nosel/FRisoRMuPtMIso2");
+    _dbm->loadDb("ElNIso"    , "FR_Nov2.root", "FRElPtCorr_UCSX_non");
+    _dbm->loadDb("MuNIso"    , "FR_Nov2.root", "FRMuPtCorr_UCSX_non");
+    _dbm->loadDb("ElIso"     , "FR_Nov2.root", "FRElPtCorr_UCSX_iso");
+    _dbm->loadDb("MuIso"     , "FR_Nov2.root", "FRMuPtCorr_UCSX_iso");
+
+    _dbm->loadDb("ElNIsoMC"  , "FR_Nov2.root", "FRElPtCorr_qcd_non");
+    _dbm->loadDb("MuNIsoMC"  , "FR_Nov2.root", "FRMuPtCorr_qcd_non");
+    _dbm->loadDb("ElIsoMC"   , "FR_Nov2.root", "FRElPtCorr_qcd_iso");
+    _dbm->loadDb("MuIsoMC"   , "FR_Nov2.root", "FRMuPtCorr_qcd_iso");
+
+    _dbm->loadDb("ElNIsoUp"  , "FR_Nov2.root", "FRElPtCorr_UCSX_HI_non");
+    _dbm->loadDb("MuNIsoUp"  , "FR_Nov2.root", "FRMuPtCorr_UCSX_HI_non");
+    _dbm->loadDb("ElIsoUp"   , "FR_Nov2.root", "FRElPtCorr_UCSX_HI_iso");
+    _dbm->loadDb("MuIsoUp"   , "FR_Nov2.root", "FRMuPtCorr_UCSX_HI_iso");
+    
+    _dbm->loadDb("ElNIsoMCUp", "FR_Nov2.root", "FRElPtCorr_qcd_non");
+    _dbm->loadDb("MuNIsoMCUp", "FR_Nov2.root", "FRMuPtCorr_qcd_non");
+    _dbm->loadDb("ElIsoMCUp" , "FR_Nov2.root", "FRElPtCorr_qcd_iso");
+    _dbm->loadDb("MuIsoMCUp" , "FR_Nov2.root", "FRMuPtCorr_qcd_iso");
+    
+    _dbm->loadDb("ElNIsoDo"  , "FR_Nov2.root", "FRElPtCorr_UCSX_LO_non");
+    _dbm->loadDb("MuNIsoDo"  , "FR_Nov2.root", "FRMuPtCorr_UCSX_LO_non");
+    _dbm->loadDb("ElIsoDo"   , "FR_Nov2.root", "FRElPtCorr_UCSX_LO_iso");
+    _dbm->loadDb("MuIsoDo"   , "FR_Nov2.root", "FRMuPtCorr_UCSX_LO_iso");
+
+    _dbm->loadDb("ElNIsoMCDo", "FR_Nov2.root", "FRElPtCorr_qcd_non");
+    _dbm->loadDb("MuNIsoMCDo", "FR_Nov2.root", "FRMuPtCorr_qcd_non");
+    _dbm->loadDb("ElIsoMCDo" , "FR_Nov2.root", "FRElPtCorr_qcd_iso");
+    _dbm->loadDb("MuIsoMCDo" , "FR_Nov2.root", "FRMuPtCorr_qcd_iso");
   }
   if(_FR=="FO4C") {
     _dbm->loadDb("El","MaySync/CH_FRFile_090615.root","tt/nosel/FRISisofo4RElPtMIso2");
@@ -252,13 +301,20 @@ WZsynchro::initialize(){
   //_dbm->loadDb("chargeMId","superDB.db");
   
   
-  int ilhe = (int)atoi(_LHESYS.c_str());
-  bool tmp_ismux = ilhe >= 1001 && ilhe <= 1009;
-  bool tmp_ispdf = ilhe >= 2001 && ilhe <= 2100;
+  //chargeflip DB
+  _dbm->loadDb("chargeMId"  , "flipMapUCSX.root", "flipMapUCSX");
+  _dbm->loadDb("chargeMIdMC", "flipMapUCSX.root", "flipMapUCSX");
   
-  if (!tmp_ismux && !tmp_ispdf) {
-    _LHESYS = "0";
-  }
+  // SF DB
+  _dbm->loadDb("hltSF"      , "hltSF.db"                                           ); 
+  _dbm->loadDb("BTagSF"     , "BTagSFMedium.db"                                    ); 
+  _dbm->loadDb("BTagEffUSDG", "GC_BTagEffs.root", "h2_BTaggingEff_csv_med_Eff_udsg");
+  _dbm->loadDb("BTagEffC"   , "GC_BTagEffs.root", "h2_BTaggingEff_csv_med_Eff_c"   );
+  _dbm->loadDb("BTagEffB"   , "GC_BTagEffs.root", "h2_BTaggingEff_csv_med_Eff_b"   );
+
+  //lepton SF
+  _dbm->loadDb("FastSimElSF", "sf_el_tight_IDEmu_ISOEMu_ra5.root", "histo3D");
+  _dbm->loadDb("FastSimMuSF", "sf_mu_mediumID_multi.root"        , "histo3D");
 
 }
 
@@ -267,40 +323,16 @@ WZsynchro::modifyWeight() {
 
   if (_vc->get("isData") != 1) {
     //generator weights
-    //if (_LHESYS == "0") {_weight *= _vc->get("genWeight");}
-    //else {_weight *= lheWeight();}
-    _weight *= _vc->get("genWeight");
+    if (_LHESYS == 0) {_weight *= _vc->get("genWeight");}
+    else {_weight *= _wzMod->getLHEweight(_LHESYS);}
+    //_weight *= _vc->get("genWeight");
     //pileup weights
+    //_weight *= _vc->get("vtxWeight");
     _weight *= _vc->get("puWeight");
   }
 
 }
 
-
-double
-WZsynchro::lheWeight() {
-
-
-  int tmp_nlhe = _vc->get("nLHEweight");
-  //std::cout << "tmp_nlhe=" << tmp_nlhe << std::endl;
-  
-  for (int i = 0; i < tmp_nlhe; i++) {
-        int tmp_lhe_id = _vc->get("LHEweight_id", i);
-	
-      
-        if (tmp_lhe_id == (int)atoi(_LHESYS.c_str())) {
-	  double tmp_lhe_wgt = _vc->get("LHEweight_wgt", i);
-	  
-	  
-          //std::cout << "using weight LHEid[" << i << "]="  << tmp_lhe_id << " LHEvalue=" << tmp_lhe_wgt  <<  std::endl;
-		
-          return tmp_lhe_wgt;
-        }
-      
-  }
-  return 1.0;
-
-}
 
 
 void
@@ -314,6 +346,8 @@ WZsynchro::defineOutput() {
   ///////////////////////////////////////////////////////////////////////////
   // GLOBAL PLOTS:  These plots are drawn for every SR
   ///////////////////////////////////////////////////////////////////////////
+  /*
+  //Original sizes with large range and minimal binning
   _hm->addVariable("l1Pt_"  , 150, 0.,  150, "p_{T}(l_{1}) [GeV]"                 );
   _hm->addVariable("l2Pt_"  , 150, 0.,  150, "p_{T}(l_{2}) [GeV]"                 );
   _hm->addVariable("MET_"   , 500, 0. , 500, "#slash{E}_{T} [GeV]"                );
@@ -322,7 +356,16 @@ WZsynchro::defineOutput() {
   _hm->addVariable("NBJets_",   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)");
   _hm->addVariable("NJets_" ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)"          );
   _hm->addVariable("M3l_"   , 3000, 0.,  3000, "M_{3l} [GeV]"            );
-
+  */
+  //_hm->addVariable("l1Pt_"  , 150, 0.,  150, "p_{T}(l_{1}) [GeV]"                 );
+  //_hm->addVariable("l2Pt_"  , 150, 0.,  150, "p_{T}(l_{2}) [GeV]"                 );
+  _hm->addVariable("MET_"   , 30, 0. , 300., "#slash{E}_{T} [GeV]"                );
+  _hm->addVariable("HT_"    , 30, 0. , 600., "H_{T} [GeV]"                        );
+  //_hm->addVariable("MT_"    , 200, 0. , 200., "min(M_{T,1}, M_{T,2}) [GeV]"        );
+  _hm->addVariable("NBJets_",   7,-0.5, 6.5, "N_{b-jets} (p_{T} > 25 GeV, medium)");
+  _hm->addVariable("NJets_" ,   7,-0.5, 6.5, "N_{jets} (p_{T} > 40 GeV)"          );
+  _hm->addVariable("M3l_"   ,  30, 60.,360., "M_{3l} [GeV]"            );
+  _hm->addVariable("M3lfull_" ,40, 0., 4000, "M_{3l} [GeV]"            );
 
   vector<string> reg;
   //reg.push_back("WZSM");
@@ -336,6 +379,7 @@ WZsynchro::defineOutput() {
 
     
   for (size_t r=0; r<reg.size(); r++) {
+  /*
     // lepton variables
     _hm->addVariable("lepZ1_jetPtRatio_"+reg[r], 100, 0., 1.2, "Z Leading Lepton Jet p_{T} Ratio [GeV]", false);
     _hm->addVariable("lepZ1_jetPtRel_"+reg[r]  , 150, 0.,120., "Z Leading Lepton Jet p_{T} Rel   [GeV]", false);
@@ -366,7 +410,37 @@ WZsynchro::defineOutput() {
     _hm->addVariable("NBJetsTight40_"+reg[r]  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)", false);
     _hm->addVariable("NJets40_"+reg[r]        ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)", false);
     //_hm->addVariable("m3l"             , 250, 0.,  500, "M_{3l} [GeV]", false);
+    */
     
+    _hm->addVariable("lepZ1_jetPtRatio_"+reg[r],  20, 0., 1.2, "Z Leading Lepton Jet p_{T} Ratio [GeV]", false);
+    _hm->addVariable("lepZ1_jetPtRel_"+reg[r]  ,  30, 0., 80., "Z Leading Lepton Jet p_{T} Rel   [GeV]", false);
+    _hm->addVariable("lepZ1_miniRelIso_"+reg[r],  20, 0., 0.4, "Z Leading Lepton Isolation", false);
+    _hm->addVariable("lepZ1_Pt_"+reg[r]        ,  15, 0., 150, "Z Leading Lepton p_{T} [GeV]", false);
+    _hm->addVariable("lepZ1_Eta_"+reg[r]       ,  20, 0., 2.5, "Z Leading Lepton #eta", false);
+    _hm->addVariable("lepZ1_SIP3D_"+reg[r]     ,  40, 0., 20., "Z Leading Lepton SIP_{3D}", false);
+    _hm->addVariable("lepZ2_jetPtRatio_"+reg[r],  20, 0., 1.2, "Z Subleading Lepton Jet p_{T} Ratio [GeV]", false);
+    _hm->addVariable("lepZ2_jetPtRel_"+reg[r]  ,  30, 0., 80., "Z Subleading Lepton Jet p_{T} Rel   [GeV]", false);
+    _hm->addVariable("lepZ2_miniRelIso_"+reg[r],  20, 0., 0.4, "Z Subleading Lepton Isolation", false);
+    _hm->addVariable("lepZ2_Pt_"+reg[r]        ,  15, 0., 150, "Z Subleading Lepton p_{T} [GeV]", false);
+    _hm->addVariable("lepZ2_Eta_"+reg[r]       ,  20, 0., 2.5, "Z Subleading Lepton #eta", false);
+    _hm->addVariable("lepZ2_SIP3D_"+reg[r]     ,  40, 0., 20., "Z Subleading Lepton SIP_{3D}", false);
+    _hm->addVariable("lepW_jetPtRatio_"+reg[r] ,  20, 0., 1.2, "W Lepton Jet p_{T} Ratio [GeV]", false);
+    _hm->addVariable("lepW_jetPtRel_"+reg[r]   ,  30, 0., 80., "W Lepton Jet p_{T} Rel   [GeV]", false);
+    _hm->addVariable("lepW_miniRelIso_"+reg[r] ,  20, 0., 0.4, "W Lepton Isolation", false);
+    _hm->addVariable("lepW_Pt_"+reg[r]         ,  15, 0., 150, "W Lepton p_{T} [GeV]", false);
+    _hm->addVariable("lepW_Eta_"+reg[r]        ,  20, 0., 2.5, "W Lepton #eta", false);
+    _hm->addVariable("lepW_SIP3D_"+reg[r]      ,  40, 0., 20., "W Lepton SIP_{3D}", false);
+    
+    // event variables 
+    //_hm->addVariable("MET"            , 500, 0. , 500, "#slash{E}_{T} [GeV]", false);
+    //_hm->addVariable("htJet40j_"+reg[r]       , 800, 0. , 800, "H_{T} [GeV]", false);
+    _hm->addVariable("mZ1_"+reg[r]            ,  30, 60.,120., "best m_{l^{+}l^{-}} [GeV]", false);
+    //_hm->addVariable("MTmin_"+reg[r]          ,  20, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]", false);
+    //_hm->addVariable("NBJetsLoose25_"+reg[r]  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, loose)", false);
+    //_hm->addVariable("NBJetsMedium25_"+reg[r] ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)", false);
+    //_hm->addVariable("NBJetsTight40_"+reg[r]  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)", false);
+    //_hm->addVariable("NJets40_"+reg[r]        ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)", false);
+    //_hm->addVariable("m3l"             , 250, 0.,  500, "M_{3l} [GeV]", false);
     
     if(!_DoCheckPlots) continue;
     _hm->addVariable("lepZ1_mediumMuonId_"+reg[r], 20, 0., 2., "Z Leading Lepton medium #mu Id", false);
@@ -526,18 +600,35 @@ WZsynchro::retrieveObjects(){
 
   _fakableLepsVeto10.clear();
   _fakableLepsVeto10Idx.clear();
+
+  _tightLeps10.clear();
+  _tightLeps10Idx.clear();
+  
+  _looseLeps10.clear();
+  _looseLeps10Idx.clear();
   
   _tightLeps10.clear();
   _tightLeps10Idx.clear();
 
   _tightLeps20.clear();
   _tightLeps20Idx.clear();
+  
+  _jetCleanLeps10.clear();
+  _jetCleanLeps10Idx.clear();
 
   selectLeptons3l();
 
+  //jet cleaning leptons =============================
+  for(size_t il=0;il<_looseLeps10.size();il++) {
+    if(!fakableLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId(),true)) continue;
+    
+    _jetCleanLeps10.push_back( _looseLeps10[il] );
+    _jetCleanLeps10Idx.push_back( _looseLeps10Idx[il] );
+  }
+
   
   _wzMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
-		       _lepJets, _lepJetsIdx, (float)40., (float)15., getUncName()=="JES", getUncDir() );
+		       _lepJets, _lepJetsIdx, (float)40., (float)25., getUncName()=="JES", getUncDir() );
   _nJets=_jets.size();
   _nBJets=_bJets.size();
   _HT=_wzMod->HT( &(_jets) );
@@ -568,9 +659,7 @@ WZsynchro::WZ3lSelection() {
   
   //step 0 only 3 leptons with pt > 10 GeV
   if(!makeCut(_tightLeps10.size()==3,"Three leptons")) return;
-  
-  if(_DoEventDump) EventDump();
-  
+    
   //if (_WZstep == 0) fillWZhistos(0.0, 0.0);
   CandList l3 =_wzMod->ThreeLeps( (&_tightLeps10));
   
@@ -583,6 +672,13 @@ WZsynchro::WZ3lSelection() {
   if (_lepflav=="mme" && munumber!=2) return;
   if (_lepflav=="mmm" && munumber!=3) return;
   
+  int ossfpair = 0;
+  if ( (l3[0]->pdgId() + l3[1]->pdgId()) == 0 ) ossfpair++;
+  if ( (l3[1]->pdgId() + l3[2]->pdgId()) == 0 ) ossfpair++;
+  if ( (l3[0]->pdgId() + l3[2]->pdgId()) == 0 ) ossfpair++;
+  if ( ossfpair == 0 ) return;
+  
+  if(_DoEventDump) EventDump();
   setWorkflow(kWZSM_3l); fillWZhistos(&l3,"WZSMstep0",0.0); setWorkflow(kWZSM);
 
 
@@ -1117,7 +1213,7 @@ WZsynchro::getFR(Candidate* cand, int idx) {
   if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kDown ) db+="Do";
 
   float ptVal=cand->pt();
-  float etaVal=std::abs(cand->eta());
+  //float etaVal=std::abs(cand->eta()); //commented due to "unused variable" message during compilation
 
   int wp=std::abs(cand->pdgId()==11)?SusyModule::kTight:SusyModule::kMedium;
 
@@ -1213,23 +1309,40 @@ WZsynchro::categorize() {
 }
 
 
+
 bool 
 WZsynchro::looseLepton(int idx, int pdgId) {
 
-  /*
-  if(abs(pdgId)==13) {//mu case
-    if(!_wzMod->muIdSel(idx, SusyModule::kLoose) ) return false;
-    if(!_wzMod->multiIsoSel(idx, SusyModule::kLoose) ) return false;
+  if (abs(pdgId) == 13) {//muons
+    return true;
+  }
+  else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) <= 1.479) { //barrel electron
+    if (_vc->get("LepGood_relIso03", idx) < 0.0893 && _vc->get("LepGood_tightId", idx) >= 1 && _vc->get("LepGood_convVeto", idx) == 1 && abs(_vc->get("LepGood_dxy", idx)) < 0.0261 && abs(_vc->get("LepGood_dz", idx)) < 0.41 && _vc->get("LepGood_lostHits", idx) <= 2 ) return true;
+    else return false;
+  }
+  else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) > 1.479 && abs(_vc->get("LepGood_etaSc", idx)) < 2.5) { //endcap electron
+    if (_vc->get("LepGood_relIso03", idx) < 0.121  && _vc->get("LepGood_tightId", idx) >= 1 && _vc->get("LepGood_convVeto", idx) == 1 && abs(_vc->get("LepGood_dxy", idx)) < 0.118 && abs(_vc->get("LepGood_dz", idx)) < 0.822 && _vc->get("LepGood_lostHits", idx) <= 1) return true;
+    else return false;
   }
   else {
-    if(!_wzMod->elIdSel(idx, SusyModule::kLoose, SusyModule::kLoose) ) return false;
-    if(!_wzMod->multiIsoSel(idx, SusyModule::kLoose) ) return false;
+    //std::cout << "WARNING [WZsynchro::tightLepton](" << idx << ", " << pdgId << ", idx) not valid lepton candidate, with LepGood_etaSc=" << _vc->get("LepGood_etaSc", idx) << std::endl;
+  }
+  return false;
+    /*
+  if(abs(pdgId)==13) {//mu case
+    if(!_wzMod->muIdSel(c, idx, SusyModule::kLoose) ) return false;
+    if(!_wzMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
+  }
+  else {
+    if(!_wzMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose) ) return false;
+    if(!_wzMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; //denom on purpose
+    if(!_wzMod->elHLTEmulSel(idx, false) ) return false; //_hltDLHT
   }
 
   return true;
   */
-  return true;
 }
+
 
 bool 
 WZsynchro::tightLepton(int idx, int pdgId) {
@@ -1238,11 +1351,11 @@ WZsynchro::tightLepton(int idx, int pdgId) {
     if (_vc->get("LepGood_relIso04", idx) < 0.12 && _vc->get("LepGood_tightId", idx) == 1) return true;
     else return false;
   }
-  else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) < 1.479) { //barrel electron
+  else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) <= 1.479) { //barrel electron
     if (_vc->get("LepGood_relIso03", idx) < 0.0766 && _vc->get("LepGood_tightId", idx) >= 2 && _vc->get("LepGood_convVeto", idx) == 1 && abs(_vc->get("LepGood_dxy", idx)) < 0.0118 && abs(_vc->get("LepGood_dz", idx)) < 0.373 && _vc->get("LepGood_lostHits", idx) <= 2 ) return true;
     else return false;
   }
-  else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) >= 1.479 && abs(_vc->get("LepGood_etaSc", idx)) < 2.5) { //endcap electron
+  else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) > 1.479 && abs(_vc->get("LepGood_etaSc", idx)) < 2.5) { //endcap electron
     if (_vc->get("LepGood_relIso03", idx) < 0.0678  && _vc->get("LepGood_tightId", idx) >= 2 && _vc->get("LepGood_convVeto", idx) == 1 && abs(_vc->get("LepGood_dxy", idx)) < 0.0739 && abs(_vc->get("LepGood_dz", idx)) < 0.602 && _vc->get("LepGood_lostHits", idx) <= 1) return true;
     else return false;
   }
@@ -1265,8 +1378,7 @@ WZsynchro::tightLepton(int idx, int pdgId) {
 
 
 bool 
-WZsynchro::fakableLepton(int idx, int pdgId) {
-/*
+WZsynchro::fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass) {
   if(abs(pdgId)==13) {//mu case
     if(!_wzMod->muIdSel(c, idx, SusyModule::kTight) ) return false;
     if(!_wzMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
@@ -1285,7 +1397,6 @@ WZsynchro::fakableLepton(int idx, int pdgId) {
     
     if(_FR.find("FO4")!=string::npos && !_wzMod->invMultiIsoSel(idx, SusyModule::kSpecFakeEl) ) return false;
   }
-*/
   return true;
 }
 
@@ -1517,9 +1628,13 @@ WZsynchro::selectLeptons3l() {
 
     //cout<<" pt: "<<cand->pt()<<"  eta: "<<cand->eta()<<"   phi: "<<cand->phi()<<"  pdgId: "<<_vc->get("LepGood_pdgId", il)<<"   dxy: "<<_vc->get("LepGood_dxy",il)<<"  dz: "<<_vc->get("LepGood_dz",il)<<endl;
     //cout<<" LepGood_pdgId: "<<_vc->get("LepGood_pdgId", il)<<" cand->pdgId()=" << cand->pdgId() << std::endl;
-    if(!tightLepton(il, cand->pdgId() ) ) continue;
     
+    if(!looseLepton(il, cand->pdgId() ) ) continue;
     if(cand->pt()<10) continue;
+    _looseLeps10.push_back(cand);
+    _looseLeps10Idx.push_back(il);  
+      
+    if(!tightLepton(il, cand->pdgId() ) ) continue;
     _tightLeps10.push_back(cand);
     _tightLeps10Idx.push_back(il);
 
@@ -1752,13 +1867,15 @@ WZsynchro::checkDoubleCount() {
 
 void WZsynchro::EventDump(){
   //if (!(_wzMod->IsDumpable(_vc->get("evt")))) return;
+  if (_vc->get("evt") < 10000 || _vc->get("evt") > 750000) return;
 
   for (int i=0; i<3; i++){
       //int index = AnalysisLeptons[i].index;
       if (abs(_vc->get("LepGood_pdgId",i))==13){
-        txt_eventdump << Form("%.0f:%d:%f:%f:%f:%d",
+        txt_eventdump << Form("%.0f:%d:%d:%f:%f:%f:%d",
 			      _vc->get("evt"),
 			      (int)_vc->get("LepGood_pdgId", i),
+			      (int)_vc->get("LepGood_charge", i),
 			      _vc->get("LepGood_pt", i),
 			      _vc->get("LepGood_eta", i),
 			      _vc->get("LepGood_relIso04", i),
@@ -1766,9 +1883,10 @@ void WZsynchro::EventDump(){
 
       }else if (abs(_vc->get("LepGood_pdgId",i))==11){
       
-        txt_eventdump << Form("%.0f:%d:%f:%f:%f:%d",
+        txt_eventdump << Form("%.0f:%d:%d:%f:%f:%f:%d",
 			      _vc->get("evt"),
 			      (int)_vc->get("LepGood_pdgId", i),
+			      (int)_vc->get("LepGood_charge", i),
 			      _vc->get("LepGood_pt", i),
 			      _vc->get("LepGood_eta", i),
 			      _vc->get("LepGood_relIso03", i),

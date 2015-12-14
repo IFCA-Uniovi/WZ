@@ -6,9 +6,9 @@
 templateCFG=template_WZ25plots_v2.cfg
 
 NAME="WZ3Lplotsv2"
-#FLAVs=( "all" "eee" "eem" "mme" "mmm" )
+FLAVs=( "all" "eee" "eem" "mme" "mmm" )
 #FLAVs=( "all" )
-FLAVs=( "eee" "eem" "mme" "mmm" )
+#FLAVs=( "eee" "eem" "mme" "mmm" )
 WZSTEPs=( "6" )
 #WZSTEPs=( "0" "1" "2" "3" "4" "5" "6" )
 
