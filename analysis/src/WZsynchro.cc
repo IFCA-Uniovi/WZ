@@ -689,13 +689,13 @@ WZsynchro::WZ3lSelection() {
   if ( ossfpair == 0 ) return;
   
   if(_DoEventDump) EventDump();
-  
+  /*
   if (!_isData) {
     _weight *= _wzMod->GCleptonScaleFactor (l3[0]->pdgId(), l3[0]->pt(), l3[0]->eta(), _HT);
     _weight *= _wzMod->GCleptonScaleFactor (l3[1]->pdgId(), l3[1]->pt(), l3[1]->eta(), _HT);
     _weight *= _wzMod->GCleptonScaleFactor (l3[2]->pdgId(), l3[2]->pt(), l3[2]->eta(), _HT);
   }
-  
+  */
   
   setWorkflow(kWZSM_3l); fillWZhistos(&l3,"WZSMstep0",0.0); setWorkflow(kWZSM);
 
@@ -1846,18 +1846,19 @@ void WZsynchro::fillWZhistos(CandList* leps, string reg, float MllZ) {
 
   }
   if (_DoCheckPlots && reg.find("0")==std::string::npos) {
+/*
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ2)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLW )          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
     if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("lepZ1_mediumMuonId_"+reg, _vc->get("LepGood_mediumMuonId", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ2))==13) fill("lepZ2_mediumMuonId_"+reg, _vc->get("LepGood_mediumMuonId", _idxLZ2)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLW))==13) fill("lepW_mediumMuonId_"+reg , _vc->get("LepGood_mediumMuonId", _idxLW)           , _weight);    
-    
-    //if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muZ1_tightId_"+reg, _vc->get("LepGood_tightId", _idxLZ1)          , _weight);
-    //if (abs(_vc->get("LepGood_pdgId",_idxLZ2))==13) fill("muZ2_tightId_"+reg, _vc->get("LepGood_tightId", _idxLZ2)          , _weight);
-    //if (abs(_vc->get("LepGood_pdgId",_idxLW))==13) fill("muW_tightId_"+reg , _vc->get("LepGood_tightId", _idxLW)           , _weight);    
-    
-    fill("lepZ1_mvaIdPhys14_"+reg , _vc->get("LepGood_mvaIdPhys14" , _idxLZ1)          , _weight);
-    fill("lepZ2_mvaIdPhys14_"+reg , _vc->get("LepGood_mvaIdPhys14" , _idxLZ2)          , _weight);
-    fill("lepW_mvaIdPhys14_"+reg  , _vc->get("LepGood_mvaIdPhys14" , _idxLW)           , _weight);
-
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("lepZ1_mediumMuonId_"+reg, _vc->get("LepGood_mediumMuonId", _idxLZ1)          , _weight);*/
   }
 }
 
