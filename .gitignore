@@ -9,7 +9,8 @@ cfg/tmpFiles
 display/cards/tmpFiles
 display/lib
 tools/lib
-workdir
+workdir/*
+!workdir/database/
 *dictgen.mk
 *gen.mk
 */*_dict_*
