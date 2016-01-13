@@ -1810,6 +1810,7 @@ void WZsynchro::fillWZhistos(CandList* leps, string reg, float MllZ) {
   fill("NBJets_", _nBJets   , _weight);
   fill("NJets_" , _nJets    , _weight);
   fill("M3l_"   , _wzMod->m3lTight(leps), _weight); // avoiding cases such as [tight, tight, loose, tight]
+  fill("M3lfull_", _wzMod->m3lTight(leps), _weight); // avoiding cases such as [tight, tight, loose, tight]
   if (_DoValidationPlots) {
       if (reg.find("0")==std::string::npos) {
         //fill("lepZ1_jetPtRatio_"+reg, _vc->get("LepGood_jetPtRatio", _idxLZ1)           , _weight);

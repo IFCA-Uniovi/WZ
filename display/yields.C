@@ -433,8 +433,8 @@ std::vector<std::string> get_vec_alphaS() {
   std::vector<std::string> result;
 
   result.push_back("1001");//first one is the reference
-  result.push_back("2102");
   result.push_back("2101");
+  result.push_back("2102");
 
   //result.push_back("1");//first one is the reference
   //result.push_back("5");
@@ -492,11 +492,11 @@ void doQ2(int total, int varset, bool latex) {
 
   map<string,float> LumisXS;
   
-  std::map<std::string, std::map<std::string, double> > map_wsum = get_map_wsum();
+  std::map<std::string, std::map<std::string, double> > map_wsum = get_map_wsum(); // map of process & variation with sum of weights
   std::map<std::string, double> map_xsec = get_map_xsec();
-  std::vector<std::string> vec_SRs = get_vec_SRs(varset);
+  std::vector<std::string> vec_SRs = get_vec_SRs(varset); // variable (& selection step) from the tree
   //std::vector<std::string> vec_samples = get_vec_samples();
-  std::vector<std::string> vec_proc = get_vec_proc();
+  std::vector<std::string> vec_proc = get_vec_proc(); // list of processes
   std::map<std::string, std::vector<std::string> > map_proc = get_map_proc();
   std::vector<std::string> vec_Q2sys = get_vec_Q2sys();
   //std::vector<std::string> vec_Q2sys = get_vec_alphaS();
@@ -1110,9 +1110,9 @@ void doPDF(int total, int varset, bool latex) {
 
 }
 
-TH1F* h_pdfXsec_WZ  = new TH1F("h_pdfXsec_WZ" , "h_pdfXsec_WZ" , 120, -0.060, 0.060);
-TH1F* h_pdfXsec_TTW = new TH1F("h_pdfXsec_TTW", "h_pdfXsec_TTW", 120, -0.060, 0.060);
-TH1F* h_pdfXsec_TTZ = new TH1F("h_pdfXsec_TTZ", "h_pdfXsec_TTZ", 120, -0.060, 0.060);
+TH1F* h_pdfXsec_WZ  = new TH1F("WZ distribution & fit" , "WZ PDF variation"       , 120, -0.060, 0.060);
+TH1F* h_pdfXsec_TTW = new TH1F("ttW distribution & fit", "t#bar{t}W PDF variation", 120, -0.060, 0.060);
+TH1F* h_pdfXsec_TTZ = new TH1F("ttZ distribution & fit", "t#bar{t}Z PDF variation", 120, -0.060, 0.060);
 
 //TH1F* h_pdfXsec_TTW = new TH1F("h_pdfXsec_TTW", "h_pdfXsec_TTW", 101, -0.05, 0.05);
 //TH1F* h_pdfXsec_TTZ = new TH1F("h_pdfXsec_TTZ", "h_pdfXsec_TTZ", 101, -0.05, 0.05);
@@ -1121,13 +1121,13 @@ void doXsecPDFhisto() {
   std::map<std::string, std::map<std::string, double> > map_wsum = get_map_wsum();
   
   std::string spdf_first = "2001";
-  std::string spdf_last = "2100";
+  std::string spdf_last  = "2100";
   
   int ipdf_first = atoi(spdf_first.c_str());
   int ipdf_last = atoi(spdf_last.c_str());
   
   //Spring15
-  std::string s_wz = "Tree_WZTo3LNu_0";
+  std::string s_wz  = "Tree_WZTo3LNu_0";
   std::string s_ttw = "Tree_TTWToLNu_0";
   std::string s_ttz = "Tree_TTZToLLNuNu_0";
   
@@ -1166,6 +1166,8 @@ void doXsecPDFhisto() {
         
   }
   
+  gStyle->SetOptFit(0001);
+  
   TCanvas c1;
   h_pdfXsec_WZ ->SetLineColor(kOrange-2);
   h_pdfXsec_TTW->SetLineColor(kGreen-6);
@@ -1174,8 +1176,8 @@ void doXsecPDFhisto() {
   h_pdfXsec_TTW->SetLineWidth(3);
   h_pdfXsec_TTZ->SetLineWidth(3);
   
-  h_pdfXsec_WZ ->Rebin(10);
-  h_pdfXsec_TTW->Rebin(10);
+  h_pdfXsec_WZ ->Rebin(12);
+  h_pdfXsec_TTW->Rebin(12);
   h_pdfXsec_TTZ->Rebin(12);
   /*
   if (h_pdfXsec_TTW->GetMaximum() > h_pdfXsec_TTZ->GetMaximum()) {
@@ -1188,24 +1190,25 @@ void doXsecPDFhisto() {
   }
   */
   
-  h_pdfXsec_TTZ->Draw();
+  //h_pdfXsec_TTZ->Draw();
   
   
   
   TLegend * leg = new TLegend(0.15,0.7,0.4,0.85);
   //leg ->AddEntry(h_pdfXsec_TTW, "variation ttW");
-  leg ->AddEntry(h_pdfXsec_TTZ, "variation ttZ");
+  //leg ->AddEntry(h_pdfXsec_TTZ, "variation ttZ");
   
   //leg ->AddEntry(h_pdfXsec_WZ , "variation WZ" );
   //h_pdfXsec_WZ->Draw();
   
-  leg->Draw("sames");
+  //leg->Draw("sames");
   
   //h_pdfXsec_TTW->Fit("gaus");
   //h_pdfXsec_TTZ->Fit("gaus");
   h_pdfXsec_WZ->Fit("gaus");
+  //leg->Draw("sames");
   
-  c1.SaveAs("c_pdfXsec.gif");
+  c1.SaveAs("c_pdfXsec.png");
 }
 
 

@@ -25,7 +25,7 @@ NBJetsTight40	1	-0.5	6.5
 NJets40	1	-0.5	6.5
 MET	1	0	300
 M3l	1	60	360
-HT	1	60	600
+HT	1	0	600
 lepZ1_jetPtRatio_WZSMstep0	1	0	1.2
 lepZ1_jetPtRel_WZSMstep0	1	0	80.
 lepZ1_miniRelIso_WZSMstep0	1	0	0.4
@@ -53,7 +53,7 @@ NBJetsTight40_WZSMstep0	1	-0.5	6.5
 NJets40_WZSMstep0	1	-0.5	6.5
 MET_WZSMstep0	1	0	300
 M3l_WZSMstep0	1	60	360
-HT_WZSMstep0	1	60	600
+HT_WZSMstep0	1	0	600
 lepZ1_jetPtRatio_WZSMstep1	1	0	1.2
 lepZ1_jetPtRel_WZSMstep1	1	0	80.
 lepZ1_miniRelIso_WZSMstep1	1	0	0.4
@@ -81,7 +81,7 @@ NBJetsTight40_WZSMstep1	1	-0.5	6.5
 NJets40_WZSMstep1	1	-0.5	6.5
 MET_WZSMstep1	1	0	300
 M3l_WZSMstep1	1	60	360
-HT_WZSMstep1	1	60	600
+HT_WZSMstep1	1	0	600
 lepZ1_jetPtRatio_WZSMstep2	1	0	1.2
 lepZ1_jetPtRel_WZSMstep2	1	0	80.
 lepZ1_miniRelIso_WZSMstep2	1	0	0.4
@@ -109,7 +109,7 @@ NBJetsTight40_WZSMstep2	1	-0.5	6.5
 NJets40_WZSMstep2	1	-0.5	6.5
 MET_WZSMstep2	1	0	300
 M3l_WZSMstep2	1	60	360
-HT_WZSMstep2	1	60	600
+HT_WZSMstep2	1	0	600
 lepZ1_jetPtRatio_WZSMstep3	1	0	1.2
 lepZ1_jetPtRel_WZSMstep3	1	0	80.
 lepZ1_miniRelIso_WZSMstep3	1	0	0.4
@@ -137,7 +137,7 @@ NBJetsTight40_WZSMstep3	1	-0.5	6.5
 NJets40_WZSMstep3	1	-0.5	6.5
 MET_WZSMstep3	1	0	300
 M3l_WZSMstep3	1	60	360
-HT_WZSMstep3	1	60	600
+HT_WZSMstep3	1	0	600
 lepZ1_jetPtRatio_WZSMstep4	1	0	1.2
 lepZ1_jetPtRel_WZSMstep4	1	0	80.
 lepZ1_miniRelIso_WZSMstep4	1	0	0.4
@@ -165,7 +165,7 @@ NBJetsTight40_WZSMstep4	1	-0.5	6.5
 NJets40_WZSMstep4	1	-0.5	6.5
 MET_WZSMstep4	1	0	300
 M3l_WZSMstep4	1	60	360
-HT_WZSMstep4	1	60	600
+HT_WZSMstep4	1	0	600
 lepZ1_jetPtRatio_WZSMstep5	1	0	1.2
 lepZ1_jetPtRel_WZSMstep5	1	0	80.
 lepZ1_miniRelIso_WZSMstep5	1	0	0.4
@@ -193,7 +193,7 @@ NBJetsTight40_WZSMstep5	1	-0.5	6.5
 NJets40_WZSMstep5	1	-0.5	6.5
 MET_WZSMstep5	1	0	300
 M3l_WZSMstep5	1	60	360
-HT_WZSMstep5	1	60	600
+HT_WZSMstep5	1	0	600
 lepZ1_jetPtRatio_WZSMstep6	1	0	1.2
 lepZ1_jetPtRel_WZSMstep6	1	0	80.
 lepZ1_miniRelIso_WZSMstep6	1	0	0.4
@@ -221,7 +221,7 @@ NBJetsTight40_WZSMstep6	1	-0.5	6.5
 NJets40_WZSMstep6	1	-0.5	6.5
 MET_WZSMstep6	1	0	300
 M3l_WZSMstep6	1	60	360
-HT_WZSMstep6	1	60	600
+HT_WZSMstep6	1	0	600
 lepZ1_mediumMuonId_WZSMstep0	1	0	2
 lepZ1_mvaIdPhys14_WZSMstep0	4	0	1.02
 lepZ2_mediumMuonId_WZSMstep0	1	0	2
