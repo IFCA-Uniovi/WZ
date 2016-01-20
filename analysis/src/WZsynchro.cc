@@ -689,13 +689,13 @@ WZsynchro::WZ3lSelection() {
   if ( ossfpair == 0 ) return;
   
   if(_DoEventDump) EventDump();
-  /*
-  if (!_isData) {
-    _weight *= _wzMod->GCleptonScaleFactor (l3[0]->pdgId(), l3[0]->pt(), l3[0]->eta(), _HT);
-    _weight *= _wzMod->GCleptonScaleFactor (l3[1]->pdgId(), l3[1]->pt(), l3[1]->eta(), _HT);
-    _weight *= _wzMod->GCleptonScaleFactor (l3[2]->pdgId(), l3[2]->pt(), l3[2]->eta(), _HT);
+  
+  if ( _vc->get("isData")!=1 ) {
+    _weight *= _wzMod->GCleptonScaleFactorWZ (l3[0]->pdgId(), l3[0]->pt(), l3[0]->eta() );
+    _weight *= _wzMod->GCleptonScaleFactorWZ (l3[1]->pdgId(), l3[1]->pt(), l3[1]->eta() );
+    _weight *= _wzMod->GCleptonScaleFactorWZ (l3[2]->pdgId(), l3[2]->pt(), l3[2]->eta() );
   }
-  */
+  
   
   setWorkflow(kWZSM_3l); fillWZhistos(&l3,"WZSMstep0",0.0); setWorkflow(kWZSM);
 

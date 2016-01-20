@@ -21,6 +21,15 @@ public:
   float bestmZ(const CandList* leps);
   float m3lTight(const CandList* leps);
   
+  
+  float GCleptonScaleFactorWZ(int pdgId, float pt, float eta);
+  float GCelectronScaleFactorWZ(float pt, float eta);
+  float GCmuonScaleFactorWZ(float pt, float eta);
+  
+  float GCtriggerScaleFactorWZ(int pdgId1, int pdgId2, float pt1, float pt2, float ht);
+  float GCeventScaleFactorWZ(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht);
+  
+  
   bool IsDumpable(int evt);
 
 protected:

@@ -460,9 +460,9 @@ void yields(int total = 1, int varset = 0, bool latex = true) {
  //doWZ_steps();
  
 
-// doQ2(total, varset, latex);
+ doQ2(total, varset, latex);
 // doPDF(total, varset, latex);
- doXsecPDFhisto();
+// doXsecPDFhisto();
 }
 
 void doWZ_steps() {
@@ -671,6 +671,7 @@ void doQ2(int total, int varset, bool latex) {
 
 
 	for (unsigned int iq2 = 0; iq2 < 8; iq2++) {
+
 	  std::string fname = fileroot + vec_Q2sys_long[iq2+1] + ".root";
 	  //std::cout << endl << fname << endl;
 	  
@@ -728,6 +729,7 @@ void doQ2(int total, int varset, bool latex) {
       double sysAcc_vec[8];
       double sysTot_vec[8];
       for (unsigned int iq2 = 0; iq2 < 8; iq2++) {
+      if (iq2==4 || iq2==6) continue;
         if (valAcc_vec[iq2] != 0 && val_Zero != 0) sysAcc_vec[iq2] = (valAcc_vec[iq2] > val_Zero)? valAcc_vec[iq2]/val_Zero - 1.0: -val_Zero/valAcc_vec[iq2] + 1.0;
         if (valTot_vec[iq2] != 0 && val_Zero != 0) sysTot_vec[iq2] = (valTot_vec[iq2] > val_Zero)? valTot_vec[iq2]/val_Zero - 1.0: -val_Zero/valTot_vec[iq2] + 1.0;
         std::string sqsqr;
@@ -793,7 +795,7 @@ void doQ2(int total, int varset, bool latex) {
           std::string tmp_smax = "-$>$"+s_sysAcc_Max;
           std::string tmp_smin = "-$>$"+s_sysAcc_Min;
           printf ("%s%.3f%s%s", "\t\\textcolor{blue}{(", sysAcc_Max, tmp_smax.c_str(), ")}\t");
-          printf ("%s%.3f%s%s%.3f", "\t\\textcolor{green}{(", sysAcc_Min, tmp_smin.c_str(),")}\tRMS: ", RMS);
+          printf ("%s%.3f%s%s", "\t\\textcolor{green}{(", sysAcc_Min, tmp_smin.c_str(),")}");
 	    }        
       } else if (total == 3) {
         if (latex) {
@@ -801,7 +803,7 @@ void doQ2(int total, int varset, bool latex) {
           std::string tmp_smax = "-$>$"+s_sysTot_Max;
           std::string tmp_smin = "-$>$"+s_sysTot_Min;
           printf ("%s%.3f%s%s", "\t\\textcolor{blue}{(", sysTot_Max, tmp_smax.c_str(), ")}\t");
-          printf ("%s%.3f%s%s%.3f", "\t\\textcolor{green}{(", sysTot_Min, tmp_smin.c_str(),")}\tRMS: ", RMS);
+          printf ("%s%.3f%s%s", "\t\\textcolor{green}{(", sysTot_Min, tmp_smin.c_str(),")}");
 	    }         
       }
       
