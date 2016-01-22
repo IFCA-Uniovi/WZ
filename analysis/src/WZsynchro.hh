@@ -87,7 +87,11 @@ private:
   
   ofstream txt_eventdump;
   void EventDump();  
-  
+
+  ofstream txt_pupidump;
+  ofstream txt_metdump;
+  ofstream txt_evtnumberdump;
+  void PupiDump();  
   
 private: 
 
@@ -252,6 +256,7 @@ private:
   bool _DoValidationPlots;
   bool _DoCheckPlots;
   bool _DoEventDump;
+  bool _DoPupiDump;
   int _WZstep;
   string _WZstepname [7]= {"Three leptons",
 	"WZ candidate",

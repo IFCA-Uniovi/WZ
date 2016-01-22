@@ -262,6 +262,7 @@ WZsynchro::initialize(){
   //_WZstep = getCfgVarI("WZstep",6);
   _DoCheckPlots = getCfgVarI("CheckPlots",0);
   _DoEventDump = getCfgVarI("EventDump",0);
+  _DoPupiDump = getCfgVarI("PupiDump",0);
 
 
 //  vector<string> jess;
@@ -336,7 +337,7 @@ WZsynchro::modifyWeight() {
     //_weight *= _vc->get("genWeight");
     //pileup weights
     //_weight *= _vc->get("vtxWeight");
-    _weight *= _vc->get("puWeight");
+    if (!_DoPupiDump) _weight *= _vc->get("puWeight");
   }
 
 }
@@ -487,6 +488,15 @@ WZsynchro::run() {
 
   if (_DoEventDump) txt_eventdump.open("workdir/logs/WZTo3LNu_eventdump.txt",std::ios_base::app);
 
+  if (_DoPupiDump){
+    if (_vc->get("evt") > 35000) return;
+    txt_pupidump.open("workdir/logs/WZTo3LNu_pupidump.txt",std::ios_base::app);
+    if (_LHESYS == 1001){
+      txt_metdump.open("workdir/logs/WZTo3LNu_metdump.txt",std::ios_base::app);
+      txt_evtnumberdump.open("workdir/logs/WZTo3LNu_evtnumberdump.txt",std::ios_base::app);
+      //txt_pupidump << Form("%d",_LHESYS);
+    }
+  }
   
   counter("denominator");
   
@@ -517,6 +527,16 @@ WZsynchro::run() {
   // 	       njet, nbjet, met, HT,
   // 	       sr ) << endl;
   if (_DoEventDump) txt_eventdump.close();
+  if (_DoPupiDump){
+    txt_pupidump.close();
+    if (_LHESYS == 1001){
+      txt_metdump.close();
+      txt_evtnumberdump.close();
+      //txt_pupidump << Form("%d",_LHESYS);
+    }
+  }
+
+ 
 }
 
 bool
@@ -690,7 +710,7 @@ WZsynchro::WZ3lSelection() {
   
   if(_DoEventDump) EventDump();
   
-  if ( _vc->get("isData")!=1 ) {
+  if ( _vc->get("isData")!=1 && !_DoPupiDump) {
     _weight *= _wzMod->GCleptonScaleFactorWZ (l3[0]->pdgId(), l3[0]->pt(), l3[0]->eta() );
     _weight *= _wzMod->GCleptonScaleFactorWZ (l3[1]->pdgId(), l3[1]->pt(), l3[1]->eta() );
     _weight *= _wzMod->GCleptonScaleFactorWZ (l3[2]->pdgId(), l3[2]->pt(), l3[2]->eta() );
@@ -761,6 +781,9 @@ WZsynchro::WZ3lSelection() {
   if(!makeCut(_m3l > 100, "M(3l) > 100 GeV" )) return;
   //if (_WZstep == 4) fillWZhistos(0.0, 0.0);
   setWorkflow(kWZSM_3lwzZselWselM3l); fillWZhistos(&candWZ,"WZSMstep4",MllZ); setWorkflow(kWZSM);
+  
+  
+  if(_DoPupiDump) PupiDump();
   
   if(!makeCut(_nBJets<=1,"1 or 0 b-jets")) return;
   //if (_WZstep == 5) fillWZhistos(0.0, 0.0);
@@ -1931,4 +1954,22 @@ void WZsynchro::EventDump(){
       
       txt_eventdump << Form("\n");
   }
+}
+
+void WZsynchro::PupiDump(){
+  //if (!(_wzMod->IsDumpable(_vc->get("evt")))) return;
+  //if (_vc->get("evt") < 35000) cout << _vc->get("evt") << endl;
+  if (_vc->get("evt") > 35000){
+    //if (_vc->get("evt") < 35100) txt_pupidump << Form("\n");
+    return;
+  }
+  if (_LHESYS == 1001){
+    txt_metdump << Form("%.2f\t",_met->pt());
+    txt_evtnumberdump << Form("%.0f\t",_vc->get("evt"));
+  }
+    
+    
+  txt_pupidump << Form("%.5f\t",_weight);
+
+  
 }
