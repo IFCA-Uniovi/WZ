@@ -22,12 +22,12 @@ public:
   float m3lTight(const CandList* leps);
 
 
-  bool IsLooseBarrelElectronWW(int idx) const;
-  bool IsLooseEndcapElectronWW(int idx) const;
-  bool IsLooseMuonWW(int idx) const;
-  bool IsTightBarrelElectronWW(int idx) const;
-  bool IsTightEndcapElectronWW(int idx) const;
-  bool IsTightMuonWW(int idx) const;
+  bool IsLooseBarrelElectronWW(int idx);
+  bool IsLooseEndcapElectronWW(int idx);
+  bool IsLooseMuonWW(int idx);
+  bool IsTightBarrelElectronWW(int idx);
+  bool IsTightEndcapElectronWW(int idx);
+  bool IsTightMuonWW(int idx);
  
   
   float GCleptonScaleFactorZZ(int pdgId, float pt, float eta);
@@ -42,8 +42,8 @@ public:
 
 protected:
   //const
-  VarClass* _vc;
-  DataBaseManager* _dbm;
+  //VarClass* _vc;
+  //DataBaseManager* _dbm;
 
 
 };

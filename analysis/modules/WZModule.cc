@@ -134,8 +134,9 @@ float WZModule::bestmZ(const CandList* leps){
 // Slide 4 https://indico.cern.ch/event/485788/contribution/3/attachments/1214544/1772984/OviIFCA-WZstatus.pdf
 
 bool
-WZModule::IsLooseBarrelElectronWW(int idx) const {
-  if( std::abs(_vc->get("LepGood_EtaSc"           , idx))  > 1.479   ) return false;
+WZModule::IsLooseBarrelElectronWW(int idx) {
+
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 1.479   ) return false;
   if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.01    ) return false;
   if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.04    ) return false;
   if( _vc->get("LepGood_sigmaIEtaIEta"            , idx)   > 0.011   ) return false;
@@ -155,9 +156,10 @@ WZModule::IsLooseBarrelElectronWW(int idx) const {
 }
 
 bool
-WZModule::IsLooseEndcapElectronWW(int idx) const {
-  if( std::abs(_vc->get("LepGood_EtaSc"           , idx))  < 1.479   ) return false;
-  if( std::abs(_vc->get("LepGood_EtaSc"           , idx))  > 2.5     ) return false;
+WZModule::IsLooseEndcapElectronWW(int idx) {
+
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  < 1.479   ) return false;
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 2.5     ) return false;
   if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.01    ) return false;
   if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.08    ) return false;
   if( _vc->get("LepGood_sigmaIEtaIEta"            , idx)   > 0.031   ) return false;
@@ -178,7 +180,8 @@ WZModule::IsLooseEndcapElectronWW(int idx) const {
 
 
 bool
-WZModule::IsLooseMuonWW(int idx) const {
+WZModule::IsLooseMuonWW(int idx) {
+
   if( std::abs(_vc->get("LepGood_eta"             , idx))  > 2.4     ) return false;
   if( _vc->get("LepGood_mediumMuonId"             , idx)   !=1       ) return false;
   if( _vc->get("LepGood_relIso04"                 , idx)   > 0.4     ) return false;
@@ -189,7 +192,8 @@ WZModule::IsLooseMuonWW(int idx) const {
 }
 
 bool
-WZModule::IsTightMuonWW(int idx) const {
+WZModule::IsTightMuonWW(int idx) {
+
   if( std::abs(_vc->get("LepGood_eta"             , idx))  > 2.4     ) return false;
   if( _vc->get("LepGood_mediumMuonId"             , idx)   !=1       ) return false;
   if( _vc->get("LepGood_relIso04"                 , idx)   > 0.4     ) return false;
@@ -200,16 +204,16 @@ WZModule::IsTightMuonWW(int idx) const {
   }
   if( std::abs(_vc->get("LepGood_dz"              , idx))  > 0.1     ) return false;
   
-  
   return true;
 
 }
 
 
 bool
-WZModule::IsTightBarrelElectronWW(int idx) const {
+WZModule::IsTightBarrelElectronWW(int idx) {
+
   if( _vc->get("LepGood_tightId"                  , idx)   < 3       ) return false;
-  if( std::abs(_vc->get("LepGood_EtaSc"           , idx))  > 1.479   ) return false;
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 1.479   ) return false;
   if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0101  ) return false;
   if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.00926 ) return false;
   if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.0336  ) return false;
@@ -226,10 +230,11 @@ WZModule::IsTightBarrelElectronWW(int idx) const {
 }
 
 bool
-WZModule::IsTightEndcapElectronWW(int idx) const {
+WZModule::IsTightEndcapElectronWW(int idx) {
+
   if( _vc->get("LepGood_tightId"                  , idx)   < 3       ) return false;
-  if( std::abs(_vc->get("LepGood_EtaSc"           , idx))  < 1.479   ) return false;
-  if( std::abs(_vc->get("LepGood_EtaSc"           , idx))  > 2.5     ) return false;
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  < 1.479   ) return false;
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 2.5     ) return false;
   if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0279  ) return false;
   if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.00724 ) return false;
   if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.0918  ) return false;

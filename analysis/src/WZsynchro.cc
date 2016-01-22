@@ -40,8 +40,8 @@ WZsynchro::initialize(){
   _vc->registerVar("nLepGood"                     );
   _vc->registerVar("LepGood_pt"                   );
   _vc->registerVar("LepGood_eta"                  );
-  _vc->registerVar("LepGood_etaSc"               );
-  _vc->registerVar("LepGood_tightId"                );
+  _vc->registerVar("LepGood_etaSc"                );
+  _vc->registerVar("LepGood_tightId"              );
   _vc->registerVar("LepGood_phi"                  );
   _vc->registerVar("LepGood_charge"               );
   _vc->registerVar("LepGood_tightCharge"          );
@@ -51,6 +51,7 @@ WZsynchro::initialize(){
   _vc->registerVar("LepGood_pdgId"                );
   _vc->registerVar("LepGood_relIso03"             );
   _vc->registerVar("LepGood_relIso04"             );
+  _vc->registerVar("LepGood_trackIso"             );
   _vc->registerVar("LepGood_jetPtRatio"           );
   _vc->registerVar("LepGood_jetPtRatio_LepAwareJEC");
   _vc->registerVar("LepGood_jetPtRatiov2"         );
@@ -169,6 +170,7 @@ WZsynchro::initialize(){
   
   // for loose leptons used in jet cleaning
   _vc->registerVar("LepGood_sigmaIEtaIEta"        );
+  _vc->registerVar("LepGood_sigmaIEtaIEta_full5x" );
   _vc->registerVar("LepGood_hadronicOverEm"       );
   _vc->registerVar("LepGood_dEtaScTrkIn"          );
   _vc->registerVar("LepGood_dPhiScTrkIn"          );
@@ -1418,12 +1420,13 @@ WZsynchro::fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass) {
 
 bool
 WZsynchro::passHLT() {
+  // Same for ZZ and WW leptons (WW analysis also uses SingleMuon and SingleElectron)
   bool passhlt = ( _vc->get("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") || 
     _vc->get("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") || 
     _vc->get("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") || 
     _vc->get("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") || 
     _vc->get("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") );
-
+  
   return passhlt;
 }
 
