@@ -150,9 +150,12 @@ Tree_TTGJets_0  3.697
 Tree_TW_0   35.6
 Tree_WJetsToLNu_aMCatNLO_0   61526.7
 Tree_WW_0   115.0
-Tree_WWTo2L2Nu_0    10.48
+Tree_WWTo2L2Nu_0    12.178
 Tree_WZ_0   47.1
 Tree_WZTo3LNu_0   4.42965
-Tree_ZZ_0   16.5
+Tree_ZZ_0   16.523
 Tree_GGHZZ4L_0   0.01212
 Tree_WGToLNuG_0   585.8
+Tree_WWZ_0 0.1651
+Tree_WZZ_0 0.05565
+Tree_ZZZ_0 0.01398

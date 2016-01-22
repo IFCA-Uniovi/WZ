@@ -21,6 +21,7 @@ using namespace std;
 #include "analysis/src/UncertaintyTest.hh"
 //#include "analysis/src/Comissioning.hh"
 #include "analysis/src/WZsynchro.hh"
+#include "analysis/src/FakeRatioWZ.hh"
 
 
 MPAF*
@@ -78,6 +79,9 @@ AnalysisFactory::get(const string& analysis, const string& cfg) {
   //}
   if(analysis=="WZsynchro") {
     return new WZsynchro(cfg);
+  }
+  if(analysis=="FakeRatioWZ") {
+    return new FakeRatioWZ(cfg);
   }
   return 0;
 }

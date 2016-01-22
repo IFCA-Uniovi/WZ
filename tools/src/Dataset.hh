@@ -48,6 +48,8 @@ private:
   // std::map<std::string, std::string> _crSamples;
   // std::map<std::string, bool> _isNormSamples;
 
+  bool _isDataDriven;
+
 public:
 
   enum {
@@ -88,7 +90,7 @@ public:
   bool isTreeType() { return _dsContentType==kTree;};
   bool isHistoType() { return _dsContentType==kHisto;};
 	
-  //bool isDataDriven(){return _isDataDriven;};
+  bool isDataDriven(){return _isDataDriven;};
   bool isFromCS(){return _isFromCS!=0;};
   int csCode(){return _isFromCS;};
 	
@@ -103,6 +105,9 @@ public:
 	
   float getWeight(int is) const {return _samples[is].getLumW(); };
   float getWeight(string sname) const;
+
+  string goodPath(string path);
+  string goodFilePath(string path, string dir, string fileName, string subdir = "data");
 	
   TTree* getTree() {return _chain;};
   int getNEvents() { return _chain->GetEntries(); };
@@ -122,14 +127,14 @@ public:
 
 private:
 
-  void loadTree(std::string path, std::string dir, std::string sname, std::string objName);
-  void loadHistos(std::string path, std::string dir, std::string sname, std::string hname, std::string optCat);
+  void loadTree(std::string path, std::string dir, string subdir, std::string sname, std::string objName);
+  void loadHistos(std::string path, std::string dir, string subdir, std::string sname, std::string hname, std::string optCat);
 
   // float computeWeight(float nEvts, float xSect, float kFact,
   // 		      float lumi, float& eqLumi);
   
-  int getNProcEvents(string path, string dir, string sname, string hname);
-  double getSumProcWgts(string path, string dir, string sname, string hwgtname);
+  int getNProcEvents(string path, string dir, string subdir, string sname, string hname);
+  double getSumProcWgts(string path, string dir, string subdir, string sname, string hwgtname);
   
 
   ClassDef(Dataset,0)

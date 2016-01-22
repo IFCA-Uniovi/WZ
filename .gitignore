@@ -1,7 +1,7 @@
-*.[a,o,pdf,png,pyc,root,so,swo,swp]
-*/*.[a,o,pdf,png,pyc,root,so,swo,swp]
-*/*/*.[a,o,pdf,png,pyc,root,so,swo,swp]
-*/*/*/*.[a,o,pdf,png,pyc,root,so,swo,swp]
+*.[a,o,gif,pdf,png,pyc,root,so,swo,swp,tex]
+*/*.[a,o,gif,pdf,png,pyc,root,so,swo,swp,tex]
+*/*/*.[a,o,gif,pdf,png,pyc,root,so,swo,swp,tex]
+*/*/*/*.[a,o,gif,pdf,png,pyc,root,so,swo,swp,tex]
 */*/*_dict_*
 analysis/bin/analysis
 analysis/lib
@@ -9,7 +9,14 @@ cfg/tmpFiles
 display/cards/tmpFiles
 display/lib
 tools/lib
-workdir
+workdir/*
+!workdir/database/
 *dictgen.mk
 *gen.mk
 */*_dict_*
+# The following were not being ignored properly despite the first line
+*.gif
+*.tex
+*.so
+*.png
+

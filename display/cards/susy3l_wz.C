@@ -7,8 +7,8 @@ void susy3l_wz() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="wzcr"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="wzcr"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="wz"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="wz"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = false;
@@ -18,9 +18,9 @@ void susy3l_wz() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs = "ht_wz" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
+    string obs = "zpeak" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll
     string sigs = "none"; 
-    bool data = true;
+    bool data = false;
 
     //Binning & title ************************* Binning & titre
     string yTitle="number of events";
@@ -94,11 +94,11 @@ void susy3l_wz() {
     }
     if(obs == "met_wzcr"){
         md.dp.setObservables("METWZCR");
-        int binning=50;
-        double rangeX[2]={0,500};
-        //bool logYScale=true;
+        int binning=10;
+        double rangeX[2]={0,250};
+        bool logYScale=false;
     }
-    if(obs == "wzcr_ht"){
+    if(obs == "ht_wzcr"){
         md.dp.setObservables("HTWZCR");
         int binning=0;
         double rangeX[2]={0,1000};
@@ -114,9 +114,9 @@ void susy3l_wz() {
         //bool logYScale=true;
     }
     if(obs == "zpeak"){
-        md.dp.setObservables("Zmass");
-        int binning=2;
-        double rangeX[2]={60,120};
+        md.dp.setObservables("ZmassWZCR");
+        int binning=5;
+        double rangeX[2]={0,200};
         bool logYScale=false;
     }
     if(obs == "zpeak_wz"){
@@ -139,6 +139,12 @@ void susy3l_wz() {
     if(obs == "mt"){
         md.dp.setObservables("MT");
         int binning=25;
+        double rangeX[2]={0,200};
+        //bool logYScale=true;
+    }
+    if(obs == "mt_wzcr"){
+        md.dp.setObservables("MTWZCR");
+        int binning=10;
         double rangeX[2]={0,200};
         //bool logYScale=true;
     }
@@ -167,8 +173,8 @@ void susy3l_wz() {
         //bool logYScale=true;
     }
     if(obs == "mll"){
-        md.dp.setObservables("lowMll");
-        int binning=10;
+        md.dp.setObservables("lowestOssfMll");
+        int binning=6;
         double rangeX[2]={0,400};
         //bool logYScale=true;
     }
@@ -262,7 +268,7 @@ void susy3l_wz() {
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=1280; //pb-1 19470
+    float lumi=3000; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=false;
@@ -287,12 +293,12 @@ void susy3l_wz() {
     //if( md.isInitStatus() ) {
  
     //TTV
-    md.anConf.addSample( "TTWToLNu"                             ,  "ttW"          , kYellow   );
-    md.anConf.addSample( "TTZToLLNuNu"                          ,  "ttZ"          , kBlue     );
+//    md.anConf.addSample( "TTWToLNu"                             ,  "ttW"          , kYellow   );
+//    md.anConf.addSample( "TTZToLLNuNu"                          ,  "ttZ"          , kBlue     );
  
     //di-boson
     md.anConf.addSample( "WZTo3LNu"                             ,  "WZ"              , kGreen    );
-    md.anConf.addSample( "ZZTo4L"                               ,  "ZZ"              , kGreen+3  );
+/*    md.anConf.addSample( "ZZTo4L"                               ,  "ZZ"              , kGreen+3  );
  
     //VVV   
     md.anConf.addSample( "WWZ"                                  ,  "VVV"             , kGreen+4   );
@@ -300,28 +306,28 @@ void susy3l_wz() {
     md.anConf.addSample( "ZZZ"                                  ,  "VVV"             , kGreen+4   );
 
     //rare
-    md.anConf.addSample( "GGHZZ4L"                              ,  "rare SM"             , kCyan     );
-    md.anConf.addSample( "TTHnobb"                              ,  "rare SM"             , kCyan      );
-    md.anConf.addSample( "VHToNonbb"                            ,  "rare SM"             , kCyan      );
-
-    md.anConf.addSample( "WGToLNuG"                             ,  "rare SM"             , kCyan      );
-    md.anConf.addSample( "WpWpJJ"                               ,  "rare SM"             , kCyan      );
-    md.anConf.addSample( "WWDouble"                             ,  "rare SM"             , kCyan      );
-    md.anConf.addSample( "WWTo2L2Nu"                            ,  "rare SM"             , kCyan      );
-    //md.anConf.addSample( "ZGTo2LG"                              ,  "rare SM"             , kCyan      );
+    md.anConf.addSample( "GGHZZ4L"                              ,  "rare"             , kCyan     );
+    md.anConf.addSample( "TTHnobb"                              ,  "rare"             , kCyan      );
+    md.anConf.addSample( "VHToNonbb"                            ,  "rare"             , kCyan      );
+    md.anConf.addSample( "WGToLNuG"                             ,  "rare"             , kCyan      );
+    //md.anConf.addSample( "WpWpJJ"                               ,  "rare"             , kCyan      );
+    md.anConf.addSample( "WWDouble"                             ,  "rare"             , kCyan      );
+    md.anConf.addSample( "WWTo2L2Nu"                            ,  "rare"             , kCyan      );
+    //md.anConf.addSample( "ZGTo2LG"                              ,  "rare"             , kCyan      );
 
     //top production
-    md.anConf.addSample( "TbarToLeptons_tch"                ,  "single t"    , kRed+3      );
-    md.anConf.addSample( "TBar_tWch"                        ,  "single t"    , kRed+3      );
-    md.anConf.addSample( "T_tWch"                           ,  "single t"    , kRed+3      );
-    md.anConf.addSample( "TToLeptons_sch_amcatnlo"          ,  "single t"    , kRed+3      );
-    md.anConf.addSample( "TToLeptons_tch"                   ,  "single t"    , kRed+3      );
-    md.anConf.addSample( "TGJets"                           ,  "single t"    , kRed+3      );
-    //md.anConf.addSample( "tZqll"                            ,  "single t"    , kRed+3      );
-    md.anConf.addSample( "TTJets"                           ,  "TT"    , kRed+2      );
-    md.anConf.addSample( "TTGJets"                          ,  "TT"    , kRed+2      );
-    md.anConf.addSample( "TTLLJets_m1to10"                  ,  "TT"    , kRed+2      );
-    md.anConf.addSample( "TTTT"                             ,  "TT"    , kRed+2      );
+    md.anConf.addSample( "TbarToLeptons_tch"                ,  "single top"    , kRed+3      );
+    md.anConf.addSample( "TBar_tWch"                        ,  "single top"    , kRed+3      );
+    md.anConf.addSample( "T_tWch"                           ,  "single top"    , kRed+3      );
+    md.anConf.addSample( "TToLeptons_sch_amcatnlo"          ,  "single top"    , kRed+3      );
+    md.anConf.addSample( "TToLeptons_tch"                   ,  "single top"    , kRed+3      );
+    md.anConf.addSample( "TGJets"                           ,  "single top"    , kRed+3      );
+    //md.anConf.addSample( "tZqll"                            ,  "single top"    , kRed+3      );
+    //md.anConf.addSample( "TTJets"                           ,  "TT"    , kRed+2      );
+    md.anConf.addSample( "TT_pow"                           ,  "TT"    , kRed+1      );
+    md.anConf.addSample( "TTGJets"                          ,  "TT"    , kRed+1      );
+    md.anConf.addSample( "TTLLJets_m1to10"                  ,  "TT"    , kRed+1      );
+    md.anConf.addSample( "TTTT"                             ,  "TT"    , kRed+1      );
 
     //W+Jets
     md.anConf.addSample( "WJetsToLNu"            ,  "WJets"    , kRed-6      );
@@ -329,7 +335,7 @@ void susy3l_wz() {
     //Drell-Yan
     md.anConf.addSample( "DYJetsToLL_M10to50"          ,  "DY"    , kRed     );
     md.anConf.addSample( "DYJetsToLL_M50"              ,  "DY"    , kRed     );
-
+*/
 
     //signal
     if(sigs=="t"){

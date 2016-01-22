@@ -173,6 +173,14 @@ WZsynchro::initialize(){
   _vc->registerVar("LepGood_dEtaScTrkIn"          );
   _vc->registerVar("LepGood_dPhiScTrkIn"          );
   _vc->registerVar("LepGood_eInvMinusPInv"        );
+  
+  // HLT paths
+  _vc->registerVar("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
+  _vc->registerVar("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+  _vc->registerVar("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+  _vc->registerVar("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
+  _vc->registerVar("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
+  
 
 
   _wzMod = new WZModule(_vc, _dbm);
@@ -254,6 +262,7 @@ WZsynchro::initialize(){
   //_WZstep = getCfgVarI("WZstep",6);
   _DoCheckPlots = getCfgVarI("CheckPlots",0);
   _DoEventDump = getCfgVarI("EventDump",0);
+  _DoPupiDump = getCfgVarI("PupiDump",0);
 
 
 //  vector<string> jess;
@@ -328,7 +337,7 @@ WZsynchro::modifyWeight() {
     //_weight *= _vc->get("genWeight");
     //pileup weights
     //_weight *= _vc->get("vtxWeight");
-    _weight *= _vc->get("puWeight");
+    if (!_DoPupiDump) _weight *= _vc->get("puWeight");
   }
 
 }
@@ -479,6 +488,15 @@ WZsynchro::run() {
 
   if (_DoEventDump) txt_eventdump.open("workdir/logs/WZTo3LNu_eventdump.txt",std::ios_base::app);
 
+  if (_DoPupiDump){
+    if (_vc->get("evt") > 35000) return;
+    txt_pupidump.open("workdir/logs/WZTo3LNu_pupidump.txt",std::ios_base::app);
+    if (_LHESYS == 1001){
+      txt_metdump.open("workdir/logs/WZTo3LNu_metdump.txt",std::ios_base::app);
+      txt_evtnumberdump.open("workdir/logs/WZTo3LNu_evtnumberdump.txt",std::ios_base::app);
+      //txt_pupidump << Form("%d",_LHESYS);
+    }
+  }
   
   counter("denominator");
   
@@ -509,6 +527,16 @@ WZsynchro::run() {
   // 	       njet, nbjet, met, HT,
   // 	       sr ) << endl;
   if (_DoEventDump) txt_eventdump.close();
+  if (_DoPupiDump){
+    txt_pupidump.close();
+    if (_LHESYS == 1001){
+      txt_metdump.close();
+      txt_evtnumberdump.close();
+      //txt_pupidump << Form("%d",_LHESYS);
+    }
+  }
+
+ 
 }
 
 bool
@@ -656,10 +684,12 @@ void
 WZsynchro::WZ3lSelection() {
   setWorkflow(kWZSM);
   
+  // HLT selection
+  if (!passHLT()) return;
   
   //step 0 only 3 leptons with pt > 10 GeV
   if(!makeCut(_tightLeps10.size()==3,"Three leptons")) return;
-    
+
   //if (_WZstep == 0) fillWZhistos(0.0, 0.0);
   CandList l3 =_wzMod->ThreeLeps( (&_tightLeps10));
   
@@ -679,6 +709,14 @@ WZsynchro::WZ3lSelection() {
   if ( ossfpair == 0 ) return;
   
   if(_DoEventDump) EventDump();
+  
+  if ( _vc->get("isData")!=1 && !_DoPupiDump) {
+    _weight *= _wzMod->GCleptonScaleFactorWZ (l3[0]->pdgId(), l3[0]->pt(), l3[0]->eta() );
+    _weight *= _wzMod->GCleptonScaleFactorWZ (l3[1]->pdgId(), l3[1]->pt(), l3[1]->eta() );
+    _weight *= _wzMod->GCleptonScaleFactorWZ (l3[2]->pdgId(), l3[2]->pt(), l3[2]->eta() );
+  }
+  
+  
   setWorkflow(kWZSM_3l); fillWZhistos(&l3,"WZSMstep0",0.0); setWorkflow(kWZSM);
 
 
@@ -743,6 +781,9 @@ WZsynchro::WZ3lSelection() {
   if(!makeCut(_m3l > 100, "M(3l) > 100 GeV" )) return;
   //if (_WZstep == 4) fillWZhistos(0.0, 0.0);
   setWorkflow(kWZSM_3lwzZselWselM3l); fillWZhistos(&candWZ,"WZSMstep4",MllZ); setWorkflow(kWZSM);
+  
+  
+  if(_DoPupiDump) PupiDump();
   
   if(!makeCut(_nBJets<=1,"1 or 0 b-jets")) return;
   //if (_WZstep == 5) fillWZhistos(0.0, 0.0);
@@ -1217,7 +1258,7 @@ WZsynchro::getFR(Candidate* cand, int idx) {
 
   int wp=std::abs(cand->pdgId()==11)?SusyModule::kTight:SusyModule::kMedium;
 
-  if(_FR.find("C")!=string::npos) ptVal=std::max(_wzMod->conePt(idx,wp), (float)ptM);
+  if(_FR.find("C")!=string::npos) ptVal=std::max(_wzMod->conePt(idx,wp), (double)ptM);
   if(_FR.find("J")!=string::npos) ptVal/=_vc->get("LepGood_jetPtRatiov2", idx);
 
   ptVal=std::max(ptVal, ptM);
@@ -1400,6 +1441,17 @@ WZsynchro::fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass) {
   return true;
 }
 
+
+bool
+WZsynchro::passHLT() {
+  bool passhlt = ( _vc->get("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") || 
+    _vc->get("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") || 
+    _vc->get("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v") || 
+    _vc->get("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v") || 
+    _vc->get("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v") );
+
+  return passhlt;
+}
 
 
 
@@ -1781,6 +1833,7 @@ void WZsynchro::fillWZhistos(CandList* leps, string reg, float MllZ) {
   fill("NBJets_", _nBJets   , _weight);
   fill("NJets_" , _nJets    , _weight);
   fill("M3l_"   , _wzMod->m3lTight(leps), _weight); // avoiding cases such as [tight, tight, loose, tight]
+  fill("M3lfull_", _wzMod->m3lTight(leps), _weight); // avoiding cases such as [tight, tight, loose, tight]
   if (_DoValidationPlots) {
       if (reg.find("0")==std::string::npos) {
         //fill("lepZ1_jetPtRatio_"+reg, _vc->get("LepGood_jetPtRatio", _idxLZ1)           , _weight);
@@ -1817,18 +1870,19 @@ void WZsynchro::fillWZhistos(CandList* leps, string reg, float MllZ) {
 
   }
   if (_DoCheckPlots && reg.find("0")==std::string::npos) {
+/*
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ2)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLW )          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
     if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("lepZ1_mediumMuonId_"+reg, _vc->get("LepGood_mediumMuonId", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ2))==13) fill("lepZ2_mediumMuonId_"+reg, _vc->get("LepGood_mediumMuonId", _idxLZ2)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLW))==13) fill("lepW_mediumMuonId_"+reg , _vc->get("LepGood_mediumMuonId", _idxLW)           , _weight);    
-    
-    //if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muZ1_tightId_"+reg, _vc->get("LepGood_tightId", _idxLZ1)          , _weight);
-    //if (abs(_vc->get("LepGood_pdgId",_idxLZ2))==13) fill("muZ2_tightId_"+reg, _vc->get("LepGood_tightId", _idxLZ2)          , _weight);
-    //if (abs(_vc->get("LepGood_pdgId",_idxLW))==13) fill("muW_tightId_"+reg , _vc->get("LepGood_tightId", _idxLW)           , _weight);    
-    
-    fill("lepZ1_mvaIdPhys14_"+reg , _vc->get("LepGood_mvaIdPhys14" , _idxLZ1)          , _weight);
-    fill("lepZ2_mvaIdPhys14_"+reg , _vc->get("LepGood_mvaIdPhys14" , _idxLZ2)          , _weight);
-    fill("lepW_mvaIdPhys14_"+reg  , _vc->get("LepGood_mvaIdPhys14" , _idxLW)           , _weight);
-
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("lepZ1_mediumMuonId_"+reg, _vc->get("LepGood_mediumMuonId", _idxLZ1)          , _weight);*/
   }
 }
 
@@ -1872,10 +1926,9 @@ void WZsynchro::EventDump(){
   for (int i=0; i<3; i++){
       //int index = AnalysisLeptons[i].index;
       if (abs(_vc->get("LepGood_pdgId",i))==13){
-        txt_eventdump << Form("%.0f:%d:%d:%f:%f:%f:%d",
+        txt_eventdump << Form("%.0f:%d:%.4f:%.4f:%.4f:%d",
 			      _vc->get("evt"),
 			      (int)_vc->get("LepGood_pdgId", i),
-			      (int)_vc->get("LepGood_charge", i),
 			      _vc->get("LepGood_pt", i),
 			      _vc->get("LepGood_eta", i),
 			      _vc->get("LepGood_relIso04", i),
@@ -1883,16 +1936,15 @@ void WZsynchro::EventDump(){
 
       }else if (abs(_vc->get("LepGood_pdgId",i))==11){
       
-        txt_eventdump << Form("%.0f:%d:%d:%f:%f:%f:%d",
+        txt_eventdump << Form("%.0f:%d:%.4f:%.4f:%.4f:%d",
 			      _vc->get("evt"),
 			      (int)_vc->get("LepGood_pdgId", i),
-			      (int)_vc->get("LepGood_charge", i),
 			      _vc->get("LepGood_pt", i),
 			      _vc->get("LepGood_eta", i),
 			      _vc->get("LepGood_relIso03", i),
 			      1);
       
-	    txt_eventdump << Form(":%f:%.0f:%f:%f:%.0f",
+	    txt_eventdump << Form(":%.4f:%.0f:%.4f:%.4f:%.0f",
 				    _vc->get("LepGood_etaSc", i),
 				    _vc->get("LepGood_convVeto", i),
 				    _vc->get("LepGood_dxy", i),
@@ -1902,4 +1954,22 @@ void WZsynchro::EventDump(){
       
       txt_eventdump << Form("\n");
   }
+}
+
+void WZsynchro::PupiDump(){
+  //if (!(_wzMod->IsDumpable(_vc->get("evt")))) return;
+  //if (_vc->get("evt") < 35000) cout << _vc->get("evt") << endl;
+  if (_vc->get("evt") > 35000){
+    //if (_vc->get("evt") < 35100) txt_pupidump << Form("\n");
+    return;
+  }
+  if (_LHESYS == 1001){
+    txt_metdump << Form("%.2f\t",_met->pt());
+    txt_evtnumberdump << Form("%.0f\t",_vc->get("evt"));
+  }
+    
+    
+  txt_pupidump << Form("%.5f\t",_weight);
+
+  
 }

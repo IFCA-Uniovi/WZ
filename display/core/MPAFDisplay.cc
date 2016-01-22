@@ -121,6 +121,8 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
   
   if(filename=="") return;
  
+  int tmpICat=icat;
+
   vector<std::pair<CatId, ValId> > catMap;
   string ndb = filename;
   ifstream fDb( ndb.c_str(), ios::in );
@@ -175,23 +177,33 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 	}
 
 	if(categ!="global" || uncTag!="") {
-	  if(uncTag=="")
-	    _au->addCategory(icat, categ);
-	  else
-	    _au->addCategory(icat, categ, uncTag);
+	  // int icatTmp=_au->getCategUniqueId(categ, uncTag);
+	  // //cout<<tks[1]<<" ==> "<<icatTmp<<"  "<<categ<<"  "<<uncTag<<endl;
+	  // if(icatTmp!=-1) {
+	  //   icat=icatTmp;
+	  // } else
+	    {
+	    if(uncTag=="")
+	      _au->addCategory(icat, categ);
+	    else
+	      _au->addCategory(icat, categ, uncTag);
+	  }
+	    //cout<<categ<<"/"<<uncTag<<" --> "<<icat<<"  "<<tmpICat<<endl;
 	} 
         else {
 	  icat=0;
 	}
       }
       else if(tks[0]=="endcateg") { //fill the maps
+	//icat=tmpICat;
 	if(icat==0) icat +=2; // 1 is nominal
         else icat++;
+	//tmpICat=icat;
       }
       else if(tks[0]=="selection") continue;
  
       else {
-	
+	//cout<<"begin "<<line<<endl;
         size_t n=tks.size()-4;
         cname="";
         for(size_t i=0;i<n-1;i++)
@@ -201,6 +213,7 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
         sname = tks[n];
 	size_t pos=categ.rfind("_");
 	string redCateg=categ;
+	
 	if(pos!=string::npos && categ.substr(pos+1, categ.size()-pos-1).find("R")==string::npos) {
 	  ext=categ.substr(pos+1, categ.size()-pos-1);
 	  redCateg=categ.substr(0, categ.size()-ext.size()-1);
@@ -210,9 +223,10 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
         gen = atoi( tks[n+2].c_str() );
         eyield = atof( tks[n+3].c_str() );
 	
-	if(ext!="")
+	if(ext!="") {
 	  extDss=anConf.findDSS( sname, ext );
-	
+	}	
+
 	CatId id;
 	id.categ = categ;
 	id.cname = cname;
@@ -228,71 +242,66 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 	vals.eyield = eyield;
 	vals.gen = gen;
 
-	// bool found=false;
-	// for(size_t ii=0;ii<catMap.size();ii++) {
-	//   if(catMap[ii].first.categ==id.categ && 
-	//      catMap[ii].first.cname==id.cname && 
-	//      catMap[ii].first.sname==id.sname && 
-	//      catMap[ii].first.useExt==id.useExt && 
-	//      catMap[ii].first.redCateg==id.redCateg && 
-	//      catMap[ii].first.ext==id.ext && 
-	//      catMap[ii].first.uncTag==id.uncTag && 
-	//      catMap[ii].first.upVar==id.upVar ) {
-	//     found=true;
-	//     break;
-	//   }
-	// }
-	// if(!found) {
 	catMap.push_back(std::make_pair(id, vals));
-	  //}
-
+	//cout<<"end "<<line<<endl;
       }
 
     } //end while line
     fDb.close();
 
-
     //Now overwritte when needed and fill the internal DB
     int n=0;
-    vector<std::pair<CatId, ValId> >::const_iterator it;
-    for(it=catMap.begin();it!=catMap.end();++it) {
+    // vector<std::pair<CatId, ValId> >::const_iterator it;
+    // vector<std::pair<CatId, ValId> >::const_iterator itEnd=catMap.end();
+    // for(it=catMap.begin();it!=itEnd;++it) {
 
-      n++;
-     
-      if(!it->first.useExt) continue;
-     
-      CatId tmpId;
-      tmpId.categ = it->first.redCateg;
-      tmpId.cname = it->first.cname;
-      tmpId.sname = it->first.sname;
-      tmpId.useExt= false;
-      tmpId.redCateg = it->first.redCateg;
-      tmpId.ext = "";
-      tmpId.uncTag = it->first.uncTag;
-      tmpId.upVar = it->first.upVar;
+    //   n++;
+    //   dss=anConf.findDSS( catMap[ic].first.sname );
+    //   for(unsigned int i=0;i<dss.size();i++) {
+    // 	string cr=dss[i]->getSample(catMap[ic].first.sname)->getCR();
+
+    //   if(!it->first.useExt) continue;
       
-      bool found=false;
-      for(size_t ii=0;ii<catMap.size();ii++) {
-	if(catMap[ii].first.categ==tmpId.categ && 
-	   catMap[ii].first.cname==tmpId.cname && 
-	   catMap[ii].first.sname==tmpId.sname && 
-	   catMap[ii].first.useExt==false && 
-	   catMap[ii].first.redCateg==tmpId.redCateg && 
-	   catMap[ii].first.ext=="" && 
-	   catMap[ii].first.uncTag==tmpId.uncTag && 
-	   catMap[ii].first.upVar==tmpId.upVar ) {
-	  catMap[ii].second = it->second;
-	  found=true;
-	  break;
-	}
-      }//end catMap
+    //   CatId tmpId;
+    //   tmpId.categ = it->first.redCateg;
+    //   tmpId.cname = it->first.cname;
+    //   tmpId.sname = it->first.sname;
+    //   tmpId.useExt= false;
+    //   tmpId.redCateg = it->first.redCateg;
+    //   tmpId.ext = "";
+    //   tmpId.uncTag = it->first.uncTag;
+    //   tmpId.upVar = it->first.upVar;
       
-      if(!found) {//category missing, need to add it
-	std::pair<CatId, ValId> p(tmpId, it->second);
-	//adding it at the end should work 
-	catMap.push_back(p);
-      }
-    }
+    //   bool found=false;
+    //   for(size_t ii=0;ii<catMap.size();ii++) {
+    // 	if(catMap[ii].first.categ==tmpId.categ && 
+    // 	   catMap[ii].first.cname==tmpId.cname && 
+    // 	   catMap[ii].first.sname==tmpId.sname && 
+    // 	   catMap[ii].first.useExt==false && 
+    // 	   catMap[ii].first.redCateg==tmpId.redCateg && 
+    // 	   catMap[ii].first.ext=="" && 
+    // 	   catMap[ii].first.uncTag==tmpId.uncTag && 
+    // 	   catMap[ii].first.upVar==tmpId.upVar ) {
+    // 	  catMap[ii].second = it->second;
+    // 	  found=true;
+    // 	  break;
+    // 	}
+    //   }//end catMap
+      
+    //   if(!found) {//category missing, need to add it
+    // 	std::pair<CatId, ValId> p(tmpId, it->second);
+    // 	//adding it at the end should work 
+    // 	catMap.push_back(p);
+    //   }
+    // }
+    
+    //   storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
+    // 		    catMap[ic].second.gen, icat,
+    // 		    catMap[ic].first.cname, catMap[ic].first.sname, catMap[ic].first.categ,
+    // 		    catMap[ic].first.uncTag, catMap[ic].first.upVar, catMap[ic].first.ext);
+      
+    // }
+
 
     //now filling
     n=0;
@@ -300,15 +309,31 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
     for(size_t ic=0;ic<catMap.size();++ic) {
       
       dss=anConf.findDSS( catMap[ic].first.sname );
+      
       int icat=_au->getCategId( catMap[ic].first.categ );
       for(unsigned int i=0;i<dss.size();i++) {
-	storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
-		      catMap[ic].second.gen, icat,
-		      catMap[ic].first.cname, catMap[ic].first.sname, catMap[ic].first.categ,
-		      catMap[ic].first.uncTag, catMap[ic].first.upVar, catMap[ic].first.ext);
+	string cr=dss[i]->getSample(catMap[ic].first.sname)->getCR();
+	if(cr=="") {
+	  storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
+			catMap[ic].second.gen, icat,
+			catMap[ic].first.cname, catMap[ic].first.sname, catMap[ic].first.categ,
+			catMap[ic].first.uncTag, catMap[ic].first.upVar, catMap[ic].first.ext);
+	}
+	else if(catMap[ic].first.ext==cr && cr!="") { // continue;
+	  storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
+			catMap[ic].second.gen, icat,
+			catMap[ic].first.cname, catMap[ic].first.sname, catMap[ic].first.categ,
+			catMap[ic].first.uncTag, catMap[ic].first.upVar, catMap[ic].first.ext);
+	  
+	  int icat2=_au->getCategId( catMap[ic].first.redCateg );
+	  storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
+			catMap[ic].second.gen, icat2,
+			catMap[ic].first.cname, catMap[ic].first.sname, catMap[ic].first.redCateg,
+			catMap[ic].first.uncTag, catMap[ic].first.upVar, "");	  
+	}
+	
+	n++;
       }
-    
-      n++;
     }
   }
   else {
@@ -334,6 +359,8 @@ MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen
   float w =ds->getWeight(sname);
   if(!ds->isPPcolDataset()) w *= anConf.getLumi();
   
+  if(ds->getSample(sname)->isDD()) w/=anConf.getLumi();
+
   yield *=w;
   eyield *=w;
  
@@ -431,7 +458,7 @@ void
 MPAFDisplay::doPlot() {
   
   setHistograms();
- 
+  
   //See if a fit is needed for the normalization
   //ugly....
   string fitVar=dp.getFitVar();
@@ -479,7 +506,7 @@ MPAFDisplay::setHistograms() {
 
   //loop over the datasets, find the histograms, sum them
   // and store them into the HistoManager
-
+  
   //do not need to reload everything at each iteration, but let's do it for the moment
   //  if(!_recompute) return;
 
@@ -491,16 +518,18 @@ MPAFDisplay::setHistograms() {
     Dataset* ds=anConf.getDataset( _ids );
     string tmpDs= _ids;
     vector<string> obss = ds->getObservables();
-    
+
     for(size_t io=0;io<obss.size();io++) {
       TH1* htmp(0);
       vector<string> samples= ds->getSamples();
       for(size_t is=0;is<samples.size(); is++) {
 	float w = ds->getWeight(is);
-
+	
 	if(ds->getSample(samples[is])->isNorm()) {
 	  w=ds->getSample(samples[is])->getNorm()/(anConf.getLumi()*ds->getHisto( obss[io], samples[is] )->Integral(0,1000000));
 	} 
+
+	if(ds->getSample(samples[is])->isDD()) w/=anConf.getLumi();
 
 	if(is==0) {
 	  htmp = ds->getHisto( obss[io], samples[is] );
@@ -1083,15 +1112,18 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
       
       if(_dsNames[id]=="data") continue;
       
+     
       valCentral[ _dsNames[id] ] += uncShapes[ic].begin()->second[ _dsNames[id] ][0];
       hCentral[ _dsNames[id] ]->SetBinContent(ic+1, uncShapes[ic].begin()->second[ _dsNames[id] ][0] );
-      
+      // if(_dsNames[id]=="T1tttt_1200_450")
+      // 	cout<<" ==== > "<<categs[ic]<<"  "<<uncShapes[ic].begin()->second[ _dsNames[id] ][0]<<"   "<<valCentral[ _dsNames[id] ]<<endl;
       for(size_t iu=0;iu<uncNames.size();iu++) {
 	if(uncShapes[ic].find(uncNames[iu])!=uncShapes[ic].end() && 
 	   uncShapes[ic][ uncNames[iu] ].find(_dsNames[id])!=uncShapes[ic][ uncNames[iu] ].end() ) {
-	  // cout<<_dsNames[id]+"_"+uncNames[iu]<<" --> "
-	  //     <<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<<"  "
-	  //     <<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<<endl;
+	  // if("T1tttt_1200_450"==_dsNames[id] && uncNames[iu].find("BTAG")!=string::npos)
+	  //   cout<<_dsNames[id]+"_"+uncNames[iu]<<" --> "
+	  // 	<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<<"  "
+	  // 	<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<<endl;
 
 	  hUp[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1] );
 	  hDown[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2] );
@@ -1142,6 +1174,7 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
       yieldStr += os.str()+"\t";
       
     } else if(_dsNames[ids]==sigName) {
+      //cout<<" --> "<<_dsNames[ids]<<"   "<<valCentral[_dsNames[ids]]<<endl;
       sumSig = valCentral[_dsNames[ids]];
     }
   }
