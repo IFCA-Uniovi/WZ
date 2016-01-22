@@ -709,13 +709,14 @@ WZsynchro::WZ3lSelection() {
   if ( ossfpair == 0 ) return;
   
   if(_DoEventDump) EventDump();
-  
+
+/*  
   if ( _vc->get("isData")!=1 && !_DoPupiDump) {
-    _weight *= _wzMod->GCleptonScaleFactorWZ (l3[0]->pdgId(), l3[0]->pt(), l3[0]->eta() );
-    _weight *= _wzMod->GCleptonScaleFactorWZ (l3[1]->pdgId(), l3[1]->pt(), l3[1]->eta() );
-    _weight *= _wzMod->GCleptonScaleFactorWZ (l3[2]->pdgId(), l3[2]->pt(), l3[2]->eta() );
+    _weight *= _wzMod->GCleptonScaleFactorZZ (l3[0]->pdgId(), l3[0]->pt(), l3[0]->eta() );
+    _weight *= _wzMod->GCleptonScaleFactorZZ (l3[1]->pdgId(), l3[1]->pt(), l3[1]->eta() );
+    _weight *= _wzMod->GCleptonScaleFactorZZ (l3[2]->pdgId(), l3[2]->pt(), l3[2]->eta() );
   }
-  
+*/  
   
   setWorkflow(kWZSM_3l); fillWZhistos(&l3,"WZSMstep0",0.0); setWorkflow(kWZSM);
 
@@ -1355,33 +1356,19 @@ bool
 WZsynchro::looseLepton(int idx, int pdgId) {
 
   if (abs(pdgId) == 13) {//muons
-    return true;
+    return _wzMod->IsLooseMuonWW(idx);
   }
   else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) <= 1.479) { //barrel electron
-    if (_vc->get("LepGood_relIso03", idx) < 0.0893 && _vc->get("LepGood_tightId", idx) >= 1 && _vc->get("LepGood_convVeto", idx) == 1 && abs(_vc->get("LepGood_dxy", idx)) < 0.0261 && abs(_vc->get("LepGood_dz", idx)) < 0.41 && _vc->get("LepGood_lostHits", idx) <= 2 ) return true;
-    else return false;
+    return _wzMod->IsLooseBarrelElectronWW(idx);
   }
   else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) > 1.479 && abs(_vc->get("LepGood_etaSc", idx)) < 2.5) { //endcap electron
-    if (_vc->get("LepGood_relIso03", idx) < 0.121  && _vc->get("LepGood_tightId", idx) >= 1 && _vc->get("LepGood_convVeto", idx) == 1 && abs(_vc->get("LepGood_dxy", idx)) < 0.118 && abs(_vc->get("LepGood_dz", idx)) < 0.822 && _vc->get("LepGood_lostHits", idx) <= 1) return true;
-    else return false;
+    return _wzMod->IsLooseEndcapElectronWW(idx);
   }
   else {
     //std::cout << "WARNING [WZsynchro::tightLepton](" << idx << ", " << pdgId << ", idx) not valid lepton candidate, with LepGood_etaSc=" << _vc->get("LepGood_etaSc", idx) << std::endl;
   }
   return false;
-    /*
-  if(abs(pdgId)==13) {//mu case
-    if(!_wzMod->muIdSel(c, idx, SusyModule::kLoose) ) return false;
-    if(!_wzMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
-  }
-  else {
-    if(!_wzMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose) ) return false;
-    if(!_wzMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; //denom on purpose
-    if(!_wzMod->elHLTEmulSel(idx, false) ) return false; //_hltDLHT
-  }
-
-  return true;
-  */
+  
 }
 
 
@@ -1389,32 +1376,19 @@ bool
 WZsynchro::tightLepton(int idx, int pdgId) {
 
   if (abs(pdgId) == 13) {//muons
-    if (_vc->get("LepGood_relIso04", idx) < 0.12 && _vc->get("LepGood_tightId", idx) == 1) return true;
-    else return false;
+    return _wzMod->IsTightMuonWW(idx);
   }
   else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) <= 1.479) { //barrel electron
-    if (_vc->get("LepGood_relIso03", idx) < 0.0766 && _vc->get("LepGood_tightId", idx) >= 2 && _vc->get("LepGood_convVeto", idx) == 1 && abs(_vc->get("LepGood_dxy", idx)) < 0.0118 && abs(_vc->get("LepGood_dz", idx)) < 0.373 && _vc->get("LepGood_lostHits", idx) <= 2 ) return true;
-    else return false;
+    return _wzMod->IsTightBarrelElectronWW(idx);
   }
   else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) > 1.479 && abs(_vc->get("LepGood_etaSc", idx)) < 2.5) { //endcap electron
-    if (_vc->get("LepGood_relIso03", idx) < 0.0678  && _vc->get("LepGood_tightId", idx) >= 2 && _vc->get("LepGood_convVeto", idx) == 1 && abs(_vc->get("LepGood_dxy", idx)) < 0.0739 && abs(_vc->get("LepGood_dz", idx)) < 0.602 && _vc->get("LepGood_lostHits", idx) <= 1) return true;
-    else return false;
+    return _wzMod->IsTightEndcapElectronWW(idx);
   }
   else {
     //std::cout << "WARNING [WZsynchro::tightLepton](" << idx << ", " << pdgId << ", idx) not valid lepton candidate, with LepGood_etaSc=" << _vc->get("LepGood_etaSc", idx) << std::endl;
   }
   return false;
   
-/*
-  if(abs(pdgId)==13) {//mu case
-    if(!_wzMod->muIdSel(idx, SusyModule::kTight) ) return false;
-    if(!_wzMod->multiIsoSel(idx, SusyModule::kMedium) ) return false;
-  }
-  else {
-    if(!_wzMod->elIdSel(idx, SusyModule::kTight, SusyModule::kTight) ) return false;
-    if(!_wzMod->multiIsoSel(idx, SusyModule::kTight) ) return false;
-  }
-*/
 }
 
 

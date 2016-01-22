@@ -20,14 +20,22 @@ public:
   CandList ThreeLeps(const CandList* leps);
   float bestmZ(const CandList* leps);
   float m3lTight(const CandList* leps);
+
+
+  bool IsLooseBarrelElectronWW(int idx) const;
+  bool IsLooseEndcapElectronWW(int idx) const;
+  bool IsLooseMuonWW(int idx) const;
+  bool IsTightBarrelElectronWW(int idx) const;
+  bool IsTightEndcapElectronWW(int idx) const;
+  bool IsTightMuonWW(int idx) const;
+ 
   
+  float GCleptonScaleFactorZZ(int pdgId, float pt, float eta);
+  float GCelectronScaleFactorZZ(float pt, float eta);
+  float GCmuonScaleFactorZZ(float pt, float eta);
   
-  float GCleptonScaleFactorWZ(int pdgId, float pt, float eta);
-  float GCelectronScaleFactorWZ(float pt, float eta);
-  float GCmuonScaleFactorWZ(float pt, float eta);
-  
-  float GCtriggerScaleFactorWZ(int pdgId1, int pdgId2, float pt1, float pt2, float ht);
-  float GCeventScaleFactorWZ(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht);
+  float GCtriggerScaleFactorZZ(int pdgId1, int pdgId2, float pt1, float pt2, float ht);
+  float GCeventScaleFactorZZ(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht);
   
   
   bool IsDumpable(int evt);
