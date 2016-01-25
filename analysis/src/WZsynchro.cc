@@ -650,7 +650,7 @@ WZsynchro::retrieveObjects(){
 
   //jet cleaning leptons =============================
   for(size_t il=0;il<_looseLeps10.size();il++) {
-    if(!fakableLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId(),true)) continue;
+    //if(!fakableLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId(),true)) continue; // loose=fakable for WW leptons
     
     _jetCleanLeps10.push_back( _looseLeps10[il] );
     _jetCleanLeps10Idx.push_back( _looseLeps10Idx[il] );
