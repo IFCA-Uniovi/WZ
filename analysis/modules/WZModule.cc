@@ -132,6 +132,7 @@ float WZModule::bestmZ(const CandList* leps){
 
 // WW leptons
 // Slide 4 https://indico.cern.ch/event/485788/contribution/3/attachments/1214544/1772984/OviIFCA-WZstatus.pdf
+// Better S/B than ZZ leptons for WZ analysis
 
 bool
 WZModule::IsLooseBarrelElectronWW(int idx) {
@@ -149,7 +150,7 @@ WZModule::IsLooseBarrelElectronWW(int idx) {
   if( _vc->get("LepGood_lostHits"                 , idx)   > 2       ) return false;
   if( std::abs(_vc->get("LepGood_dxy"             , idx))  > 0.1     ) return false;
   if( std::abs(_vc->get("LepGood_dz"              , idx))  > 0.373   ) return false;
-  if( _vc->get("LepGood_convVeto"                 , idx)   !=1      ) return false;
+  if( _vc->get("LepGood_convVeto"                 , idx)   !=1       ) return false;
 
   return true;
 
@@ -172,7 +173,7 @@ WZModule::IsLooseEndcapElectronWW(int idx) {
   if( _vc->get("LepGood_lostHits"                 , idx)   > 1       ) return false;
   if( std::abs(_vc->get("LepGood_dxy"             , idx))  > 0.2     ) return false;
   if( std::abs(_vc->get("LepGood_dz"              , idx))  > 0.602   ) return false;
-  if( _vc->get("LepGood_convVeto"                 , idx)   !=1      ) return false;
+  if( _vc->get("LepGood_convVeto"                 , idx)   !=1       ) return false;
 
   return true;
 
@@ -251,6 +252,119 @@ WZModule::IsTightEndcapElectronWW(int idx) {
 }
 
 // ------------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------------
+
+// ZZ leptons
+// https://twiki.cern.ch/twiki/bin/viewauth/CMS/WZ13TeV#Objects
+// Slide 4 https://indico.cern.ch/event/485788/contribution/3/attachments/1214544/1772984/OviIFCA-WZstatus.pdf
+
+bool
+WZModule::IsLooseBarrelElectronZZ(int idx) {
+
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 1.479   ) return false;
+  if( _vc->get("LepGood_tightId"                  , idx)   < 1       ) return false;
+  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0103  ) return false;
+  if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.0105  ) return false;
+  if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.115   ) return false;
+  if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.104   ) return false;
+//  if( _vc->get("LepGood_relIso03"                 , idx)   > 0.0893  ) return false;
+  if( std::abs(_vc->get("LepGood_eInvMinusPInv"   , idx))  > 0.102   ) return false;
+  if( std::abs(_vc->get("LepGood_dxy"             , idx))  > 0.0261  ) return false;
+  if( std::abs(_vc->get("LepGood_dz"              , idx))  > 0.41    ) return false;
+  if( _vc->get("LepGood_lostHits"                 , idx)   > 2       ) return false;
+  if( _vc->get("LepGood_convVeto"                 , idx)   !=1       ) return false;
+
+  return true;
+
+}
+
+bool
+WZModule::IsLooseEndcapElectronZZ(int idx) {
+
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  < 1.479   ) return false;
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 2.5     ) return false;
+  if( _vc->get("LepGood_tightId"                  , idx)   < 1       ) return false;
+  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0301  ) return false;
+  if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.00814 ) return false;
+  if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.182   ) return false;
+  if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.0897  ) return false;
+//  if( _vc->get("LepGood_relIso03"                 , idx)   > 0.121   ) return false;
+  if( std::abs(_vc->get("LepGood_eInvMinusPInv"   , idx))  > 0.126   ) return false;
+  if( std::abs(_vc->get("LepGood_dxy"             , idx))  > 0.118   ) return false;
+  if( std::abs(_vc->get("LepGood_dz"              , idx))  > 0.822   ) return false;
+  if( _vc->get("LepGood_lostHits"                 , idx)   > 1       ) return false;
+  if( _vc->get("LepGood_convVeto"                 , idx)   !=1       ) return false;
+
+  return true;
+
+}
+
+
+bool
+WZModule::IsLooseMuonZZ(int idx) {
+  if( std::abs(_vc->get("LepGood_eta"             , idx))  > 2.4     ) return false;
+  return true;
+}
+
+bool
+WZModule::IsTightMuonZZ(int idx) {
+
+  if( std::abs(_vc->get("LepGood_eta"             , idx))  > 2.4     ) return false;
+  if( _vc->get("LepGood_tightId"                  , idx)   !=1       ) return false;
+  if( _vc->get("LepGood_relIso04"                 , idx)   > 0.12    ) return false;
+  
+  return true;
+
+}
+
+
+bool
+WZModule::IsTightBarrelElectronZZ(int idx) {
+
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 1.479   ) return false;
+  if( _vc->get("LepGood_tightId"                  , idx)   < 2       ) return false;
+  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0101  ) return false;
+  if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.0103  ) return false;
+  if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.0336  ) return false;
+  if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.0876  ) return false;
+  if( _vc->get("LepGood_relIso03"                 , idx)   > 0.0766  ) return false;
+  if( std::abs(_vc->get("LepGood_eInvMinusPInv"   , idx))  > 0.0174  ) return false;
+  if( std::abs(_vc->get("LepGood_dxy"             , idx))  > 0.0118  ) return false;
+  if( std::abs(_vc->get("LepGood_dz"              , idx))  > 0.373   ) return false;
+  if( _vc->get("LepGood_lostHits"                 , idx)   > 2       ) return false;
+  if( _vc->get("LepGood_convVeto"                 , idx)   !=1       ) return false;
+
+  return true;
+
+}
+
+bool
+WZModule::IsTightEndcapElectronZZ(int idx) {
+
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  < 1.479   ) return false;
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 2.5     ) return false;
+  if( _vc->get("LepGood_tightId"                  , idx)   < 2       ) return false;
+  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0283  ) return false;
+  if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.00733 ) return false;
+  if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.114   ) return false;
+  if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.0678  ) return false;
+  if( _vc->get("LepGood_relIso03"                 , idx)   > 0.0678  ) return false;
+  if( std::abs(_vc->get("LepGood_eInvMinusPInv"   , idx))  > 0.0898  ) return false;
+  if( std::abs(_vc->get("LepGood_dxy"             , idx))  > 0.0739  ) return false;
+  if( std::abs(_vc->get("LepGood_dz"              , idx))  > 0.602   ) return false;
+  if( _vc->get("LepGood_lostHits"                 , idx)   > 1       ) return false;
+  if( _vc->get("LepGood_convVeto"                 , idx)   !=1       ) return false;
+
+  return true;
+
+}
+
+// ------------------------------------------------------------------------------------------
+
+
+
+
 
 bool WZModule::IsDumpable(int evt){
 

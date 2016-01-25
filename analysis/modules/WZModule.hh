@@ -28,6 +28,13 @@ public:
   bool IsTightBarrelElectronWW(int idx);
   bool IsTightEndcapElectronWW(int idx);
   bool IsTightMuonWW(int idx);
+  
+  bool IsLooseBarrelElectronZZ(int idx);
+  bool IsLooseEndcapElectronZZ(int idx);
+  bool IsLooseMuonZZ(int idx);
+  bool IsTightBarrelElectronZZ(int idx);
+  bool IsTightEndcapElectronZZ(int idx);
+  bool IsTightMuonZZ(int idx);
  
   
   float GCleptonScaleFactorZZ(int pdgId, float pt, float eta);

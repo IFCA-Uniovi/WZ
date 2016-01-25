@@ -772,10 +772,12 @@ WZsynchro::WZ3lSelection() {
   
   if (_met->pt() < 30) return;
   
-  if (
+  /*if (
       (_lZ1Cand->dR(_lWCand) < 0.1) ||
       (_lWCand->dR(_lZ2Cand) < 0.1) 
      ) return;
+  */
+  if ( Candidate::create(_lZ1Cand, _lWCand)->mass() < 4 || Candidate::create(_lZ2Cand, _lWCand)->mass() < 4 ) return;
   if(!makeCut( _lWCand->pt()>20, "W sel" ) ) return;
   //if (_WZstep == 3) fillWZhistos(0.0, 0.0);
   setWorkflow(kWZSM_3lwzZselWsel); fillWZhistos(&candWZ,"WZSMstep3",MllZ); setWorkflow(kWZSM);
