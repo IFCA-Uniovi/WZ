@@ -164,7 +164,7 @@ public:
 
   
 
-private:
+protected:
 
   void defineLeptonWPS();
   void loadBTagFastSimReader();

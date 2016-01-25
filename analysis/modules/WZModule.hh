@@ -20,22 +20,37 @@ public:
   CandList ThreeLeps(const CandList* leps);
   float bestmZ(const CandList* leps);
   float m3lTight(const CandList* leps);
+
+
+  bool IsLooseBarrelElectronWW(int idx);
+  bool IsLooseEndcapElectronWW(int idx);
+  bool IsLooseMuonWW(int idx);
+  bool IsTightBarrelElectronWW(int idx);
+  bool IsTightEndcapElectronWW(int idx);
+  bool IsTightMuonWW(int idx);
   
+  bool IsLooseBarrelElectronZZ(int idx);
+  bool IsLooseEndcapElectronZZ(int idx);
+  bool IsLooseMuonZZ(int idx);
+  bool IsTightBarrelElectronZZ(int idx);
+  bool IsTightEndcapElectronZZ(int idx);
+  bool IsTightMuonZZ(int idx);
+ 
   
-  float GCleptonScaleFactorWZ(int pdgId, float pt, float eta);
-  float GCelectronScaleFactorWZ(float pt, float eta);
-  float GCmuonScaleFactorWZ(float pt, float eta);
+  float GCleptonScaleFactorZZ(int pdgId, float pt, float eta);
+  float GCelectronScaleFactorZZ(float pt, float eta);
+  float GCmuonScaleFactorZZ(float pt, float eta);
   
-  float GCtriggerScaleFactorWZ(int pdgId1, int pdgId2, float pt1, float pt2, float ht);
-  float GCeventScaleFactorWZ(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht);
+  float GCtriggerScaleFactorZZ(int pdgId1, int pdgId2, float pt1, float pt2, float ht);
+  float GCeventScaleFactorZZ(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht);
   
   
   bool IsDumpable(int evt);
 
 protected:
   //const
-  VarClass* _vc;
-  DataBaseManager* _dbm;
+  //VarClass* _vc;
+  //DataBaseManager* _dbm;
 
 
 };
