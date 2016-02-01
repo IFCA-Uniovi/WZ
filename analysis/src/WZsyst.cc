@@ -1,22 +1,22 @@
-#include "analysis/src/WZsynchro.hh"
+#include "analysis/src/WZsyst.hh"
 
 #include <algorithm>
 #include <sstream>
 #include <iostream>
 
-WZsynchro::WZsynchro(std::string cfg){
+WZsyst::WZsyst(std::string cfg){
 
   startExecution(cfg);
   initialize();
 
 }
 
-WZsynchro::~WZsynchro(){
+WZsyst::~WZsyst(){
  
 }
 
 void
-WZsynchro::initialize(){
+WZsyst::initialize(){
 
 
   _vc->registerVar("run"                          );
@@ -266,7 +266,7 @@ WZsynchro::initialize(){
   _LHESYS  = getCfgVarI("LHESYS", 0);
   _categorization = getCfgVarI("categorization",1);
   _DoValidationPlots = getCfgVarI("ValidationPlots",1);
-  //_WZstep = getCfgVarI("WZstep",6);
+  _WZstep = getCfgVarI("WZstep",6);
   _DoCheckPlots = getCfgVarI("CheckPlots",0);
   _DoEventDump = getCfgVarI("EventDump",0);
   _DoPupiDump = getCfgVarI("PupiDump",0);
@@ -277,7 +277,7 @@ WZsynchro::initialize(){
 //  jess.push_back("Jet_pt");
 //  addSystSource("JES",SystUtils::kNone, "%", jess, "JES8TeV.db", "" );
 
-  // addManualSystSource("BTAG",SystUtils::kNone);
+   addManualSystSource("BTAG",SystUtils::kNone);
   // addManualSystSource("BTAG",SystUtils::kUp  );
   // addManualSystSource("BTAG",SystUtils::kDown);
   
@@ -340,7 +340,7 @@ WZsynchro::initialize(){
 }
 
 void
-WZsynchro::modifyWeight() {
+WZsyst::modifyWeight() {
 
   if (_vc->get("isData") != 1) {
     //generator weights
@@ -357,13 +357,13 @@ WZsynchro::modifyWeight() {
 
 
 void
-WZsynchro::modifySkimming() {
+WZsyst::modifySkimming() {
 
 }
 
 
 void
-WZsynchro::defineOutput() {
+WZsyst::defineOutput() {
   ///////////////////////////////////////////////////////////////////////////
   // GLOBAL PLOTS:  These plots are drawn for every SR
   ///////////////////////////////////////////////////////////////////////////
@@ -488,13 +488,13 @@ WZsynchro::defineOutput() {
 
 
 void
-WZsynchro::writeOutput() {
+WZsyst::writeOutput() {
  
 }
 
 
 void
-WZsynchro::run() {
+WZsyst::run() {
   
   if(_vc->get("isData") && !checkDoubleCount()) return;
 
@@ -583,7 +583,7 @@ WZsynchro::run() {
 }
 
 bool
-WZsynchro::noIsoSel() {
+WZsyst::noIsoSel() {
   
   if( _fakableLepsVeto10.size()!=0 ) return false;
   
@@ -593,7 +593,7 @@ WZsynchro::noIsoSel() {
 }
 
 bool
-WZsynchro::oneIsoSel() {
+WZsyst::oneIsoSel() {
   
   if( _fakableLepsVeto10.size()!=1 ) return false;
 
@@ -604,7 +604,7 @@ WZsynchro::oneIsoSel() {
 }
 
 bool
-WZsynchro::twoIsoSel() {
+WZsyst::twoIsoSel() {
   
   if( _fakableLepsVeto10.size()!=2 ) return false;
 
@@ -615,7 +615,7 @@ WZsynchro::twoIsoSel() {
 }
 
 float
-WZsynchro::getProbAtLeastNIso(CandList fObjs, vector<unsigned int> fObjIdx,
+WZsyst::getProbAtLeastNIso(CandList fObjs, vector<unsigned int> fObjIdx,
 			      int nIso) {
 
   //MM tirage Bernoulli sans remise non ordonne avec probas individuelles
@@ -654,7 +654,7 @@ WZsynchro::getProbAtLeastNIso(CandList fObjs, vector<unsigned int> fObjIdx,
 
 //==================================================================================================
 void 
-WZsynchro::retrieveObjects(){
+WZsyst::retrieveObjects(){
   
   _jets.clear();
   
@@ -724,7 +724,7 @@ WZsynchro::retrieveObjects(){
 
 
 void 
-WZsynchro::WZ3lSelection() {
+WZsyst::WZ3lSelection() {
   setWorkflow(kWZSM);
   
   // HLT selection
@@ -825,20 +825,28 @@ WZsynchro::WZ3lSelection() {
   
   
   if(!makeCut(_m3l > 100, "M(3l) > 100 GeV" )) return;
-  //if (_WZstep == 4) fillWZhistos(0.0, 0.0);
-  setWorkflow(kWZSM_3lwzZselWselM3l); fillWZhistos(&candWZ,"WZSMstep4",MllZ); setWorkflow(kWZSM);
+  if (_WZstep == 4){
+    setWorkflow(kWZSM_3lwzZselWselM3l);
+    fillWZhistos(&candWZ,"WZSMstep4",MllZ);
+    setWorkflow(kWZSM);
+  }
   
   if(_DoEventDump) EventDump();
   if(_DoPupiDump) PupiDump();
   
   if(!makeCut(_nBJets<=1,"1 or 0 b-jets")) return;
-  //if (_WZstep == 5) fillWZhistos(0.0, 0.0);
-  setWorkflow(kWZSM_3lwzZselWselM3lNbj1); fillWZhistos(&candWZ,"WZSMstep5",MllZ); setWorkflow(kWZSM);
+  if (_WZstep == 5){
+    setWorkflow(kWZSM_3lwzZselWselM3lNbj1);
+    fillWZhistos(&candWZ,"WZSMstep5",MllZ);
+    setWorkflow(kWZSM);
+  }
   
   if(!makeCut(_nBJets==0,"0 b-jets")) return;
-  //if (_WZstep == 6) fillWZhistos(0.0, 0.0);
-  setWorkflow(kWZSM_3lwzZselWselM3lNbj0); fillWZhistos(&candWZ,"WZSMstep6",MllZ); setWorkflow(kWZSM);
-  
+  if (_WZstep == 6){
+    setWorkflow(kWZSM_3lwzZselWselM3lNbj0);
+    fillWZhistos(&candWZ,"WZSMstep6",MllZ);
+    setWorkflow(kWZSM);
+  }
    
   setWorkflow(kGlobal); 
 }
@@ -849,7 +857,7 @@ WZsynchro::WZ3lSelection() {
 // signal region selection
 
 void 
-WZsynchro::setSignalRegions() {
+WZsyst::setSignalRegions() {
     
   //objects ===========================================
   _val["NB"]  = &(_nBJets);
@@ -1175,7 +1183,7 @@ WZsynchro::setSignalRegions() {
 }
 
 void
-WZsynchro::setSelLine(string str) {
+WZsyst::setSelLine(string str) {
 
   //MM could be done in a better way
 
@@ -1208,7 +1216,7 @@ WZsynchro::setSelLine(string str) {
 
 //================================================
 bool 
-WZsynchro::genMatchedToFake(int idx) {
+WZsyst::genMatchedToFake(int idx) {
 
   if (_vc->get("isData") == 1) return false;
 
@@ -1219,7 +1227,7 @@ WZsynchro::genMatchedToFake(int idx) {
 }
 
 bool
-WZsynchro::genMatchedMisCharge() {
+WZsyst::genMatchedMisCharge() {
 
 
   if (_vc->get("isData")==1) return false;
@@ -1241,7 +1249,7 @@ WZsynchro::genMatchedMisCharge() {
 }
 
 int 
-WZsynchro::genMatchCateg(const Candidate* cand) {
+WZsyst::genMatchCateg(const Candidate* cand) {
 
   // //loop over the number of generated leptons
   // int nGenL = _vc->get("nGenPart");
@@ -1263,7 +1271,7 @@ WZsynchro::genMatchCateg(const Candidate* cand) {
 }
 
 bool
-WZsynchro::passGenSelection() {
+WZsyst::passGenSelection() {
 
 
   if( _sampleName.find("DYJets")!=(size_t)-1 || _sampleName.find("TTJets")!=(size_t)-1 ) {
@@ -1284,7 +1292,7 @@ WZsynchro::passGenSelection() {
 
 
 float 
-WZsynchro::getFR(Candidate* cand, int idx) {
+WZsyst::getFR(Candidate* cand, int idx) {
   string db;
   float ptM=10;
   if( std::abs(cand->pdgId())==13) db="Mu";
@@ -1316,7 +1324,7 @@ WZsynchro::getFR(Candidate* cand, int idx) {
 
 
 void
-WZsynchro::chargeFlipProb() {
+WZsyst::chargeFlipProb() {
 
   string db="chargeMId";
   if(!_vc->get("isData") ) db="chargeMIdMC";
@@ -1341,7 +1349,7 @@ WZsynchro::chargeFlipProb() {
 //===============================================================
 //===============================================================
 bool
-WZsynchro::testRegion() {
+WZsyst::testRegion() {
 
   bool passSel=true;
 
@@ -1382,7 +1390,7 @@ WZsynchro::testRegion() {
 
 
 void
-WZsynchro::categorize() {
+WZsyst::categorize() {
 
   int offset=1;
   string categ="";
@@ -1390,7 +1398,7 @@ WZsynchro::categorize() {
     _SR = _categs[ic];
     if(testRegion() ) {setWorkflow(ic+offset); return;}
   }
-  std::cout << "WARNING: WZsynchro::categorize() did not find any workflow that matches this event. The workflow returns to kGlobal what may cause problems with the histograms" << std::endl;
+  std::cout << "WARNING: WZsyst::categorize() did not find any workflow that matches this event. The workflow returns to kGlobal what may cause problems with the histograms" << std::endl;
   //std::cout<<"====> "<<_looseLepsPtCut.size()<<" / "<<_tightLepsPtCut.size()<<" / "<<_nJets<<" / "<<_nBJets<<" / "<<hltSelection()<<" / "<<_met->pt()<<" / "<<_HT<<" / "<<_vc->get("evt")<<" / "<<_vc->get("lumi")<<std::endl;
   setWorkflow(kGlobal);
 }
@@ -1398,7 +1406,7 @@ WZsynchro::categorize() {
 
 
 bool 
-WZsynchro::looseLepton(int idx, int pdgId) {
+WZsyst::looseLepton(int idx, int pdgId) {
   
   if (abs(pdgId) == 13) {//muons
     return _wzMod->IsLooseMuonWW(idx);
@@ -1410,7 +1418,7 @@ WZsynchro::looseLepton(int idx, int pdgId) {
     return _wzMod->IsLooseEndcapElectronWW(idx);
   }
   else {
-    //std::cout << "WARNING [WZsynchro::tightLepton](" << idx << ", " << pdgId << ", idx) not valid lepton candidate, with LepGood_etaSc=" << _vc->get("LepGood_etaSc", idx) << std::endl;
+    //std::cout << "WARNING [WZsyst::tightLepton](" << idx << ", " << pdgId << ", idx) not valid lepton candidate, with LepGood_etaSc=" << _vc->get("LepGood_etaSc", idx) << std::endl;
   }
   return false;
   
@@ -1418,7 +1426,7 @@ WZsynchro::looseLepton(int idx, int pdgId) {
 
 
 bool 
-WZsynchro::tightLepton(int idx, int pdgId) {
+WZsyst::tightLepton(int idx, int pdgId) {
 
   if (abs(pdgId) == 13) {//muons
     return _wzMod->IsTightMuonWW(idx);
@@ -1430,7 +1438,7 @@ WZsynchro::tightLepton(int idx, int pdgId) {
     return _wzMod->IsTightEndcapElectronWW(idx);
   }
   else {
-    //std::cout << "WARNING [WZsynchro::tightLepton](" << idx << ", " << pdgId << ", idx) not valid lepton candidate, with LepGood_etaSc=" << _vc->get("LepGood_etaSc", idx) << std::endl;
+    //std::cout << "WARNING [WZsyst::tightLepton](" << idx << ", " << pdgId << ", idx) not valid lepton candidate, with LepGood_etaSc=" << _vc->get("LepGood_etaSc", idx) << std::endl;
   }
   return false;
   
@@ -1438,7 +1446,7 @@ WZsynchro::tightLepton(int idx, int pdgId) {
 
 
 bool 
-WZsynchro::fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass) {
+WZsyst::fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass) {
   if(abs(pdgId)==13) {//mu case
     if(!_wzMod->muIdSel(c, idx, SusyModule::kTight) ) return false;
     if(!_wzMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
@@ -1462,7 +1470,7 @@ WZsynchro::fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass) {
 
 
 bool
-WZsynchro::passHLT() {
+WZsyst::passHLT() {
   // Same for ZZ and WW leptons (WW analysis also uses SingleMuon and SingleElectron)
   bool passhlt = ( _vc->get("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v") || 
     _vc->get("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v") || 
@@ -1480,7 +1488,7 @@ WZsynchro::passHLT() {
 
 
 bool
-WZsynchro::passCERNSelection() {
+WZsyst::passCERNSelection() {
 
   if(!makeCut( _vc->get("nLepGood10_Mini"), "CERN lepmult" ) ) return false;
   if(!makeCut<float>( _vc->get("mZ1cut10TL_Mini"), 76 , "]![", "CERN Z veto",  106 ) ) return false;
@@ -1550,7 +1558,7 @@ WZsynchro::passCERNSelection() {
   return true;
 
 }
-bool WZsynchro::ttbarSelection(){
+bool WZsyst::ttbarSelection(){
   ///filters : hbheFilterNew25ns==1 && Flag_CSCTightHaloFilter==1 && Flag_eeBadScFilter==1
   ///trigger : HLT_DoubleMu || HLT_DoubleEl || HLT_MuEG
   ///nL : nLepGood >= 2
@@ -1577,7 +1585,7 @@ bool WZsynchro::ttbarSelection(){
   return true;
 }
 
-bool WZsynchro::ZlSelection(){
+bool WZsyst::ZlSelection(){
   if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
   if (!(_vc->get("HLT_DoubleMu") || _vc->get("HLT_DoubleEl") || _vc->get("HLT_MuEG"))) return false;
   if (_vc->get("nLepGood10") !=3 ) return false;
@@ -1602,7 +1610,7 @@ bool WZsynchro::ZlSelection(){
     
   return true;
 }
-bool WZsynchro::WlSelection(){
+bool WZsyst::WlSelection(){
   if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
   if (!(_vc->get("HLT_SingleMu") || _vc->get("HLT_SingleEl"))) return false;
   if (_vc->get("nLepGood10") != 2) return false;
@@ -1637,7 +1645,7 @@ bool WZsynchro::WlSelection(){
   return true;
 }
 
-bool WZsynchro::ZMuMuSelection(){
+bool WZsyst::ZMuMuSelection(){
   if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
   if (!(_vc->get("HLT_SingleMu"))) return false;
   if (_vc->get("nLepGood") < 2) return false;
@@ -1663,7 +1671,7 @@ bool WZsynchro::ZMuMuSelection(){
   return true;
 }
 
-bool WZsynchro::ZEESelection(){
+bool WZsyst::ZEESelection(){
   if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
   if (!(_vc->get("HLT_SingleEl"))) return false;
   if (_vc->get("nLepGood") < 2) return false;
@@ -1690,7 +1698,7 @@ bool WZsynchro::ZEESelection(){
 
 //===========================================================================
 void
-WZsynchro::selectLeptons3l() {
+WZsyst::selectLeptons3l() {
   for(size_t il=0;il<_vc->get("nLepGood"); il++) {
 
     bool isMu=std::abs(_vc->get("LepGood_pdgId", il))==13;
@@ -1734,7 +1742,7 @@ WZsynchro::selectLeptons3l() {
 //==============================================
 //MET uncertainty variation
 TVector2
-WZsynchro::varyMET() {
+WZsyst::varyMET() {
 
   unsigned int nJets=_vc->get("nJet");
   unsigned int nDiscJets=_vc->get("nDiscJet");
@@ -1818,7 +1826,7 @@ WZsynchro::varyMET() {
   return met;
 }
 
-void WZsynchro::fillhistos() {
+void WZsyst::fillhistos() {
   fill("l1Pt", (_idxFake==_idxL2)?(_l1Cand->pt()):_l2Cand->pt(), _weight );
   fill("l2Pt", (_idxFake==_idxL2)?(_l2Cand->pt()):_l1Cand->pt(), _weight );
   fill("HT"    , _HT       , _weight);
@@ -1828,7 +1836,7 @@ void WZsynchro::fillhistos() {
   fill("NJets" , _nJets    , _weight);
 }
 
-void WZsynchro::fillValidationHistos(string reg){
+void WZsyst::fillValidationHistos(string reg){
   
   fill(reg+"_lep1_jetPtRatio", _vc->get("LepGood_jetPtRatio_LepAwareJEC", _idxL1) , _weight);
   fill(reg+"_lep1_jetPtRel"  , _vc->get("LepGood_jetPtRelv2", _idxL1)               , _weight);
@@ -1854,7 +1862,7 @@ void WZsynchro::fillValidationHistos(string reg){
   fill(reg+"_NJets40"        , _vc->get("nJet40")        , _weight);
 }  
 
-void WZsynchro::fillWZhistos(CandList* leps, string reg, float MllZ) {
+void WZsyst::fillWZhistos(CandList* leps, string reg, float MllZ) {
   //fill("l1Pt", (_idxFake==_idxL2)?(_l1Cand->pt()):_l2Cand->pt(), _weight );
   //fill("l2Pt", (_idxFake==_idxL2)?(_l2Cand->pt()):_l1Cand->pt(), _weight );
   fill("HT_"    , _HT       , _weight);
@@ -1919,7 +1927,7 @@ void WZsynchro::fillWZhistos(CandList* leps, string reg, float MllZ) {
 
 
 bool
-WZsynchro::checkDoubleCount() {
+WZsyst::checkDoubleCount() {
   int run=_vc->get("run");
   int lumi=_vc->get("lumi");
   unsigned long int evt=(unsigned long int)_vc->get("evt");
@@ -1950,7 +1958,7 @@ WZsynchro::checkDoubleCount() {
   return true;
 }
 
-void WZsynchro::EventDump(){
+void WZsyst::EventDump(){
   //if (_vc->get("evt") > 60000) return;
   //if (_vc->get("evt") < 10000 || _vc->get("evt") > 750000) return;
 
@@ -1987,7 +1995,7 @@ void WZsynchro::EventDump(){
   }
 }
 
-void WZsynchro::PupiDump(){
+void WZsyst::PupiDump(){
 
   if (_vc->get("evt") > 35000) return;
 

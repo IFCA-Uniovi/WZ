@@ -294,13 +294,13 @@ SSDL2015::initialize(){
   _dbm->loadDb("jes","JESUncer25nsV5_MC.db");
 
    //addManualSystSource("EWKFR",SystUtils::kNone);
-   addManualSystSource("Eff",SystUtils::kNone);
+  // addManualSystSource("Eff",SystUtils::kNone);
    //addManualSystSource("Theory",SystUtils::kNone);
-   addManualSystSource("JES",SystUtils::kNone);
+  // addManualSystSource("JES",SystUtils::kNone);
    addManualSystSource("BTAG",SystUtils::kNone);
-   addManualSystSource("BTAGFS",SystUtils::kNone);
-   addManualSystSource("LepEffFS",SystUtils::kNone);
-   addManualSystSource("ISR",SystUtils::kNone);
+  // addManualSystSource("BTAGFS",SystUtils::kNone);
+  // addManualSystSource("LepEffFS",SystUtils::kNone);
+  // addManualSystSource("ISR",SystUtils::kNone);
 
   //FR databases
   if(_FR=="FO2C") {

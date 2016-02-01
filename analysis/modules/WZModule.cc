@@ -132,6 +132,7 @@ float WZModule::bestmZ(const CandList* leps){
 
 // WW leptons
 // Slide 4 https://indico.cern.ch/event/485788/contribution/3/attachments/1214544/1772984/OviIFCA-WZstatus.pdf
+// https://twiki.cern.ch/twiki/bin/view/CMS/WW2015Variables
 // Better S/B than ZZ leptons for WZ analysis
 
 bool
@@ -197,7 +198,7 @@ WZModule::IsTightMuonWW(int idx) {
 
   if( std::abs(_vc->get("LepGood_eta"             , idx))  > 2.4     ) return false;
   if( _vc->get("LepGood_mediumMuonId"             , idx)   !=1       ) return false;
-  if( _vc->get("LepGood_relIso04"                 , idx)   > 0.4     ) return false;
+  if( _vc->get("LepGood_relIso04"                 , idx)   > 0.15    ) return false;
   if( _vc->get("LepGood_pt", idx) > 20 ){
     if( std::abs(_vc->get("LepGood_dxy"           , idx))  > 0.02    ) return false;
   } else {
@@ -215,7 +216,7 @@ WZModule::IsTightBarrelElectronWW(int idx) {
 
   if( _vc->get("LepGood_tightId"                  , idx)   < 3       ) return false;
   if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 1.479   ) return false;
-  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0101  ) return false;
+  //if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0101  ) return false;
   if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.00926 ) return false;
   if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.0336  ) return false;
   if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.0597  ) return false;
@@ -236,7 +237,7 @@ WZModule::IsTightEndcapElectronWW(int idx) {
   if( _vc->get("LepGood_tightId"                  , idx)   < 3       ) return false;
   if( std::abs(_vc->get("LepGood_etaSc"           , idx))  < 1.479   ) return false;
   if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 2.5     ) return false;
-  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0279  ) return false;
+  //if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0279  ) return false;
   if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.00724 ) return false;
   if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.0918  ) return false;
   if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.0615  ) return false;
