@@ -4,10 +4,10 @@
 #templateCFG=template_fakeEstim.cfg
 #templateCFG=template_WZ3l.cfg
 
-NAME="WZ3Lyieldsv2CSVT"
+NAME="WZ3Lyieldsv2"
 DIR="workdir/root/WZsynchro/"
-#FLAVs=( "all" "eee" "eem" "mme" "mmm" )
-FLAVs=( "all" )
+FLAVs=( "all" "eee" "eem" "mme" "mmm" )
+#FLAVs=( "all" )
 #FLAVs=( "eee" "eem" "mme" "mmm" )
 #WZSTEPs=( "4" "3" "2" "1" "0" )
 WZSTEPs=( "0" "1" "2" "3" "4" "5" "6" )
@@ -40,40 +40,8 @@ if [ ! -d "workdir/logs" ]; then
   mkdir workdir/logs
 fi
 
-PROCS=( "Tree_WZTo3LNu_0"
-    "Tree_DYJetsToLL_M10to50_aMCatNLO_0"
-    "Tree_DYJetsToLL_M50_aMCatNLO"
-    "Tree_TW_0"
-    "Tree_TbarW_0"
-    "Tree_TToLeptons_sch_0"
-    "Tree_TToLeptons_tch_0"
-    "Tree_TbarToLeptons_tch_0"
-    "Tree_WJetsToLNu_aMCatNLO_0"
-    "Tree_WW_0"
-    "Tree_WWTo2L2Nu_0"
-    "Tree_WGToLNuG_0"
-    "Tree_ZZ_0"
-    "Tree_GGHZZ4L_0"
-    "Tree_TTJets"
-    "Tree_TTWToLNu_0"
-    "Tree_TTZToLLNuNu_0"
-    "Tree_TTGJets_0"
-    "Tree_TTHnobb_0"
-    "Tree_WWZ_0"
-    "Tree_WZZ_0"
-    "Tree_ZZZ_0"         )
-
-    
-
-
-
-
-> workdir/logs/yieldsWZ_CSVT.txt
-for iproc in ${PROCS[@]}; do
-  proc=$iproc
-  echo $proc >> workdir/logs/yieldsWZ_CSVT.txt
-
-  for iwzstep in ${WZSTEPs[@]}; do
+> workdir/logs/yieldsWZ25yieldsv2.txt
+for iwzstep in ${WZSTEPs[@]}; do
 
       wzstep=$iwzstep
       ii=0
@@ -108,16 +76,15 @@ for iproc in ${PROCS[@]}; do
 	      #echo $FILE
 	      #qsub -q all.q -N MPAFjob -o $MPAF/workdir/logs/log_${sr}_${pt}_${mva}_${btag}_${flav}_${LHESYS}${lhe}.out -e $MPAF/workdir/logs/log_${sr}_${pt}_${mva}_${btag}_${flav}_${LHESYS}${lhe}.err $MPAF/scripts/submit.sh $MPAF/cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg              
 	      #analysis -c cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg >& $MPAF/workdir/logs/log_${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.log
-	      root -q -l -b display/cards/listyieldsWZ25.C\(\"${file}\",${wzstep},\"${proc}\"\) >> workdir/logs/yieldsWZ_CSVT.txt
+	      root -q -l -b display/cards/listyieldsWZ25.C\(\"${file}\",${wzstep}\) >> workdir/logs/yieldsWZ25yieldsv2.txt
               ilhe=`echo $ilhe +1 | bc`
 
               #ii=`echo $ii +1 | bc`
 
           done
 	done
-  done
 done
 
-sed -i '/Processing/d' workdir/logs/yieldsWZ_CSVT.txt
-sed -i '/^$/d' workdir/logs/yieldsWZ_CSVT.txt
+sed -i '/Processing/d' workdir/logs/yieldsWZ25yieldsv2.txt
+sed -i '/^$/d' workdir/logs/yieldsWZ25yieldsv2.txt
 

@@ -517,34 +517,7 @@ WZsynchro::run() {
   counter("denominator");
   
   retrieveObjects();
-
-
-  // BTAG SF
-  if(!_vc->get("isData") ) {
-    if(!isInUncProc())  {
-      _btagW = _wzMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
-      //cout<<" --> "<<_btagW<<endl;
-      _weight *= _btagW;
-    }
-    else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
-      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
-				   _bJetsIdx, 1, _fastSim); 
-    else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
-      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
-				   _bJetsIdx, -1, _fastSim); 
-    else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kUp )
-      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
-				   _bJetsIdx, 0, _fastSim, 1); 
-    else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kDown )
-      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
-				   _bJetsIdx, 0, _fastSim, -1); 
-    else //other syst. variations
-      _weight *= _btagW;
-        
-  }
-
-
-  
+ 
   WZ3lSelection();
 
   //cout<<_vc->get("evt")<<"   "<<_jets[0]->pt()<<endl;
@@ -830,6 +803,39 @@ WZsynchro::WZ3lSelection() {
   
   if(_DoEventDump) EventDump();
   if(_DoPupiDump) PupiDump();
+  
+  
+  
+/*
+  // BTAG SF
+  if(!_vc->get("isData") ) {
+    if(!isInUncProc())  {
+      _btagW = _wzMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
+      //cout<<" --> "<<_btagW<<endl;
+      _weight *= _btagW;
+    }
+    else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
+      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
+				   _bJetsIdx, 1, _fastSim); 
+    else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
+      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
+				   _bJetsIdx, -1, _fastSim); 
+    else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kUp )
+      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
+				   _bJetsIdx, 0, _fastSim, 1); 
+    else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kDown )
+      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
+				   _bJetsIdx, 0, _fastSim, -1); 
+    else //other syst. variations
+      _weight *= _btagW;
+        
+  }
+*/
+  
+  
+  
+  
+  
   
   if(!makeCut(_nBJets<=1,"1 or 0 b-jets")) return;
   //if (_WZstep == 5) fillWZhistos(0.0, 0.0);

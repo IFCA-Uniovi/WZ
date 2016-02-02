@@ -517,33 +517,6 @@ WZsyst::run() {
   counter("denominator");
   
   retrieveObjects();
-
-
-  // BTAG SF
-  if(!_vc->get("isData") ) {
-    if(!isInUncProc())  {
-      _btagW = _wzMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
-      //cout<<" --> "<<_btagW<<endl;
-      _weight *= _btagW;
-    }
-    else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
-      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
-				   _bJetsIdx, 1, _fastSim); 
-    else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
-      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
-				   _bJetsIdx, -1, _fastSim); 
-    else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kUp )
-      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
-				   _bJetsIdx, 0, _fastSim, 1); 
-    else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kDown )
-      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
-				   _bJetsIdx, 0, _fastSim, -1); 
-    else //other syst. variations
-      _weight *= _btagW;
-        
-  }
-
-
   
   WZ3lSelection();
 
@@ -761,7 +734,7 @@ WZsyst::WZ3lSelection() {
   }
 */  
   
-  setWorkflow(kWZSM_3l); fillWZhistos(&l3,"WZSMstep0",0.0); setWorkflow(kWZSM);
+  //setWorkflow(kWZSM_3l); fillWZhistos(&l3,"WZSMstep0",0.0); setWorkflow(kWZSM);
 
 
   CandList candWZ =_wzMod->bestWZ( (&_tightLeps10), _idxLZ1, _idxLZ2, _idxLW);
@@ -802,14 +775,14 @@ WZsyst::WZ3lSelection() {
   if(!makeCut( 1>0, "WZ candidate" ) ) return;
   //if (_WZstep == 1) fillWZhistos(0.0, 0.0);
   float MllZ = Candidate::create(_lZ1Cand, _lZ2Cand)->mass();
-  setWorkflow(kWZSM_3lwz); fillWZhistos(&candWZ,"WZSMstep1",MllZ); setWorkflow(kWZSM);
+  //setWorkflow(kWZSM_3lwz); fillWZhistos(&candWZ,"WZSMstep1",MllZ); setWorkflow(kWZSM);
   
 
   if (std::fabs(MllZ - 90) > 30) return;
   
   if(!makeCut( _lZ1Cand->pt()>20, "Z sel" ) ) return;
   //if (_WZstep == 2) fillWZhistos(0.0, 0.0);
-  setWorkflow(kWZSM_3lwzZsel); fillWZhistos(&candWZ,"WZSMstep2",MllZ); setWorkflow(kWZSM);
+  //setWorkflow(kWZSM_3lwzZsel); fillWZhistos(&candWZ,"WZSMstep2",MllZ); setWorkflow(kWZSM);
   
   if (_met->pt() < 30) return;
   
@@ -821,10 +794,10 @@ WZsyst::WZ3lSelection() {
   if ( Candidate::create(_lZ1Cand, _lWCand)->mass() < 4 || Candidate::create(_lZ2Cand, _lWCand)->mass() < 4 ) return;
   if(!makeCut( _lWCand->pt()>20, "W sel" ) ) return;
   //if (_WZstep == 3) fillWZhistos(0.0, 0.0);
-  setWorkflow(kWZSM_3lwzZselWsel); fillWZhistos(&candWZ,"WZSMstep3",MllZ); setWorkflow(kWZSM);
+  //setWorkflow(kWZSM_3lwzZselWsel); fillWZhistos(&candWZ,"WZSMstep3",MllZ); setWorkflow(kWZSM);
   
   
-  if(!makeCut(_m3l > 100, "M(3l) > 100 GeV" )) return;
+  if(!makeCut(_wzMod->m3lTight(leps) > 100, "M(3l) > 100 GeV" )) return; //
   if (_WZstep == 4){
     setWorkflow(kWZSM_3lwzZselWselM3l);
     fillWZhistos(&candWZ,"WZSMstep4",MllZ);
@@ -833,6 +806,32 @@ WZsyst::WZ3lSelection() {
   
   if(_DoEventDump) EventDump();
   if(_DoPupiDump) PupiDump();
+  
+
+// BTAG SF
+  if(!_vc->get("isData") ) {
+    if(!isInUncProc())  {
+      _btagW = _wzMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
+      //cout<<" --> "<<_btagW<<endl;
+      _weight *= _btagW;
+    }
+    else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
+      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
+				   _bJetsIdx, 1, _fastSim); 
+    else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
+      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
+				   _bJetsIdx, -1, _fastSim); 
+    else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kUp )
+      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
+				   _bJetsIdx, 0, _fastSim, 1); 
+    else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kDown )
+      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
+				   _bJetsIdx, 0, _fastSim, -1); 
+    else //other syst. variations
+      _weight *= _btagW;
+        
+  }
+
   
   if(!makeCut(_nBJets<=1,"1 or 0 b-jets")) return;
   if (_WZstep == 5){
