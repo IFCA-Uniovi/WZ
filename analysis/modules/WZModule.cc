@@ -136,58 +136,12 @@ float WZModule::bestmZ(const CandList* leps){
 // Better S/B than ZZ leptons for WZ analysis
 
 bool
-WZModule::IsLooseBarrelElectronWW(int idx) {
-
-  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 1.479   ) return false;
-  if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.01    ) return false;
-  if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.04    ) return false;
-  if( _vc->get("LepGood_sigmaIEtaIEta"            , idx)   > 0.011   ) return false;
-  if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.08    ) return false;
-  if( std::abs(_vc->get("LepGood_eInvMinusPInv"   , idx))  > 0.01    ) return false;
-  if( _vc->get("LepGood_ecalPFClusterIso"         , idx)   > 0.45    ) return false;
-  if( _vc->get("LepGood_hcalPFClusterIso"         , idx)   > 0.25    ) return false;
-  if( _vc->get("LepGood_trackIso"                 , idx)   > 0.2     ) return false;
-//  if( _vc->get("LepGood_relIso03"                 , idx)   > 0.766     ) return false;
-  if( _vc->get("LepGood_lostHits"                 , idx)   > 2       ) return false;
-  if( std::abs(_vc->get("LepGood_dxy"             , idx))  > 0.1     ) return false;
-  if( std::abs(_vc->get("LepGood_dz"              , idx))  > 0.373   ) return false;
-  if( _vc->get("LepGood_convVeto"                 , idx)   !=1       ) return false;
-
-  return true;
-
-}
-
-bool
-WZModule::IsLooseEndcapElectronWW(int idx) {
-
-  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  < 1.479   ) return false;
-  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 2.5     ) return false;
-  if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.01    ) return false;
-  if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.08    ) return false;
-  if( _vc->get("LepGood_sigmaIEtaIEta"            , idx)   > 0.031   ) return false;
-  if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.08    ) return false;
-  if( std::abs(_vc->get("LepGood_eInvMinusPInv"   , idx))  > 0.01    ) return false;
-  if( _vc->get("LepGood_ecalPFClusterIso"         , idx)   > 0.45    ) return false;
-  if( _vc->get("LepGood_hcalPFClusterIso"         , idx)   > 0.25    ) return false;
-  if( _vc->get("LepGood_trackIso"                 , idx)   > 0.2     ) return false;
-//  if( _vc->get("LepGood_relIso03"                 , idx)   > 0.766     ) return false;
-  if( _vc->get("LepGood_lostHits"                 , idx)   > 1       ) return false;
-  if( std::abs(_vc->get("LepGood_dxy"             , idx))  > 0.2     ) return false;
-  if( std::abs(_vc->get("LepGood_dz"              , idx))  > 0.602   ) return false;
-  if( _vc->get("LepGood_convVeto"                 , idx)   !=1       ) return false;
-
-  return true;
-
-}
-
-
-bool
 WZModule::IsLooseMuonWW(int idx) {
 
   if( std::abs(_vc->get("LepGood_eta"             , idx))  > 2.4     ) return false;
   if( _vc->get("LepGood_mediumMuonId"             , idx)   !=1       ) return false;
   if( _vc->get("LepGood_relIso04"                 , idx)   > 0.4     ) return false;
-  if( _vc->get("LepGood_dr03TkSumPt"              , idx)   > 0.4     ) return false;
+  if( _vc->get("LepGood_dr03TkSumPt", idx)/_vc->get("LepGood_pt", idx)   > 0.4     ) return false;
 
   return true;
 
@@ -206,6 +160,97 @@ WZModule::IsTightMuonWW(int idx) {
   }
   if( std::abs(_vc->get("LepGood_dz"              , idx))  > 0.1     ) return false;
   
+  return true;
+
+}
+
+
+bool
+WZModule::IsLooseBarrelElectronWW(int idx) {
+
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 1.479   ) return false;
+  if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.01    ) return false;
+  if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.04    ) return false;
+  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.011   ) return false;
+  if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.08    ) return false;
+  if( std::abs(_vc->get("LepGood_eInvMinusPInv"   , idx))  > 0.01    ) return false;
+  if( _vc->get("LepGood_ecalPFClusterIso", idx)/_vc->get("LepGood_pt", idx)   > 0.45    ) return false;
+  if( _vc->get("LepGood_hcalPFClusterIso", idx)/_vc->get("LepGood_pt", idx)   > 0.25    ) return false;
+  if( _vc->get("LepGood_dr03TkSumPt", idx)/_vc->get("LepGood_pt", idx)        > 0.2     ) return false;
+//  if( _vc->get("LepGood_relIso03"                 , idx)   > 0.766     ) return false;
+  if( _vc->get("LepGood_lostHits"                 , idx)   > 2       ) return false;
+  if( std::abs(_vc->get("LepGood_dxy"             , idx))  > 0.1     ) return false;
+  if( std::abs(_vc->get("LepGood_dz"              , idx))  > 0.373   ) return false;
+  if( _vc->get("LepGood_convVeto"                 , idx)   !=1       ) return false;
+
+  return true;
+
+}
+
+bool
+WZModule::IsLooseEndcapElectronWW(int idx) {
+
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  < 1.479   ) return false;
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 2.5     ) return false;
+  if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.01    ) return false;
+  if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.08    ) return false;
+  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.031   ) return false;
+  if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.08    ) return false;
+  if( std::abs(_vc->get("LepGood_eInvMinusPInv"   , idx))  > 0.01    ) return false;
+  if( _vc->get("LepGood_ecalPFClusterIso", idx)/_vc->get("LepGood_pt", idx)   > 0.45    ) return false;
+  if( _vc->get("LepGood_hcalPFClusterIso", idx)/_vc->get("LepGood_pt", idx)   > 0.25    ) return false;
+  if( _vc->get("LepGood_dr03TkSumPt", idx)/_vc->get("LepGood_pt", idx)        > 0.2     ) return false;
+//  if( _vc->get("LepGood_relIso03"                 , idx)   > 0.766     ) return false;
+  if( _vc->get("LepGood_lostHits"                 , idx)   > 1       ) return false;
+  if( std::abs(_vc->get("LepGood_dxy"             , idx))  > 0.2     ) return false;
+  if( std::abs(_vc->get("LepGood_dz"              , idx))  > 0.602   ) return false;
+  if( _vc->get("LepGood_convVeto"                 , idx)   !=1       ) return false;
+
+  return true;
+
+}
+
+bool
+WZModule::IsMediumBarrelElectronWW(int idx) {
+
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 1.479   ) return false;
+  if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.0103  ) return false;
+  if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.0336  ) return false;
+  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0101  ) return false;
+  if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.0876  ) return false;
+  if( std::abs(_vc->get("LepGood_eInvMinusPInv"   , idx))  > 0.0174  ) return false;
+//  if( _vc->get("LepGood_ecalPFClusterIso"         , idx)   > 0.45    ) return false;
+//  if( _vc->get("LepGood_hcalPFClusterIso"         , idx)   > 0.25    ) return false;
+//  if( _vc->get("LepGood_trackIso"                 , idx)   > 0.2     ) return false;
+  if( _vc->get("LepGood_relIso03"                 , idx)   > 0.766     ) return false;
+  if( _vc->get("LepGood_lostHits"                 , idx)   > 2       ) return false;
+  if( std::abs(_vc->get("LepGood_dxy"             , idx))  > 0.118   ) return false;
+  if( std::abs(_vc->get("LepGood_dz"              , idx))  > 0.373   ) return false;
+  if( _vc->get("LepGood_convVeto"                 , idx)   !=1       ) return false;
+
+  return true;
+
+}
+
+bool
+WZModule::IsMediumEndcapElectronWW(int idx) {
+
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  < 1.479   ) return false;
+  if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 2.5     ) return false;
+  if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.00733 ) return false;
+  if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.11400 ) return false;
+  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.02830 ) return false;
+  if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.06780 ) return false;
+  if( std::abs(_vc->get("LepGood_eInvMinusPInv"   , idx))  > 0.08980 ) return false;
+//  if( _vc->get("LepGood_ecalPFClusterIso"         , idx)   > 0.45    ) return false;
+//  if( _vc->get("LepGood_hcalPFClusterIso"         , idx)   > 0.25    ) return false;
+//  if( _vc->get("LepGood_trackIso"                 , idx)   > 0.2     ) return false;
+  if( _vc->get("LepGood_relIso03"                 , idx)   > 0.0678  ) return false;
+  if( _vc->get("LepGood_lostHits"                 , idx)   > 1       ) return false;
+  if( std::abs(_vc->get("LepGood_dxy"             , idx))  > 0.0739  ) return false;
+  if( std::abs(_vc->get("LepGood_dz"              , idx))  > 0.602   ) return false;
+  if( _vc->get("LepGood_convVeto"                 , idx)   !=1       ) return false;
+
   return true;
 
 }
@@ -395,6 +440,60 @@ bool WZModule::IsDumpable(int evt){
   }
   return dumpable;
 }
+
+// --------------- B-tag SF -----------------------------
+
+float
+WZModule::bTagSF_HL(CandList& jets, vector<pair<string, unsigned int> >& jetIdx,
+                   CandList& bJets, vector<pair<string, unsigned int> >& bJetIdx,
+                   int heavy, int light){
+  // put heavy = -1 / 0 / +1 for down / central / up for b/c jets
+  // put light = -1 / 0 / +1 for down / central / up for light jets
+
+  float pdata = 1.0;
+  float pmc   = 1.0;
+  int   st = 1;
+
+  for(unsigned int i=0;i<jets.size(); ++i) {
+    bool find=false;
+    unsigned int  flavor = 2;
+    st = light;
+    
+    if(std::abs(_vc->get( (string)(jetIdx[i].first+"_mcFlavour") , jetIdx[i].second)) == 5){
+      flavor = 0; // b jet
+      st = heavy;
+    }
+    else if(std::abs(_vc->get( (string)(jetIdx[i].first+"_mcFlavour") , jetIdx[i].second)) == 4){
+      flavor = 1; // c jet
+      st = heavy;
+    }
+    
+    for(unsigned int iv=0;iv<bJets.size();iv++) {
+      if(jetIdx[i].first==bJetIdx[iv].first && jetIdx[i].second==bJetIdx[iv].second) { find=true; break;}
+    }
+
+
+
+    if(find){
+      pdata*=bTagMediumEfficiency(jets[i], flavor) * 
+	bTagMediumScaleFactor(jets[i], flavor, st);
+      pmc*=bTagMediumEfficiency(jets[i], flavor);
+    }
+    else {
+      pdata*=(1-bTagMediumEfficiency(jets[i], flavor) * 
+	      bTagMediumScaleFactor(jets[i], flavor, st));
+      pmc*=(1-bTagMediumEfficiency(jets[i], flavor));
+    }
+  }
+
+  //cout<<"pd " <<pdata<<"  "<<pmc<<endl;
+  if(pmc != 0) return pdata/pmc;
+  return 1.0;
+
+}
+
+
+
 
 
 // ------------------ SF stuff from Giuseppe -------------------

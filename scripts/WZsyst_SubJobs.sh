@@ -4,11 +4,11 @@
 #templateCFG=template_fakeEstim.cfg
 templateCFG=template_WZsyst.cfg
 
-NAME="WZ3Lbtagunc"
+NAME="WZ3LbtaguncM"
 #FLAVs=( "all" "eee" "eem" "mme" "mmm" )
 FLAVs=( "all" )
 #FLAVs=( "eee" "eem" "mme" "mmm" )
-WZSTEPs=( "4" "5" "6" )
+WZSTEPs=( "6" "5" )
 #WZSTEPs=( "6" )
 
 QSQRs=( "1001" )

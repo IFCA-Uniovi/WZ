@@ -464,12 +464,15 @@ WZsynchro::defineOutput() {
     //_hm->addVariable("m3l"             , 250, 0.,  500, "M_{3l} [GeV]", false);
     
     if(!_DoCheckPlots) continue;
-    _hm->addVariable("lepZ1_mediumMuonId_"+reg[r], 20, 0., 2., "Z Leading Lepton medium #mu Id", false);
+   /* _hm->addVariable("lepZ1_mediumMuonId_"+reg[r], 20, 0., 2., "Z Leading Lepton medium #mu Id", false);
     _hm->addVariable("lepZ2_mediumMuonId_"+reg[r], 20, 0., 2., "Z Subleading Lepton medium #mu Id", false);
     _hm->addVariable("lepW_mediumMuonId_"+reg[r] , 20, 0., 2., "W Lepton medium #mu Id", false);
     _hm->addVariable("lepZ1_mvaIdPhys14_"+reg[r] , 240, 0., 1.2, "Z Leading Lepton mva Id (Phys14)", false);
     _hm->addVariable("lepZ2_mvaIdPhys14_"+reg[r] , 240, 0., 1.2, "Z Subleading Lepton mva Id (Phys14)", false);
-    _hm->addVariable("lepW_mvaIdPhys14_"+reg[r]  , 240, 0., 1.2, "W Lepton medium mva Id (Phys14)", false);
+    _hm->addVariable("lepW_mvaIdPhys14_"+reg[r]  , 240, 0., 1.2, "W Lepton medium mva Id (Phys14)", false);*/
+    _hm->addVariable("ecalPFClusterIso_"+reg[r], 400, -10., 10., "ecalPFClusterIso", false);
+    _hm->addVariable("hcalPFClusterIso_"+reg[r], 400, -10., 10., "hcalPFClusterIso", false);
+    _hm->addVariable("trackIso_"+reg[r] ,        400, -10., 10., "trackIso", false);
   }
 
  
@@ -499,9 +502,9 @@ WZsynchro::run() {
   if(_vc->get("isData") && !checkDoubleCount()) return;
 
   if (_DoEventDump){
-    if (_vc->get("evt") > 80000) return;
+    //if (_vc->get("evt") > 80000) return;
     //cout << "dump event " << _vc->get("evt") << endl;
-    txt_eventdump.open("workdir/logs/WZTo3LNu_eventdump.txt",std::ios_base::app);
+    txt_eventdump.open("workdir/logs/WZTo3LNu_eventdumpNoBveto"+_lepflav+".txt",std::ios_base::app);
   }
 
   if (_DoPupiDump){
@@ -672,7 +675,7 @@ WZsynchro::retrieveObjects(){
 
   
   _wzMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
-		       _lepJets, _lepJetsIdx, (float)40., (float)25., getUncName()=="JES", getUncDir() );
+		       _lepJets, _lepJetsIdx, (float)40., (float)30., getUncName()=="JES", getUncDir() );
   _nJets=_jets.size();
   _nBJets=_bJets.size();
   _HT=_wzMod->HT( &(_jets) );
@@ -771,7 +774,7 @@ WZsynchro::WZ3lSelection() {
     if(std::abs(_lWCand->pdgId())!=13 ) return;
   }
   
-  
+  if ( !WLepton( _idxLW, _lWCand->pdgId() ) ) return;
   if(!makeCut( 1>0, "WZ candidate" ) ) return;
   //if (_WZstep == 1) fillWZhistos(0.0, 0.0);
   float MllZ = Candidate::create(_lZ1Cand, _lZ2Cand)->mass();
@@ -797,7 +800,7 @@ WZsynchro::WZ3lSelection() {
   setWorkflow(kWZSM_3lwzZselWsel); fillWZhistos(&candWZ,"WZSMstep3",MllZ); setWorkflow(kWZSM);
   
   
-  if(!makeCut(_m3l > 100, "M(3l) > 100 GeV" )) return;
+  if(!makeCut(_wzMod->m3lTight(&candWZ) > 100, "M(3l) > 100 GeV" )) return;
   //if (_WZstep == 4) fillWZhistos(0.0, 0.0);
   setWorkflow(kWZSM_3lwzZselWselM3l); fillWZhistos(&candWZ,"WZSMstep4",MllZ); setWorkflow(kWZSM);
   
@@ -806,35 +809,26 @@ WZsynchro::WZ3lSelection() {
   
   
   
-/*
-  // BTAG SF
+// BTAG SF
   if(!_vc->get("isData") ) {
     if(!isInUncProc())  {
-      _btagW = _wzMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
-      //cout<<" --> "<<_btagW<<endl;
+      _btagW = _wzMod->bTagSF_HL( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, 0);
       _weight *= _btagW;
     }
     else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
-      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
-				   _bJetsIdx, 1, _fastSim); 
+      _weight *= _wzMod->bTagSF_HL( _jets, _jetsIdx, _bJets, _bJetsIdx, 1, 0); 
     else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
-      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
-				   _bJetsIdx, -1, _fastSim); 
-    else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kUp )
-      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
-				   _bJetsIdx, 0, _fastSim, 1); 
-    else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kDown )
-      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
-				   _bJetsIdx, 0, _fastSim, -1); 
+      _weight *= _wzMod->bTagSF_HL( _jets, _jetsIdx, _bJets, _bJetsIdx, -1, 0);
+	else if(isInUncProc() && getUncName()=="BMISTAG" && getUncDir()==SystUtils::kUp )
+      _weight *= _wzMod->bTagSF_HL( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, 1); 
+    else if(isInUncProc() && getUncName()=="BMISTAG" && getUncDir()==SystUtils::kDown )
+      _weight *= _wzMod->bTagSF_HL( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, -1);   
     else //other syst. variations
       _weight *= _btagW;
         
   }
-*/
   
-  
-  
-  
+ 
   
   
   if(!makeCut(_nBJets<=1,"1 or 0 b-jets")) return;
@@ -1430,6 +1424,25 @@ WZsynchro::tightLepton(int idx, int pdgId) {
     return _wzMod->IsTightMuonWW(idx);
   }
   else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) <= 1.479) { //barrel electron
+    return _wzMod->IsMediumBarrelElectronWW(idx);
+  }
+  else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) > 1.479 && abs(_vc->get("LepGood_etaSc", idx)) < 2.5) { //endcap electron
+    return _wzMod->IsMediumEndcapElectronWW(idx);
+  }
+  else {
+    //std::cout << "WARNING [WZsynchro::tightLepton](" << idx << ", " << pdgId << ", idx) not valid lepton candidate, with LepGood_etaSc=" << _vc->get("LepGood_etaSc", idx) << std::endl;
+  }
+  return false;
+  
+}
+
+bool 
+WZsynchro::WLepton(int idx, int pdgId) {
+
+  if (abs(pdgId) == 13) {//muons
+    return true;
+  }
+  else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) <= 1.479) { //barrel electron
     return _wzMod->IsTightBarrelElectronWW(idx);
   }
   else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) > 1.479 && abs(_vc->get("LepGood_etaSc", idx)) < 2.5) { //endcap electron
@@ -1907,19 +1920,16 @@ void WZsynchro::fillWZhistos(CandList* leps, string reg, float MllZ) {
 
   }
   if (_DoCheckPlots && reg.find("0")==std::string::npos) {
-/*
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ2)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLW )          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("lepZ1_mediumMuonId_"+reg, _vc->get("LepGood_mediumMuonId", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("lepZ1_mediumMuonId_"+reg, _vc->get("LepGood_mediumMuonId", _idxLZ1)          , _weight);*/
+
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==11) fill("ecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ2))==11) fill("ecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLZ2)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLW ))==11) fill("ecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLW )          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==11) fill("hcalPFClusterIso_"+reg, _vc->get("LepGood_hcalPFClusterIso", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ2))==11) fill("hcalPFClusterIso_"+reg, _vc->get("LepGood_hcalPFClusterIso", _idxLZ2)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLW ))==11) fill("hcalPFClusterIso_"+reg, _vc->get("LepGood_hcalPFClusterIso", _idxLW )          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==11) fill("trackIso_"+reg, _vc->get("LepGood_trackIso", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ2))==11) fill("trackIso_"+reg, _vc->get("LepGood_trackIso", _idxLZ2)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLW ))==11) fill("trackIso_"+reg, _vc->get("LepGood_trackIso", _idxLW )          , _weight);
   }
 }
 
@@ -1959,7 +1969,8 @@ WZsynchro::checkDoubleCount() {
 void WZsynchro::EventDump(){
   //if (_vc->get("evt") > 60000) return;
   //if (_vc->get("evt") < 10000 || _vc->get("evt") > 750000) return;
-
+  txt_eventdump << (unsigned long)_vc->get("evt") << endl;
+  /*
   for (int i=0; i<3; i++){
       //int index = AnalysisLeptons[i].index;
       if (abs(_vc->get("LepGood_pdgId",i))==13){
@@ -1991,6 +2002,7 @@ void WZsynchro::EventDump(){
       
       txt_eventdump << Form("\n");
   }
+  */
 }
 
 void WZsynchro::PupiDump(){

@@ -278,6 +278,7 @@ WZsyst::initialize(){
 //  addSystSource("JES",SystUtils::kNone, "%", jess, "JES8TeV.db", "" );
 
    addManualSystSource("BTAG",SystUtils::kNone);
+   addManualSystSource("BMISTAG",SystUtils::kNone);
   // addManualSystSource("BTAG",SystUtils::kUp  );
   // addManualSystSource("BTAG",SystUtils::kDown);
   
@@ -672,7 +673,7 @@ WZsyst::retrieveObjects(){
 
   
   _wzMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
-		       _lepJets, _lepJetsIdx, (float)40., (float)25., getUncName()=="JES", getUncDir() );
+		       _lepJets, _lepJetsIdx, (float)40., (float)30., getUncName()=="JES", getUncDir() );
   _nJets=_jets.size();
   _nBJets=_bJets.size();
   _HT=_wzMod->HT( &(_jets) );
@@ -771,7 +772,7 @@ WZsyst::WZ3lSelection() {
     if(std::abs(_lWCand->pdgId())!=13 ) return;
   }
   
-  
+  if ( !WLepton( _idxLW, _lWCand->pdgId() ) ) return;
   if(!makeCut( 1>0, "WZ candidate" ) ) return;
   //if (_WZstep == 1) fillWZhistos(0.0, 0.0);
   float MllZ = Candidate::create(_lZ1Cand, _lZ2Cand)->mass();
@@ -797,7 +798,7 @@ WZsyst::WZ3lSelection() {
   //setWorkflow(kWZSM_3lwzZselWsel); fillWZhistos(&candWZ,"WZSMstep3",MllZ); setWorkflow(kWZSM);
   
   
-  if(!makeCut(_wzMod->m3lTight(leps) > 100, "M(3l) > 100 GeV" )) return; //
+  if(!makeCut(_wzMod->m3lTight(&candWZ) > 100, "M(3l) > 100 GeV" )) return; //
   if (_WZstep == 4){
     setWorkflow(kWZSM_3lwzZselWselM3l);
     fillWZhistos(&candWZ,"WZSMstep4",MllZ);
@@ -811,22 +812,17 @@ WZsyst::WZ3lSelection() {
 // BTAG SF
   if(!_vc->get("isData") ) {
     if(!isInUncProc())  {
-      _btagW = _wzMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
-      //cout<<" --> "<<_btagW<<endl;
+      _btagW = _wzMod->bTagSF_HL( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, 0);
       _weight *= _btagW;
     }
     else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
-      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
-				   _bJetsIdx, 1, _fastSim); 
+      _weight *= _wzMod->bTagSF_HL( _jets, _jetsIdx, _bJets, _bJetsIdx, 1, 0); 
     else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
-      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
-				   _bJetsIdx, -1, _fastSim); 
-    else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kUp )
-      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
-				   _bJetsIdx, 0, _fastSim, 1); 
-    else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kDown )
-      _weight *= _wzMod->bTagSF( _jets, _jetsIdx, _bJets,
-				   _bJetsIdx, 0, _fastSim, -1); 
+      _weight *= _wzMod->bTagSF_HL( _jets, _jetsIdx, _bJets, _bJetsIdx, -1, 0);
+	else if(isInUncProc() && getUncName()=="BMISTAG" && getUncDir()==SystUtils::kUp )
+      _weight *= _wzMod->bTagSF_HL( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, 1); 
+    else if(isInUncProc() && getUncName()=="BMISTAG" && getUncDir()==SystUtils::kDown )
+      _weight *= _wzMod->bTagSF_HL( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, -1);   
     else //other syst. variations
       _weight *= _btagW;
         
@@ -1429,6 +1425,25 @@ WZsyst::tightLepton(int idx, int pdgId) {
 
   if (abs(pdgId) == 13) {//muons
     return _wzMod->IsTightMuonWW(idx);
+  }
+  else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) <= 1.479) { //barrel electron
+    return _wzMod->IsMediumBarrelElectronWW(idx);
+  }
+  else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) > 1.479 && abs(_vc->get("LepGood_etaSc", idx)) < 2.5) { //endcap electron
+    return _wzMod->IsMediumEndcapElectronWW(idx);
+  }
+  else {
+    //std::cout << "WARNING [WZsyst::tightLepton](" << idx << ", " << pdgId << ", idx) not valid lepton candidate, with LepGood_etaSc=" << _vc->get("LepGood_etaSc", idx) << std::endl;
+  }
+  return false;
+  
+}
+
+bool 
+WZsyst::WLepton(int idx, int pdgId) {
+
+  if (abs(pdgId) == 13) {//muons
+    return true;
   }
   else if (abs(pdgId) == 11 && abs(_vc->get("LepGood_etaSc", idx)) <= 1.479) { //barrel electron
     return _wzMod->IsTightBarrelElectronWW(idx);

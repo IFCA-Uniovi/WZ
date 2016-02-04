@@ -64,9 +64,10 @@ private:
   void categorize();
 
   bool passCERNSelection();
-  //bool looseLepton(int idx, int pdgId);
+
   bool looseLepton(int idx, int pdgId);
   bool tightLepton(int idx, int pdgId);
+  bool WLepton(int idx, int pdgId);
   bool fakableLepton(const Candidate*c, int idx, int pdgId, bool bypass);
   
   //==============================
