@@ -1,18 +1,18 @@
-#ifndef WZsynchro_HH
-#define WZsynchro_HH
+#ifndef WZsyst_HH
+#define WZsyst_HH
 
 #include "analysis/core/MPAF.hh"
 #include "analysis/modules/SusyModule.hh"
 #include "analysis/modules/WZModule.hh"
 
-class WZsynchro: public MPAF {
+class WZsyst: public MPAF {
 
 public:
 
   // Member Functions
 
-  WZsynchro(std::string);
-  virtual ~WZsynchro();
+  WZsyst(std::string);
+  virtual ~WZsyst();
 
 
 private:
@@ -64,7 +64,6 @@ private:
   void categorize();
 
   bool passCERNSelection();
-
   bool looseLepton(int idx, int pdgId);
   bool tightLepton(int idx, int pdgId);
   bool WLepton(int idx, int pdgId);

@@ -2,14 +2,14 @@
 #Run over flavors and selection steps, producing rootfiles from which yields will be extracted with yieldsWZ25_table.sh
 #usage from MPAF folder: source scripts/phys14exerc_SubJobs.sh
 #templateCFG=template_fakeEstim.cfg
-templateCFG=template_WZ3l.cfg
+templateCFG=template_WZsyst.cfg
 
-NAME="WZ3L_fixIsoyield"
+NAME="WZ3LbtaguncM"
 #FLAVs=( "all" "eee" "eem" "mme" "mmm" )
-#FLAVs=( "all" )
-FLAVs=( "eee" "eem" "mme" "mmm" )
-#WZSTEPs=( "4" "3" "2" "1" "0" )
-WZSTEPs=( "6" )
+FLAVs=( "all" )
+#FLAVs=( "eee" "eem" "mme" "mmm" )
+WZSTEPs=( "6" "5" )
+#WZSTEPs=( "6" )
 
 QSQRs=( "1001" )
 #QSQRs=( "1001" "1002" "1003" "1004" "1005" "1006" "1007" "1008" "1009" )

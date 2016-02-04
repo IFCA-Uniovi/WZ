@@ -930,7 +930,7 @@ SusyModule::cleanJets(CandList* leptons,
 				       _vc->get(jType+ext+"_phi", ij) );
 
       jets.push_back(jet);
-      bvals.push_back( _vc->get(jType+ext+"_btagCSV",ij)<0.890 );//0.814
+      bvals.push_back( _vc->get(jType+ext+"_btagCSV",ij)<0.970 );//0.814
       tmpIdxs.push_back(make_pair(jType+ext, ij));
     }
   }
@@ -1134,8 +1134,8 @@ SusyModule::bTagSF(CandList& jets ,
   for(unsigned int i=0;i<jets.size(); ++i) {
     bool find=false;
     unsigned int  flavor = 2;
-    if(_vc->get( (string)(jetIdx[i].first+"_mcFlavour") , jetIdx[i].second) == 5) flavor = 0; // b jet
-    else if(_vc->get( (string)(jetIdx[i].first+"_mcFlavour") , jetIdx[i].second) == 4) flavor = 1; // c jet
+    if(std::abs(_vc->get( (string)(jetIdx[i].first+"_mcFlavour") , jetIdx[i].second)) == 5) flavor = 0; // b jet
+    else if(std::abs(_vc->get( (string)(jetIdx[i].first+"_mcFlavour") , jetIdx[i].second)) == 4) flavor = 1; // c jet
     
     for(unsigned int iv=0;iv<bJets.size();iv++) {
       if(jetIdx[i].first==bJetIdx[iv].first && jetIdx[i].second==bJetIdx[iv].second) { find=true; break;}

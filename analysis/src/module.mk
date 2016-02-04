@@ -21,3 +21,4 @@ FILES += UncertaintyTest
 #FILES += Comissioning
 FILES += WZsynchro
 FILES += FakeRatioWZ
+FILES += WZsyst

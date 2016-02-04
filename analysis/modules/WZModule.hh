@@ -25,6 +25,8 @@ public:
   bool IsLooseBarrelElectronWW(int idx);
   bool IsLooseEndcapElectronWW(int idx);
   bool IsLooseMuonWW(int idx);
+  bool IsMediumBarrelElectronWW(int idx);
+  bool IsMediumEndcapElectronWW(int idx);
   bool IsTightBarrelElectronWW(int idx);
   bool IsTightEndcapElectronWW(int idx);
   bool IsTightMuonWW(int idx);
@@ -36,6 +38,9 @@ public:
   bool IsTightEndcapElectronZZ(int idx);
   bool IsTightMuonZZ(int idx);
  
+  float bTagSF_HL(CandList& jets , vector<pair<string, unsigned int> >& jetIdx ,
+               CandList& bJets, vector<pair<string, unsigned int> >& bJetIdx,
+	           int heavy, int light);
   
   float GCleptonScaleFactorZZ(int pdgId, float pt, float eta);
   float GCelectronScaleFactorZZ(float pt, float eta);
