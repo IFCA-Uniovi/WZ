@@ -70,7 +70,7 @@ CandList WZModule::bestZ(const CandList* leps, int& idxZ1, int& idxZ2) {
       
       float mll = Candidate::create(leps->at(il1), leps->at(il2))->mass();
       float massdiff = std::abs(91.1876 - mll);
-      float massdiff90 = std::abs(90 - mll);
+      float massdiff90 = std::abs(91 - mll);
       
       //if (massdiff90 > 15) continue;
       if (massdiffMin < massdiff) continue;
@@ -174,7 +174,7 @@ CandList WZModule::bestGenZ(const CandList* leps, int& idxZ1, int& idxZ2) {
       
       float mll = Candidate::create(leps->at(il1), leps->at(il2))->mass();
       float massdiff = std::abs(91.1876 - mll);
-      float massdiff90 = std::abs(90 - mll);
+      float massdiff90 = std::abs(91 - mll);
       
       //if (massdiff90 > 15) continue;
       if (massdiffMin < massdiff) continue;
@@ -227,7 +227,7 @@ WZModule::IsLooseMuonWW(int idx) {
   if( std::abs(_vc->get("LepGood_eta"             , idx))  > 2.4     ) return false;
   if( _vc->get("LepGood_mediumMuonId"             , idx)   !=1       ) return false;
   if( _vc->get("LepGood_relIso04"                 , idx)   > 0.4     ) return false;
-  if( _vc->get("LepGood_dr03TkSumPt", idx)/_vc->get("LepGood_pt", idx)   > 0.15     ) return false;
+  if( _vc->get("LepGood_dr03TkSumPt", idx)/_vc->get("LepGood_pt", idx)   > 0.4     ) return false;
 
   return true;
 

@@ -789,10 +789,10 @@ WZsynchro::WZ3lSelection() {
   }
   
   if ( !WLepton( _idxLW, _lWCand->pdgId() ) ) return;
- /* if ( std::abs(_lWCand->pdgId())==11 ){
+  if ( std::abs(_lWCand->pdgId())==11 ){
     _weight /= _wzMod->GCleptonScaleFactorWW(_lWCand->pdgId(), _lWCand->pt(), _lWCand->eta() );
     _weight *= _wzMod->GCTightElectronScaleFactorWW(_lWCand->pt(), _lWCand->eta() );
-  }*/
+  }
   
   if(!makeCut( 1>0, "WZ candidate" ) ) return;
   //if (_WZstep == 1) fillWZhistos(0.0, 0.0);
@@ -801,7 +801,7 @@ WZsynchro::WZ3lSelection() {
   
 
    
-  if (std::abs(_wzMod->bestmZ(&_tightLeps10) - 90) > 15) return;
+  if (std::abs(_wzMod->bestmZ(&_tightLeps10) - 91) > 15) return;
   
   if(!makeCut( _lZ1Cand->pt()>20, "Z sel" ) ) return;
   //if (_WZstep == 2) fillWZhistos(0.0, 0.0);
@@ -828,7 +828,7 @@ WZsynchro::WZ3lSelection() {
   if(_DoPupiDump) PupiDump();
   
   
-  /*
+  
 // BTAG SF
   if(!_vc->get("isData") ) {
     if(!isInUncProc())  {
@@ -843,11 +843,11 @@ WZsynchro::WZ3lSelection() {
       _weight *= _wzMod->bTagSF_HL( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, 1); 
     else if(isInUncProc() && getUncName()=="BMISTAG" && getUncDir()==SystUtils::kDown )
       _weight *= _wzMod->bTagSF_HL( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, -1);   
-    //else //other syst. variations
-      //_weight *= _btagW;
+    else //other syst. variations
+      _weight *= _wzMod->bTagSF_HL( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, 0);
         
   }
-  */
+  
  
   
   

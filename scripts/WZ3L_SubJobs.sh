@@ -4,10 +4,10 @@
 #templateCFG=template_fakeEstim.cfg
 templateCFG=template_WZ3l.cfg
 
-NAME="WZ3L_truth"
+NAME="WZ3L_elec"
 #FLAVs=( "all" "eee" "eem" "mme" "mmm" )
-FLAVs=( "eee" )
-#FLAVs=( "mmm" "mme" "eem" "eee" )
+#FLAVs=( "eee" )
+FLAVs=( "eee" "eem" "mme" "mmm" )
 #WZSTEPs=( "4" "3" "2" "1" "0" )
 WZSTEPs=( "6" )
 
