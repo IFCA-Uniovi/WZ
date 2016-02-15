@@ -20,6 +20,10 @@ public:
   CandList ThreeLeps(const CandList* leps);
   float bestmZ(const CandList* leps);
   float m3lTight(const CandList* leps);
+  
+  CandList bestGenWZ(const CandList* leps, int& idxZ1, int& idxZ2, int& idxW);
+  CandList bestGenZ(const CandList* leps, int& idxZ1, int& idxZ2);
+  float bestGenmZ(const CandList* leps);
 
 
   bool IsLooseBarrelElectronWW(int idx);
@@ -49,6 +53,16 @@ public:
   float GCtriggerScaleFactorZZ(int pdgId1, int pdgId2, float pt1, float pt2, float ht);
   float GCeventScaleFactorZZ(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht);
   
+  float GCleptonScaleFactorWW(int pdgId, float pt, float eta);
+  float GCMediumElectronScaleFactorWW(float pt, float eta);
+  float GCTightElectronScaleFactorWW(float pt, float eta);
+  float GCMediumMuonScaleFactorWW(float pt, float eta);
+  
+  void cleanJetsOld(CandList* leptons, 
+		 CandList& cleanJets, vector<pair<string, unsigned int> >& jetIdxs,
+		 CandList& cleanBJets, vector<pair<string,unsigned int> >& bJetIdxs,
+		 CandList& lepJets, vector<pair<string,unsigned int> >& lepJetsIdxs,
+		 float thr, float bthr, bool isJESUnc = false, int dir = 0);
   
   bool IsDumpable(int evt);
 

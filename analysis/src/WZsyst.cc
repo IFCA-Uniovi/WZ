@@ -277,8 +277,12 @@ WZsyst::initialize(){
 //  jess.push_back("Jet_pt");
 //  addSystSource("JES",SystUtils::kNone, "%", jess, "JES8TeV.db", "" );
 
-   addManualSystSource("BTAG",SystUtils::kNone);
-   addManualSystSource("BMISTAG",SystUtils::kNone);
+  _dbm->loadDb("jes","JESUncer25nsV5_MC.db");
+
+
+  addManualSystSource("BTAG",SystUtils::kNone);
+  addManualSystSource("BMISTAG",SystUtils::kNone);
+  addManualSystSource("JES",SystUtils::kNone);
   // addManualSystSource("BTAG",SystUtils::kUp  );
   // addManualSystSource("BTAG",SystUtils::kDown);
   
@@ -672,14 +676,14 @@ WZsyst::retrieveObjects(){
   }
 
   
-  _wzMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
-		       _lepJets, _lepJetsIdx, (float)40., (float)30., getUncName()=="JES", getUncDir() );
+  _wzMod->cleanJetsOld( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
+		       _lepJets, _lepJetsIdx, (float)30., (float)30., getUncName()=="JES", getUncDir() );
   _nJets=_jets.size();
   _nBJets=_bJets.size();
   _HT=_wzMod->HT( &(_jets) );
   _m3l=_vc->get("m3l");
 
-  if(false) {
+  if(isInUncProc() && getUncName()=="JES") {
     TVector2 met = varyMET();
     _met = Candidate::create( met.Mod(), met.Phi() );
   }
@@ -1760,8 +1764,8 @@ WZsyst::varyMET() {
 
   unsigned int nJets=_vc->get("nJet");
   unsigned int nDiscJets=_vc->get("nDiscJet");
-  unsigned int nFwdJets=_vc->get("nJetFwd");
-  if(!isInUncProc() ) {//first, store the jets
+  //unsigned int nFwdJets=_vc->get("nJetFwd");
+  if(isInUncProc() ) {//first, store the jets
     _uncleanJets.clear();
     _uncleanDiscJets.clear();
     _uncleanFwdJets.clear();
@@ -1773,10 +1777,10 @@ WZsyst::varyMET() {
       TVector2 jet; jet.SetMagPhi( _vc->get("DiscJet_pt", ij), _vc->get("DiscJet_phi", ij)   );
       _uncleanDiscJets.push_back(jet);
     }
-    for(unsigned int ij=0;ij<nFwdJets;ij++) { 
+    /*for(unsigned int ij=0;ij<nFwdJets;ij++) { 
       TVector2 jet; jet.SetMagPhi(_vc->get("JetFwd_pt", ij),_vc->get("JetFwd_phi", ij));
       _uncleanFwdJets.push_back(jet);
-    }
+    }*/
   
     // for(unsigned int ij=0;ij<nJets;ij++) {
     //   cout<<getUncName()<<" -> "<<_vc->get("Jet_pt", ij)<<" / "<<_vc->get("Jet_eta", ij)<<endl;
@@ -1826,7 +1830,7 @@ WZsyst::varyMET() {
     met -= jet;
     //cout<<" -> "<<_vc->get("DiscJet_pt", ij)*(1+scale)<<" / "<<_vc->get("DiscJet_eta", ij)<<endl;
   }
-  for(unsigned int ij=0;ij<nFwdJets;ij++) { 
+  /*for(unsigned int ij=0;ij<nFwdJets;ij++) { 
     //add back the standard jets
     met += _uncleanFwdJets[ij];
     //JES varied jets
@@ -1835,7 +1839,7 @@ WZsyst::varyMET() {
     TVector2 jet; jet.SetMagPhi(_vc->get("JetFwd_pt", ij), _vc->get("JetFwd_phi", ij) );
     met -= jet;
     //cout<<" -> "<<_vc->get("JetFwd_pt", ij)*(1+scale)<<" / "<<_vc->get("JetFwd_eta", ij)<<endl;
-  }
+  }*/
 
   return met;
 }

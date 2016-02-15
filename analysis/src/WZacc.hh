@@ -1,18 +1,18 @@
-#ifndef WZsynchro_HH
-#define WZsynchro_HH
+#ifndef WZacc_HH
+#define WZacc_HH
 
 #include "analysis/core/MPAF.hh"
 #include "analysis/modules/SusyModule.hh"
 #include "analysis/modules/WZModule.hh"
 
-class WZsynchro: public MPAF {
+class WZacc: public MPAF {
 
 public:
 
   // Member Functions
 
-  WZsynchro(std::string);
-  virtual ~WZsynchro();
+  WZacc(std::string);
+  virtual ~WZacc();
 
 
 private:
@@ -54,6 +54,8 @@ private:
 
   //==============================
   void WZ3lSelection();
+  void AccSelection();
+  void AccRecoSelection();
   void setSignalRegions();
   void setSelLine(string str);
   //void setCut(string var, float valCut, string cType, float upValCut=0);
@@ -82,6 +84,8 @@ private:
   void fillhistos();
   void fillValidationHistos(std::string reg);
   void fillWZhistos(CandList* leps, std::string reg);
+  void fillAcchistos(CandList* leps, std::string reg);
+  void fillAccRecohistos(CandList* leps, std::string reg);
   
   bool checkDoubleCount();
   
@@ -143,6 +147,9 @@ private:
 	kWZCR,
 	
 	kWZSM,
+	kWZSM_accden,
+	kWZSM_accnum,
+	kWZSM_accnum0b,
 	kWZSM_3l,
 	kWZSM_3lwz,
 	kWZSM_3lwzZsel,
@@ -214,6 +221,12 @@ private:
   
   CandList _jetCleanLeps10;
   std::vector<unsigned int>  _jetCleanLeps10Idx;
+  
+  CandList _genLeps;
+  std::vector<unsigned int>  _genLepsIdx;
+
+  CandList _rawLeps;
+  std::vector<unsigned int>  _rawLepsIdx;
   
   unsigned int _nLooseLeps;
  

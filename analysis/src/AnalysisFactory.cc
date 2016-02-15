@@ -23,6 +23,7 @@ using namespace std;
 #include "analysis/src/WZsynchro.hh"
 #include "analysis/src/FakeRatioWZ.hh"
 #include "analysis/src/WZsyst.hh"
+#include "analysis/src/WZacc.hh"
 
 
 MPAF*
@@ -86,6 +87,9 @@ AnalysisFactory::get(const string& analysis, const string& cfg) {
   }
   if(analysis=="WZsyst") {
     return new WZsyst(cfg);
+  }
+  if(analysis=="WZacc") {
+    return new WZacc(cfg);
   }
   return 0;
 }

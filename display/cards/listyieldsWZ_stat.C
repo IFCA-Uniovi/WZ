@@ -1,12 +1,12 @@
 #include <iostream>
 #include <math.h>
-//called by yieldsWZ_test.sh to get yields with variations for uncertainties
-////////// Use with rootfiles produced by analyzer WZsyst
+//called by yieldsWZ_acc.sh to get yields with variations for uncertainties
+////////// Use with rootfiles produced by analyzer WZacc
 
 
 
 
-void listyieldsWZ_test(std::string rootfile, int wzstep, std::string proc,int var){
+void listyieldsWZ_stat(std::string rootfile, int wzstep, std::string proc,int var,int lhe){
 	string WZstepname [7]= {"Three leptons",
 	"WZ candidate",
 	"Z sel",
@@ -15,13 +15,13 @@ void listyieldsWZ_test(std::string rootfile, int wzstep, std::string proc,int va
 	"1 or 0 b-jets",
 	"0 b-jets"};
 	
-	string variation [7]= {"Central",
+	string variation [5]= {"Central",
 	"Up b-tag",
 	"Down b-tag",
 	"Up b-mistag",
-	"Down b-mistag",
-	"Up JES",
-	"Down JES"};
+	"Down b-mistag"};
+	
+	TH1F::SetDefaultSumw2();
 	
 	TH1F *histo = nullptr;
 	TFile *f = new TFile(rootfile.c_str());
@@ -30,14 +30,18 @@ void listyieldsWZ_test(std::string rootfile, int wzstep, std::string proc,int va
 	if (var == 2) histo = (TH1F*)f->Get(Form("MET_WZSMstep%iUncBTAGDo/%s",wzstep, proc.c_str() ));
 	if (var == 3) histo = (TH1F*)f->Get(Form("MET_WZSMstep%iUncBMISTAGUp/%s",wzstep, proc.c_str() ));
 	if (var == 4) histo = (TH1F*)f->Get(Form("MET_WZSMstep%iUncBMISTAGDo/%s",wzstep, proc.c_str() ));
-	if (var == 5) histo = (TH1F*)f->Get(Form("MET_WZSMstep%iUncJESUp/%s",wzstep, proc.c_str() ));
-	if (var == 6) histo = (TH1F*)f->Get(Form("MET_WZSMstep%iUncJESDo/%s",wzstep, proc.c_str() ));
+	
+	if (var == 5) histo = (TH1F*)f->Get(Form("mZ1_WZaccden/%s", proc.c_str() ));
+	if (var == 6) histo = (TH1F*)f->Get(Form("mZ1_WZaccnum/%s", proc.c_str() ));
+	
+	Double_t error;
 	Int_t yield = histo->GetEntries();
-	Double_t integral = histo->Integral(0,1000000);
+	Double_t integral = histo->Integral(0,100000000);
 	
 	Double_t normfactor;
 	
-	if (proc.find("DYJetsToLL_M10to50") != std::string::npos) normfactor=18610/2.967885e+07;
+	if (proc.find("WZTo3LNu") != std::string::npos) normfactor=4.42965/1980800;
+	else if (proc.find("DYJetsToLL_M10to50") != std::string::npos) normfactor=18610/2.967885e+07;
 	else if (proc.find("DYJetsToLL_M50") != std::string::npos) normfactor=6025.2/2.874797e+07;
 	else if (proc.find("_TW_") != std::string::npos) normfactor=35.6/995600;
 	else if (proc.find("TbarW") != std::string::npos) normfactor=35.6/988500;
@@ -58,12 +62,24 @@ void listyieldsWZ_test(std::string rootfile, int wzstep, std::string proc,int va
 	else if (proc.find("_WWZ_") != std::string::npos) normfactor=0.1651/250000;
 	else if (proc.find("_WZZ_") != std::string::npos) normfactor=0.05565/250000;
 	else if (proc.find("_ZZZ_") != std::string::npos) normfactor=0.01398/250000;
+	else if (proc.find("_ZGTo2LG_") != std::string::npos) normfactor=117.864/4451319;
 
-	
-    Double_t yield_scaled = histo->Integral(0,100000000)*normfactor*2260;
-
+	histo->Scale(normfactor*2260);
+    //Double_t yield_scaled = integral*normfactor*2260;
+    Double_t error_scaled;
+    Double_t yield_scaled = histo->IntegralAndError(0,1000000,error_scaled);
+    
+    /*
+    if (rootfile.find("all") != std::string::npos){
+      cout << lhe << "\t";
+      if (var==5) cout << "Den: " << integral;
+      if (var==6) cout << "Num: " << integral << endl;
+    }
+    */
+    
+    
 	if (rootfile.find("all") != std::string::npos){
-		cout << WZstepname[wzstep] << "\t" << variation[var] <<"\t" << integral << endl;
+		cout << WZstepname[wzstep] <<"\t" << yield_scaled << " $\\pm$ " << error_scaled << endl;
 	} else if (rootfile.find("eee") != std::string::npos) {
 		cout << "Selection step:	" << WZstepname[wzstep] << "	" << "eee	" << yield << endl;
 	} else if (rootfile.find("eem") != std::string::npos) {
@@ -73,4 +89,5 @@ void listyieldsWZ_test(std::string rootfile, int wzstep, std::string proc,int va
 	} else if (rootfile.find("mmm") != std::string::npos) {
 		cout << "Selection step:	" << WZstepname[wzstep] << "	" << "mmm	" << yield << endl;
 	}
+	
 }
