@@ -4,7 +4,7 @@
 #templateCFG=template_fakeEstim.cfg
 templateCFG=template_WZ3l.cfg
 
-NAME="WZ3L_fixIsoyield"
+NAME="WZ3L_rollback"
 #FLAVs=( "all" "eee" "eem" "mme" "mmm" )
 #FLAVs=( "all" )
 FLAVs=( "eee" "eem" "mme" "mmm" )

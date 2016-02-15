@@ -675,7 +675,7 @@ WZsynchro::retrieveObjects(){
 
   
   _wzMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
-		       _lepJets, _lepJetsIdx, (float)40., (float)30., getUncName()=="JES", getUncDir() );
+		       _lepJets, _lepJetsIdx, (float)30., (float)30., getUncName()=="JES", getUncDir() );
   _nJets=_jets.size();
   _nBJets=_bJets.size();
   _HT=_wzMod->HT( &(_jets) );
@@ -781,7 +781,7 @@ WZsynchro::WZ3lSelection() {
   setWorkflow(kWZSM_3lwz); fillWZhistos(&candWZ,"WZSMstep1",MllZ); setWorkflow(kWZSM);
   
 
-  if (std::fabs(MllZ - 90) > 30) return;
+  if (std::fabs(MllZ - 90) > 15) return;
   
   if(!makeCut( _lZ1Cand->pt()>20, "Z sel" ) ) return;
   //if (_WZstep == 2) fillWZhistos(0.0, 0.0);

@@ -72,7 +72,7 @@ CandList WZModule::bestZ(const CandList* leps, int& idxZ1, int& idxZ2) {
       float massdiff = std::fabs(91.1876 - mll);
       float massdiff90 = std::fabs(90 - mll);
       
-      if (massdiff90 > 30) continue;
+      if (massdiff90 > 15) continue;
       if (massdiffMin < massdiff) continue;
       
       massdiffMin = massdiff;
@@ -104,8 +104,9 @@ float WZModule::m3lTight(const CandList* leps){
 
 float WZModule::bestmZ(const CandList* leps){
   //this ensures that best mZ is calculated using 3 tight leptons (possibility of [tight, tight, loose, tight] in event, for example)
-  // PENDING TASK: understand why, after Z peak selection, this function gives values outside the window, as if there were no valid Z candidate (though such an event shouldn't have passed the cut!)
+
   float mll = 0;
+  float mlltemp = 0;
   float massdiffMin = 9999.9;
   for(unsigned int il1=0;il1<leps->size()-1;il1++) {
     for(unsigned int il2=il1+1;il2<leps->size();il2++) {
@@ -113,11 +114,11 @@ float WZModule::bestmZ(const CandList* leps){
       int flav = leps->at(il1)->pdgId() + leps->at(il2)->pdgId();
       if (flav != 0 ) continue;
       
-      mll = Candidate::create(leps->at(il1), leps->at(il2))->mass();
+      mlltemp = Candidate::create(leps->at(il1), leps->at(il2))->mass();
       float massdiff = std::fabs(91.1876 - mll);
       
       if (massdiffMin < massdiff) continue;
-      
+      mll = mlltemp;
       massdiffMin = massdiff;
       
     }//il2
