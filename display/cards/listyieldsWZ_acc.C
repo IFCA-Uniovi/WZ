@@ -22,6 +22,21 @@ void listyieldsWZ_acc(std::string rootfile, int wzstep, std::string proc,int var
 	"Down b-mistag"};
 	
 	TH1F *histo = nullptr;
+	TH1F *histo2 = nullptr;
+	TH1F *histo3 = nullptr;
+	
+	TH1F *histo11 = nullptr;
+	TH1F *histo12 = nullptr;
+	TH1F *histo13 = nullptr;
+	
+	TH1F *histo21 = nullptr;
+	TH1F *histo22 = nullptr;
+	TH1F *histo23 = nullptr;
+	
+	TH1F *histo31 = nullptr;
+	TH1F *histo32 = nullptr;
+	TH1F *histo33 = nullptr;
+	
 	TFile *f = new TFile(rootfile.c_str());
 	if (var == 0) histo = (TH1F*)f->Get(Form("MET_WZSMstep%i/%s",wzstep, proc.c_str() ));
 	if (var == 1) histo = (TH1F*)f->Get(Form("MET_WZSMstep%iUncBTAGUp/%s",wzstep, proc.c_str() ));
@@ -32,6 +47,28 @@ void listyieldsWZ_acc(std::string rootfile, int wzstep, std::string proc,int var
 	if (var == 5) histo = (TH1F*)f->Get(Form("mZ1_WZaccden/%s", proc.c_str() ));
 	if (var == 6) histo = (TH1F*)f->Get(Form("mZ1_WZaccnum/%s", proc.c_str() ));
 	if (var == 7) histo = (TH1F*)f->Get(Form("mZ1_WZaccnum0b/%s", proc.c_str() ));
+	
+	if (var==567){
+	  histo = (TH1F*)f->Get(Form("mZ1_WZaccden/%s", proc.c_str() ));
+	  histo2 = (TH1F*)f->Get(Form("mZ1_WZaccnum/%s", proc.c_str() ));
+	  histo3 = (TH1F*)f->Get(Form("mZ1_WZaccnum0b/%s", proc.c_str() ));
+	  
+	  if(false){
+	    histo11 = (TH1F*)f->Get(Form("mZ1_WZaccden/Tree_WZTo3LNuFxFx_1"));
+	    histo12 = (TH1F*)f->Get(Form("mZ1_WZaccnum/Tree_WZTo3LNuFxFx_1" ));
+	    histo13 = (TH1F*)f->Get(Form("mZ1_WZaccnum0b/Tree_WZTo3LNuFxFx_1" ));	  
+
+	    histo21 = (TH1F*)f->Get(Form("mZ1_WZaccden/Tree_WZTo3LNuFxFx_2" ));
+	    histo22 = (TH1F*)f->Get(Form("mZ1_WZaccnum/Tree_WZTo3LNuFxFx_2" ));
+	    histo23 = (TH1F*)f->Get(Form("mZ1_WZaccnum0b/Tree_WZTo3LNuFxFx_2" ));
+
+	    histo31 = (TH1F*)f->Get(Form("mZ1_WZaccden/Tree_WZTo3LNuFxFx_3" ));
+	    histo32 = (TH1F*)f->Get(Form("mZ1_WZaccnum/Tree_WZTo3LNuFxFx_3" ));
+	    histo33 = (TH1F*)f->Get(Form("mZ1_WZaccnum0b/Tree_WZTo3LNuFxFx_3" ));
+	  }
+
+	  
+	}
 	
 	Int_t yield = histo->GetEntries();
 	Double_t integral = histo->Integral(0,100000000);
@@ -63,15 +100,28 @@ void listyieldsWZ_acc(std::string rootfile, int wzstep, std::string proc,int var
 	
     Double_t yield_scaled = histo->Integral(0,100000000)*normfactor*2260;
     
-    
+    /*
     if (rootfile.find("all") != std::string::npos){
       cout << lhe << "\t";
       if (var==5) cout << "Den: " << integral;
       if (var==6) cout << "Num: " << integral;
       if (var==7) cout << "Num_0b: " << integral;
     }
+    */
+     //Table with Den | Num | Num_0b
+    if (rootfile.find("all") != std::string::npos && var==567){
+      cout << lhe << " " << histo->Integral(0,100000000) << " " << histo2->Integral(0,100000000) << " " << histo3->Integral(0,100000000) << endl;
+    }
     
     
+    /*  
+    if (rootfile.find("all") != std::string::npos && var==567){
+      cout << lhe << " " << histo->Integral(0,100000000)+histo11->Integral(0,100000000)+histo21->Integral(0,100000000)+histo31->Integral(0,100000000);
+      cout << " " << histo2->Integral(0,100000000)+histo12->Integral(0,100000000)+histo22->Integral(0,100000000)+histo32->Integral(0,100000000);
+      cout << " " << histo3->Integral(0,100000000)+histo13->Integral(0,100000000)+histo23->Integral(0,100000000)+histo33->Integral(0,100000000) << endl;
+    }  
+    */
+   
     /*
 	if (rootfile.find("all") != std::string::npos){
 		cout << WZstepname[wzstep] << "" << "\t" << variation[var] <<"\t" << yield_scaled << endl;

@@ -103,7 +103,7 @@ float WZModule::m3lTight(const CandList* leps){
 }
 
 float WZModule::bestmZ(const CandList* leps){
-  //this ensures that best mZ is calculated using 3 tight leptons (possibility of [tight, tight, loose, tight] in event, for example)
+  //this ensures that best mZ is calculated using 3 tight leptons (possibility of [tight, tight, loose or not even loose, tight] in event, for example)
   float mlltemp = 0;
   float mll = 0;
   float massdiffMin = 9999.9;
@@ -214,6 +214,23 @@ float WZModule::bestGenmZ(const CandList* leps){
   
   return mll; 
 }
+
+
+bool WZModule::truthMatch(const vector<unsigned int> recolepsidx){
+  if (recolepsidx.size()==0) return false;
+ 
+  unsigned int matchedcount = 0;  
+  for(unsigned int il1=0;il1<recolepsidx.size();il1++) {
+    if (_vc->get("LepGood_mcMatchId",recolepsidx[il1])!=0 && _vc->get("LepGood_mcMatchAny",recolepsidx[il1])==1) matchedcount++;
+  }//il1
+  
+  return (matchedcount==recolepsidx.size());
+  
+}
+
+
+
+
 // ------------------------------------------------------------------------------------------
 
 // WW leptons
@@ -257,8 +274,8 @@ WZModule::IsLooseBarrelElectronWW(int idx) {
   if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 1.479   ) return false;
   if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.01    ) return false;
   if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.04    ) return false;
-//  if( _vc->get("LepGood_sigmaIEtaIEta"            , idx)   > 0.011   ) return false;
-  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.011   ) return false; // USE THIS FOR SYNCHRO!!!!!!!!!
+  if( _vc->get("LepGood_sigmaIEtaIEta"            , idx)   > 0.011   ) return false;
+//  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.011   ) return false; // USE THIS FOR SYNCHRO!!!!!!!!!
   if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.08    ) return false;
   if( std::abs(_vc->get("LepGood_eInvMinusPInv"   , idx))  > 0.01    ) return false;
   if( _vc->get("LepGood_ecalPFClusterIso", idx)/_vc->get("LepGood_pt", idx)   > 0.45    ) return false;
@@ -281,8 +298,8 @@ WZModule::IsLooseEndcapElectronWW(int idx) {
   if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 2.5     ) return false;
   if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.01    ) return false;
   if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.08    ) return false;
-//  if( _vc->get("LepGood_sigmaIEtaIEta"            , idx)   > 0.031   ) return false; 
-  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.031   ) return false; // USE THIS FOR SYNCHRO!!!!!!!!!
+  if( _vc->get("LepGood_sigmaIEtaIEta"            , idx)   > 0.031   ) return false; 
+//  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.031   ) return false; // USE THIS FOR SYNCHRO!!!!!!!!!
   if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.08    ) return false;
   if( std::abs(_vc->get("LepGood_eInvMinusPInv"   , idx))  > 0.01    ) return false;
   if( _vc->get("LepGood_ecalPFClusterIso", idx)/_vc->get("LepGood_pt", idx)   > 0.45    ) return false;
@@ -304,8 +321,8 @@ WZModule::IsMediumBarrelElectronWW(int idx) {
   if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 1.479   ) return false;
   if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.0103  ) return false;
   if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.0336  ) return false;
-//  if( _vc->get("LepGood_sigmaIEtaIEta"            , idx)   > 0.0101  ) return false;
-  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0101  ) return false; // USE THIS FOR SYNCHRO!!!!!!!!!
+  if( _vc->get("LepGood_sigmaIEtaIEta"            , idx)   > 0.0101  ) return false;
+//  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0101  ) return false; // USE THIS FOR SYNCHRO!!!!!!!!!
   if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.0876  ) return false;
   if( std::abs(_vc->get("LepGood_eInvMinusPInv"   , idx))  > 0.0174  ) return false;
 //  if( _vc->get("LepGood_ecalPFClusterIso"         , idx)   > 0.45    ) return false;
@@ -313,7 +330,7 @@ WZModule::IsMediumBarrelElectronWW(int idx) {
 //  if( _vc->get("LepGood_trackIso"                 , idx)   > 0.2     ) return false;
   if( _vc->get("LepGood_relIso03"                 , idx)   > 0.766     ) return false;
   if( _vc->get("LepGood_lostHits"                 , idx)   > 2       ) return false;
-  if( std::abs(_vc->get("LepGood_dxy"             , idx))  > 0.118   ) return false;
+  if( std::abs(_vc->get("LepGood_dxy"             , idx))  > 0.0118   ) return false;
   if( std::abs(_vc->get("LepGood_dz"              , idx))  > 0.373   ) return false;
   if( _vc->get("LepGood_convVeto"                 , idx)   !=1       ) return false;
 
@@ -328,8 +345,8 @@ WZModule::IsMediumEndcapElectronWW(int idx) {
   if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 2.5     ) return false;
   if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.00733 ) return false;
   if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.11400 ) return false;
-//  if( _vc->get("LepGood_sigmaIEtaIEta"            , idx)   > 0.02830 ) return false;
-  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.02830 ) return false; // USE THIS FOR SYNCHRO!!!!!!!!!
+  if( _vc->get("LepGood_sigmaIEtaIEta"            , idx)   > 0.02830 ) return false;
+//  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.02830 ) return false; // USE THIS FOR SYNCHRO!!!!!!!!!
   if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.06780 ) return false;
   if( std::abs(_vc->get("LepGood_eInvMinusPInv"   , idx))  > 0.08980 ) return false;
 //  if( _vc->get("LepGood_ecalPFClusterIso"         , idx)   > 0.45    ) return false;
@@ -351,7 +368,7 @@ WZModule::IsTightBarrelElectronWW(int idx) {
 
   if( _vc->get("LepGood_tightId"                  , idx)   < 3       ) return false;
   if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 1.479   ) return false;
-  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0101  ) return false;
+//  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0101  ) return false;
   if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.00926 ) return false;
   if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.0336  ) return false;
   if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.0597  ) return false;
@@ -372,7 +389,7 @@ WZModule::IsTightEndcapElectronWW(int idx) {
   if( _vc->get("LepGood_tightId"                  , idx)   < 3       ) return false;
   if( std::abs(_vc->get("LepGood_etaSc"           , idx))  < 1.479   ) return false;
   if( std::abs(_vc->get("LepGood_etaSc"           , idx))  > 2.5     ) return false;
-  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0279  ) return false;
+//  if( _vc->get("LepGood_sigmaIEtaIEta_full5x"     , idx)   > 0.0279  ) return false;
   if( std::abs(_vc->get("LepGood_dEtaScTrkIn"     , idx))  > 0.00724 ) return false;
   if( std::abs(_vc->get("LepGood_dPhiScTrkIn"     , idx))  > 0.0918  ) return false;
   if( _vc->get("LepGood_hadronicOverEm"           , idx)   > 0.0615  ) return false;
@@ -757,16 +774,26 @@ WZModule::GCleptonScaleFactorZZ(int pdgId, float pt, float eta) {
 float 
 WZModule::GCeventScaleFactorZZ(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht) {
   return GCtriggerScaleFactor(pdgId1, pdgId2, pt1, pt2, ht) * 
-         GCleptonScaleFactor (pdgId1, pt1, eta1, ht) * 
-         GCleptonScaleFactor(pdgId2, pt2, eta2, ht);
+         GCleptonScaleFactorZZ(pdgId1, pt1, eta1) * 
+         GCleptonScaleFactorZZ(pdgId2, pt2, eta2);
 }
 
 
 
 //--------------
+float 
+WZModule::LeptonScaleFactorWW(int pdgId, float pt, float eta) {
+  if (abs(pdgId)==13) return MediumMuonScaleFactorWW(pt, eta);
+  else if (abs(pdgId)==11) return MediumElectronScaleFactorWW(pt, eta);
+    //if(ht>300) return electronScaleFactorHighHT(pt, eta);
+    //else       return electronScaleFactorLowHT(pt, eta);
+  //}
+  return 0.;
+}
+
 
 float 
-WZModule::GCMediumElectronScaleFactorWW(float pt, float eta) {
+WZModule::MediumElectronScaleFactorWW(float pt, float eta) {
 // "passingMedium" 
    if (std::abs(eta)>=0 && std::abs(eta)<1.5){
       if (pt>=10 && pt<20) return 0.951;
@@ -786,9 +813,64 @@ WZModule::GCMediumElectronScaleFactorWW(float pt, float eta) {
    return 0.;
 }
 
+float 
+WZModule::POGMediumElectronScaleFactorWW(float pt, float eta) {
+// "Medium, 80%" 
+   if (eta >= -2.5 && eta < -1.56){
+      if (pt>=10 && pt<25) return 0.875092;
+      if (pt>=25 && pt<35) return 0.909022;
+      if (pt>=35 && pt<45) return 0.933497;
+      if (pt>=45 && pt<55) return 0.943781;
+      if (pt>=55) return 0.964878;
+   } else if (eta >= -1.56 && eta < -1.442){
+      if (pt>=10 && pt<25) return 0.919841;
+      if (pt>=25 && pt<35) return 0.958816;
+      if (pt>=35 && pt<45) return 0.948981;
+      if (pt>=45 && pt<55) return 0.959025;
+      if (pt>=55) return 0.960032;
+   } else if (eta >= -1.442 && eta < -0.8){
+      if (pt>=10 && pt<25) return 0.951201;
+      if (pt>=25 && pt<35) return 0.962405;
+      if (pt>=35 && pt<45) return 0.972345;
+      if (pt>=45 && pt<55) return 0.978349;
+      if (pt>=55) return 0.972738;
+   } else if (eta >= -0.8 && eta < 0){
+      if (pt>=10 && pt<25) return 0.932862;
+      if (pt>=25 && pt<35) return 0.964012;
+      if (pt>=35 && pt<45) return 0.972032;
+      if (pt>=45 && pt<55) return 0.97981;
+      if (pt>=55) return 0.985638;
+   } else if (eta>=0 && eta<0.8){
+      if (pt>=10 && pt<25) return 0.945258;
+      if (pt>=25 && pt<35) return 0.969;
+      if (pt>=35 && pt<45) return 0.977363;
+      if (pt>=45 && pt<55) return 0.985956;
+      if (pt>=55) return 0.984022;
+   } else if (eta>=0.8 && eta<1.442){
+      if (pt>=10 && pt<25) return 0.953177;
+      if (pt>=25 && pt<35) return 0.962386;
+      if (pt>=35 && pt<45) return 0.971577;
+      if (pt>=45 && pt<55) return 0.974854;
+      if (pt>=55) return 0.974689;
+   } else if (eta>=1.442 && eta<1.56){
+      if (pt>=10 && pt<25) return 0.875;
+      if (pt>=25 && pt<35) return 0.918064;
+      if (pt>=35 && pt<45) return 0.942505;
+      if (pt>=45 && pt<55) return 0.932182;
+      if (pt>=55) return 0.989869;
+   } else if (eta>=1.56 && eta<=2.5){
+      if (pt>=10 && pt<25) return 0.876512;
+      if (pt>=25 && pt<35) return 0.910395;
+      if (pt>=35 && pt<45) return 0.935298;
+      if (pt>=45 && pt<55) return 0.9487;
+      if (pt>=55) return 0.962644;
+   }
+   return 0.;
+}
+
 
 float 
-WZModule::GCTightElectronScaleFactorWW(float pt, float eta) {
+WZModule::TightElectronScaleFactorWW(float pt, float eta) {
 // "passingMedium" 
    if (std::abs(eta)>=0 && std::abs(eta)<1.5){
       if (pt>=10 && pt<20) return 0.960;
@@ -810,7 +892,7 @@ WZModule::GCTightElectronScaleFactorWW(float pt, float eta) {
 
 
 float 
-WZModule::GCMediumMuonScaleFactorWW(float pt, float eta) {
+WZModule::MediumMuonScaleFactorWW(float pt, float eta) {
 // "passingMedium" 
    if (std::abs(eta)>=0 && std::abs(eta)<1.5){
       if (pt>=10 && pt<20) return 0.856;
@@ -826,6 +908,41 @@ WZModule::GCMediumMuonScaleFactorWW(float pt, float eta) {
       if (pt>=40 && pt<50) return 0.994;
       if (pt>=50 && pt<70) return 0.994;
       if (pt>=70) return 0.985;
+   }
+   return 0.;
+}
+
+float 
+WZModule::POGMediumMuonScaleFactorWW(float pt, float eta) {
+// "passingMedium" 
+   if (std::abs(eta)>=0 && std::abs(eta)<0.9){
+      if (pt>=10 && pt<25) return 0.979414*1.00451;
+      if (pt>=25 && pt<30) return 0.984815*1.001;
+      if (pt>=30 && pt<40) return 0.989551*1.00079;
+      if (pt>=40 && pt<50) return 0.991315*0.998682;
+      if (pt>=50 && pt<60) return 0.987545*1.0;
+      if (pt>=60) return 0.991321*0.998554;
+   } else if (std::abs(eta)>=0.9 && std::abs(eta)<1.2){
+      if (pt>=10 && pt<25) return 0.987974*1.00434;
+      if (pt>=25 && pt<30) return 0.985705*1.00373;
+      if (pt>=30 && pt<40) return 0.991785*1.00471;
+      if (pt>=40 && pt<50) return 0.992362*1.00166;
+      if (pt>=50 && pt<60) return 0.991781*0.997668;
+      if (pt>=60) return 0.992222*1.00443;
+   } else if (std::abs(eta)>=1.2 && std::abs(eta)<2.1){
+      if (pt>=10 && pt<25) return 0.995794*0.99689;
+      if (pt>=25 && pt<30) return 0.991305*1.00028;
+      if (pt>=30 && pt<40) return 0.993265*1.00312;
+      if (pt>=40 && pt<50) return 0.994487*0.999851;
+      if (pt>=50 && pt<60) return 0.991223*1.00065;
+      if (pt>=60) return 0.995587*1.00057;
+   } else if (std::abs(eta)>=2.1 && std::abs(eta)<=2.4){
+      if (pt>=10 && pt<25) return 0.976729*0.993198;
+      if (pt>=25 && pt<30) return 0.967756*0.993565;
+      if (pt>=30 && pt<40) return 0.96795*0.996759;
+      if (pt>=40 && pt<50) return 0.965109*1.00271;
+      if (pt>=50 && pt<60) return 0.957879*1.00429;
+      if (pt>=60) return 0.97477*0.998136;
    }
    return 0.;
 }

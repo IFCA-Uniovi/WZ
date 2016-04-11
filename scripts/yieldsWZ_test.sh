@@ -9,7 +9,7 @@
 #templateCFG=template_fakeEstim.cfg
 #templateCFG=template_WZ3l.cfg
 
-NAME="WZ3LjesTop"
+NAME="WZ3Ljesnew"
 DIR="workdir/root/WZsyst/"
 #FLAVs=( "all" "eee" "eem" "mme" "mmm" )
 FLAVs=( "all" )
@@ -46,12 +46,7 @@ if [ ! -d "workdir/logs" ]; then
   mkdir workdir/logs
 fi
 
-PROCS=( "Tree_TW_0"
-	"Tree_TbarW_0"
-	"Tree_TTWToLNu_0"
-	"Tree_TTZToLLNuNu_0"
-	"Tree_TTGJets_0"
-	"Tree_TTHnobb_0" )
+PROCS=( "WZTo3LNu" )
     
 # "Tree_WZTo3LNu_0"
 #"Tree_TW_0"
@@ -65,17 +60,17 @@ PROCS=( "Tree_TW_0"
 #	"Tree_TTHnobb_0"
 
 
-> workdir/logs/yieldsWZ_TopJES.txt
+> workdir/logs/yieldsWZ_newJES.txt
 for iproc in ${PROCS[@]}; do
   proc=$iproc
-  echo $proc >> workdir/logs/yieldsWZ_TopJES.txt
+  echo $proc >> workdir/logs/yieldsWZ_newJES.txt
 
   for iwzstep in ${WZSTEPs[@]}; do
 
       wzstep=$iwzstep
       ii=0
 
-    #echo "STEP"$wzstep >> workdir/logs/yieldsWZ_TopJES.txt
+    #echo "STEP"$wzstep >> workdir/logs/yieldsWZ_newJES.txt
 	  
 	for iflav in ${FLAVs[@]}; do  
 	  flav=$iflav
@@ -109,7 +104,7 @@ for iproc in ${PROCS[@]}; do
 	      #echo $FILE
 	      #qsub -q all.q -N MPAFjob -o $MPAF/workdir/logs/log_${sr}_${pt}_${mva}_${btag}_${flav}_${LHESYS}${lhe}.out -e $MPAF/workdir/logs/log_${sr}_${pt}_${mva}_${btag}_${flav}_${LHESYS}${lhe}.err $MPAF/scripts/submit.sh $MPAF/cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg              
 	      #analysis -c cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg >& $MPAF/workdir/logs/log_${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.log
-	      root -q -l -b display/cards/listyieldsWZ_test.C\(\"${file}\",${wzstep},\"${proc}\",${var}\) >> workdir/logs/yieldsWZ_TopJES.txt
+	      root -q -l -b display/cards/listyieldsWZ_test.C\(\"${file}\",${wzstep},\"${proc}\",${var}\) >> workdir/logs/yieldsWZ_newJES.txt
               ilhe=`echo $ilhe +1 | bc`
 
               #ii=`echo $ii +1 | bc`
@@ -120,6 +115,6 @@ for iproc in ${PROCS[@]}; do
   done
 done
 
-sed -i '/Processing/d' workdir/logs/yieldsWZ_TopJES.txt
-sed -i '/^$/d' workdir/logs/yieldsWZ_TopJES.txt
+sed -i '/Processing/d' workdir/logs/yieldsWZ_newJES.txt
+sed -i '/^$/d' workdir/logs/yieldsWZ_newJES.txt
 

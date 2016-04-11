@@ -3,7 +3,7 @@
 # Run this to get validation plots for WZ selection, from rootfiles created with Sub_AnalysisWZ25_plots_850pb.sh
 
 #REGS=( "ttbar" "ZMuMu" "ZEE" "Zl" "Wl" )
-NAME="WZ3Lplotsv2"
+NAME="WZ3L_plots07mr_NoTMNoPU"
 DIR="workdir/root/WZsynchro/"
 FLAVs=( "all" "eee" "eem" "mme" "mmm" )
 #FLAVs=( "all" )
@@ -62,6 +62,12 @@ fi
 cd $MPAF/display
 
 DIR=$MPAF/workdir/plots/WZsynchro
+
+for iflav in ${FLAVs[@]}; do
+> $MPAF/workdir/logs/yieldsWZ_fromMPAF_NoTMNoPU_${iflav}.txt
+done
+
+
 for iwzstep in ${WZSTEPs[@]}; do
 
     wzstep=$iwzstep
@@ -97,7 +103,7 @@ for iwzstep in ${WZSTEPs[@]}; do
 		        	  continue
 		        	fi
 		        	plot=${var}_WZSMstep${wzstep}
-		        	root -l -b -q cards/template_plotsWZv2_25ns.C\(\"${plot}\",\"${filename}\"\) 
+		        	root -l -b -q cards/template_plotsWZv2_25ns.C\(\"${plot}\",\"${filename}\"\) >> $MPAF/workdir/logs/yieldsWZ_fromMPAF_NoTMNoPU_${iflav}.txt
 		
 		        	mv $DIR/png/${plot}.png   $DIR/WZstep${wzstep}/${flav}/${var}.png
 		        	mv $DIR/pdf/${plot}.pdf   $DIR/WZstep${wzstep}/${flav}/${var}.pdf
@@ -113,5 +119,15 @@ rmdir $DIR/png
 rmdir $DIR/pdf
 rmdir $DIR/eps
 rmdir $DIR/root
+
+for iflav in ${FLAVs[@]}; do
+#sed -i '/Processing/d' $MPAF/workdir/logs/yieldsWZ_fromMPAF_NoTMNoPU_${iflav}.txt
+sed -i '/Adding/d' $MPAF/workdir/logs/yieldsWZ_fromMPAF_NoTMNoPU_${iflav}.txt
+sed -i '/Loading/d' $MPAF/workdir/logs/yieldsWZ_fromMPAF_NoTMNoPU_${iflav}.txt
+sed -i '/Dirname/d' $MPAF/workdir/logs/yieldsWZ_fromMPAF_NoTMNoPU_${iflav}.txt
+sed -i '/root/d' $MPAF/workdir/logs/yieldsWZ_fromMPAF_NoTMNoPU_${iflav}.txt
+sed -i '/systematics/d' $MPAF/workdir/logs/yieldsWZ_fromMPAF_NoTMNoPU_${iflav}.txt
+sed -i '/^$/d' $MPAF/workdir/logs/yieldsWZ_fromMPAF_NoTMNoPU_${iflav}.txt
+done
 
 cd ..

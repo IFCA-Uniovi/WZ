@@ -13,7 +13,8 @@ void listyieldsWZ25(std::string rootfile, int wzstep){
 	
 	
 	TFile *f = new TFile(rootfile.c_str());
-	TH1F *histo = (TH1F*)f->Get(Form("MET_WZSMstep%i/Tree_WZTo3LNu_0",wzstep));
+	//TH1F *histo = (TH1F*)f->Get(Form("MET_WZSMstep%i/Tree_WZTo3LNu_0",wzstep));
+	TH1F *histo = (TH1F*)f->Get(Form("MET_WZSMstep%i/WZTo3LNu",wzstep));
 	//Int_t yield = histo->GetEntries();
 
 	//Double_t integral = histo->Integral(0,100000000);

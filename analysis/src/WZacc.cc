@@ -827,7 +827,7 @@ WZacc::AccRecoSelection() {
   if ( !WLepton( _idxLW, _lWCand->pdgId() ) ) return;
   if(!makeCut( 1>0, "WZ candidate" ) ) return;
    
-  if (std::abs(_wzMod->bestmZ(&_tightLeps10) - 90) > 15) return;
+  if (std::abs(_wzMod->bestmZ(&_tightLeps10) - 91) > 15) return;
   
   if(!makeCut( _lZ1Cand->pt()>20, "Z sel" ) ) return;
   

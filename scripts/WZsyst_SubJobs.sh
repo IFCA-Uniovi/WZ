@@ -4,7 +4,7 @@
 #templateCFG=template_fakeEstim.cfg
 templateCFG=template_WZsyst.cfg
 
-NAME="WZ3LjesTop"
+NAME="WZ3Ljesnew"
 #FLAVs=( "all" "eee" "eem" "mme" "mmm" )
 FLAVs=( "all" )
 #FLAVs=( "eee" "eem" "mme" "mmm" )

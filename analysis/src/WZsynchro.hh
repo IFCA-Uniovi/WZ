@@ -143,6 +143,7 @@ private:
 	kWZCR,
 	
 	kWZSM,
+	kWZSM_0sel,
 	kWZSM_3l,
 	kWZSM_3lwz,
 	kWZSM_3lwzZsel,
@@ -214,6 +215,12 @@ private:
   
   CandList _jetCleanLeps10;
   std::vector<unsigned int>  _jetCleanLeps10Idx;
+  
+  CandList _genLeps;
+  std::vector<unsigned int>  _genLepsIdx;
+
+  CandList _rawLeps;
+  std::vector<unsigned int>  _rawLepsIdx;
   
   unsigned int _nLooseLeps;
  

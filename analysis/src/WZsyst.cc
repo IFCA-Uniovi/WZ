@@ -88,17 +88,6 @@ WZsyst::initialize(){
   
   _vc->registerVar("nJet25"                       );
   _vc->registerVar("nJet40"                       );
-  _vc->registerVar("nJet"                         );
-  _vc->registerVar("Jet_id"                       );
-  _vc->registerVar("Jet_pt"                       );
-  _vc->registerVar("Jet_rawPt"                    );
-  _vc->registerVar("Jet_eta"                      );
-  _vc->registerVar("Jet_phi"                      );
-  _vc->registerVar("Jet_mass"                     );
-  _vc->registerVar("Jet_btagCSV"                  );
-  _vc->registerVar("Jet_CorrFactor_L1"            );
-  _vc->registerVar("Jet_CorrFactor_L1L2L3Res"     );
-  _vc->registerVar("Jet_mcFlavour"                );
 
   _vc->registerVar("nJetFwd"                      );
   _vc->registerVar("JetFwd_pt"                    );
@@ -132,16 +121,47 @@ WZsyst::initialize(){
   _vc->registerVar("nBJetTight40"                 );
   _vc->registerVar("nSoftBJetMedium25"            );
 
-  //Discarded (they don't pass the cleaning at Heppy level) jets
-  _vc->registerVar("nDiscJet"                     );
-  _vc->registerVar("DiscJet_id"                   );
-  _vc->registerVar("DiscJet_pt"                   );
-  _vc->registerVar("DiscJet_rawPt"                );
-  _vc->registerVar("DiscJet_eta"                  );
-  _vc->registerVar("DiscJet_phi"                  );
-  _vc->registerVar("DiscJet_mass"                 );
-  _vc->registerVar("DiscJet_btagCSV"              );
-  _vc->registerVar("DiscJet_mcFlavour"            );  
+  vector<string> extsJEC({"","_jecUp","_jecDown"});
+
+  for(unsigned int ie=0;ie<extsJEC.size();ie++) {
+
+    _vc->registerVar("met"+extsJEC[ie]+"_pt"                       );
+    _vc->registerVar("met"+extsJEC[ie]+"_eta"                      );
+    _vc->registerVar("met"+extsJEC[ie]+"_phi"                      );
+    _vc->registerVar("met"+extsJEC[ie]+"_mass"                     );
+  
+    // _vc->registerVar("metNoHF_pt"                   );
+    // _vc->registerVar("metNoHF_eta"                  );
+    // _vc->registerVar("metNoHF_phi"                  );
+    // _vc->registerVar("metNoHF_mass"                 );
+    // _vc->registerVar("nJet25"                       );
+    // _vc->registerVar("nJet40"                       );
+
+    _vc->registerVar("nJet"+extsJEC[ie]                            );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_id"                       );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_pt"                       );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_rawPt"                    );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_eta"                      );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_phi"                      );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_mass"                     );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_mcFlavour"                );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_btagCSV"                  );
+
+    _vc->registerVar("Jet"+extsJEC[ie]+"_CorrFactor_L1"            );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_CorrFactor_L1L2L3Res"     );
+
+
+    _vc->registerVar("nDiscJet"+extsJEC[ie]                        );
+    _vc->registerVar("DiscJet"+extsJEC[ie]+"_id"                   );
+    _vc->registerVar("DiscJet"+extsJEC[ie]+"_pt"                   );
+    _vc->registerVar("DiscJet"+extsJEC[ie]+"_rawPt"                );
+    _vc->registerVar("DiscJet"+extsJEC[ie]+"_eta"                  );
+    _vc->registerVar("DiscJet"+extsJEC[ie]+"_phi"                  );
+    _vc->registerVar("DiscJet"+extsJEC[ie]+"_mass"                 );
+    _vc->registerVar("DiscJet"+extsJEC[ie]+"_mcFlavour"            );
+    _vc->registerVar("DiscJet"+extsJEC[ie]+"_btagCSV"              );
+
+  }
 
   //minitree variables
   _vc->registerVar("iL1TV_Mini" );
@@ -353,8 +373,8 @@ WZsyst::modifyWeight() {
     else {_weight *= _wzMod->getLHEweight(_LHESYS);}
     //_weight *= _vc->get("genWeight");
     //pileup weights
-    //_weight *= _vc->get("vtxWeight");
-    if (!_DoPupiDump) _weight *= _vc->get("puWeight");
+    _weight *= _vc->get("vtxWeight");
+    //if (!_DoPupiDump) _weight *= _vc->get("puWeight");
   }
 
 }
@@ -676,8 +696,10 @@ WZsyst::retrieveObjects(){
   }
 
   
-  _wzMod->cleanJetsOld( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
-		       _lepJets, _lepJetsIdx, (float)30., (float)30., getUncName()=="JES", getUncDir() );
+  //_wzMod->cleanJetsOld( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
+  //		       _lepJets, _lepJetsIdx, (float)30., (float)30., getUncName()=="JES", getUncDir() );
+  _wzMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
+  		       _lepJets, _lepJetsIdx, (float)30., (float)30., getUncName()=="JES", getUncDir() );
   _nJets=_jets.size();
   _nBJets=_bJets.size();
   _HT=_wzMod->HT( &(_jets) );
@@ -707,26 +729,41 @@ WZsyst::WZ3lSelection() {
   
   // HLT selection
   if (!passHLT()) return;
+  if ( _looseLeps10.size() > 3 ) return;
+   
   
   //step 0 only 3 leptons with pt > 10 GeV
   if(!makeCut(_tightLeps10.size()==3,"Three leptons")) return;
+  if (!_wzMod->truthMatch( _tightLeps10Idx ) ) return;
+
 
   //if (_WZstep == 0) fillWZhistos(0.0, 0.0);
-  CandList l3 =_wzMod->ThreeLeps( (&_tightLeps10));
+  //CandList l3 =_wzMod->ThreeLeps( (&_tightLeps10));
   
+/*
+  if ( _vc->get("isData")!=1 ){
+    if ( l3[0]->status() != 1 || l3[1]->status() != 1 || l3[2]->status() != 1 ){
+      cout << "lepton with status =/= 1" << endl;
+      return;
+    }
+  }
+  */
   int munumber = 0;
-  if(std::abs(l3[0]->pdgId())==13 ) munumber++;
-  if(std::abs(l3[1]->pdgId())==13 ) munumber++;
-  if(std::abs(l3[2]->pdgId())==13 ) munumber++;
+  if(std::abs(_tightLeps10[0]->pdgId())==13 ) munumber++;
+  if(std::abs(_tightLeps10[1]->pdgId())==13 ) munumber++;
+  if(std::abs(_tightLeps10[2]->pdgId())==13 ) munumber++;
   if (_lepflav=="eee" && munumber!=0) return;
   if (_lepflav=="eem" && munumber!=1) return;
   if (_lepflav=="mme" && munumber!=2) return;
   if (_lepflav=="mmm" && munumber!=3) return;
   
+  
+  //if(_DoEventDump) EventDump();
+  
   int ossfpair = 0;
-  if ( (l3[0]->pdgId() + l3[1]->pdgId()) == 0 ) ossfpair++;
-  if ( (l3[1]->pdgId() + l3[2]->pdgId()) == 0 ) ossfpair++;
-  if ( (l3[0]->pdgId() + l3[2]->pdgId()) == 0 ) ossfpair++;
+  if ( (_tightLeps10[0]->pdgId() + _tightLeps10[1]->pdgId()) == 0 ) ossfpair++;
+  if ( (_tightLeps10[1]->pdgId() + _tightLeps10[2]->pdgId()) == 0 ) ossfpair++;
+  if ( (_tightLeps10[0]->pdgId() + _tightLeps10[2]->pdgId()) == 0 ) ossfpair++;
   if ( ossfpair == 0 ) return;
   
 
@@ -779,15 +816,15 @@ WZsyst::WZ3lSelection() {
   if ( !WLepton( _idxLW, _lWCand->pdgId() ) ) return;
   if(!makeCut( 1>0, "WZ candidate" ) ) return;
   //if (_WZstep == 1) fillWZhistos(0.0, 0.0);
-  float MllZ = Candidate::create(_lZ1Cand, _lZ2Cand)->mass();
-  //setWorkflow(kWZSM_3lwz); fillWZhistos(&candWZ,"WZSMstep1",MllZ); setWorkflow(kWZSM);
+  //float MllZ = Candidate::create(_lZ1Cand, _lZ2Cand)->mass();
+  //setWorkflow(kWZSM_3lwz); fillWZhistos(&candWZ,"WZSMstep1"); setWorkflow(kWZSM);
   
 
-  if (std::fabs(MllZ - 90) > 30) return;
+  if (std::abs(_wzMod->bestmZ(&_tightLeps10) - 91) > 15) return;
   
   if(!makeCut( _lZ1Cand->pt()>20, "Z sel" ) ) return;
   //if (_WZstep == 2) fillWZhistos(0.0, 0.0);
-  //setWorkflow(kWZSM_3lwzZsel); fillWZhistos(&candWZ,"WZSMstep2",MllZ); setWorkflow(kWZSM);
+  //setWorkflow(kWZSM_3lwzZsel); fillWZhistos(&candWZ,"WZSMstep2"); setWorkflow(kWZSM);
   
   if (_met->pt() < 30) return;
   
@@ -799,13 +836,13 @@ WZsyst::WZ3lSelection() {
   if ( Candidate::create(_lZ1Cand, _lWCand)->mass() < 4 || Candidate::create(_lZ2Cand, _lWCand)->mass() < 4 ) return;
   if(!makeCut( _lWCand->pt()>20, "W sel" ) ) return;
   //if (_WZstep == 3) fillWZhistos(0.0, 0.0);
-  //setWorkflow(kWZSM_3lwzZselWsel); fillWZhistos(&candWZ,"WZSMstep3",MllZ); setWorkflow(kWZSM);
+  //setWorkflow(kWZSM_3lwzZselWsel); fillWZhistos(&candWZ,"WZSMstep3"); setWorkflow(kWZSM);
   
   
   if(!makeCut(_wzMod->m3lTight(&candWZ) > 100, "M(3l) > 100 GeV" )) return; //
   if (_WZstep == 4){
     setWorkflow(kWZSM_3lwzZselWselM3l);
-    fillWZhistos(&candWZ,"WZSMstep4",MllZ);
+    fillWZhistos(&candWZ,"WZSMstep4");
     setWorkflow(kWZSM);
   }
   
@@ -836,14 +873,14 @@ WZsyst::WZ3lSelection() {
   if(!makeCut(_nBJets<=1,"1 or 0 b-jets")) return;
   if (_WZstep == 5){
     setWorkflow(kWZSM_3lwzZselWselM3lNbj1);
-    fillWZhistos(&candWZ,"WZSMstep5",MllZ);
+    fillWZhistos(&candWZ,"WZSMstep5");
     setWorkflow(kWZSM);
   }
   
   if(!makeCut(_nBJets==0,"0 b-jets")) return;
   if (_WZstep == 6){
     setWorkflow(kWZSM_3lwzZselWselM3lNbj0);
-    fillWZhistos(&candWZ,"WZSMstep6",MllZ);
+    fillWZhistos(&candWZ,"WZSMstep6");
     setWorkflow(kWZSM);
   }
    
@@ -1761,7 +1798,7 @@ WZsyst::selectLeptons3l() {
 //MET uncertainty variation
 TVector2
 WZsyst::varyMET() {
-
+/*
   unsigned int nJets=_vc->get("nJet");
   unsigned int nDiscJets=_vc->get("nDiscJet");
   //unsigned int nFwdJets=_vc->get("nJetFwd");
@@ -1777,10 +1814,10 @@ WZsyst::varyMET() {
       TVector2 jet; jet.SetMagPhi( _vc->get("DiscJet_pt", ij), _vc->get("DiscJet_phi", ij)   );
       _uncleanDiscJets.push_back(jet);
     }
-    /*for(unsigned int ij=0;ij<nFwdJets;ij++) { 
-      TVector2 jet; jet.SetMagPhi(_vc->get("JetFwd_pt", ij),_vc->get("JetFwd_phi", ij));
-      _uncleanFwdJets.push_back(jet);
-    }*/
+    //for(unsigned int ij=0;ij<nFwdJets;ij++) { 
+      //TVector2 jet; jet.SetMagPhi(_vc->get("JetFwd_pt", ij),_vc->get("JetFwd_phi", ij));
+      //uncleanFwdJets.push_back(jet);
+    //}
   
     // for(unsigned int ij=0;ij<nJets;ij++) {
     //   cout<<getUncName()<<" -> "<<_vc->get("Jet_pt", ij)<<" / "<<_vc->get("Jet_eta", ij)<<endl;
@@ -1830,17 +1867,24 @@ WZsyst::varyMET() {
     met -= jet;
     //cout<<" -> "<<_vc->get("DiscJet_pt", ij)*(1+scale)<<" / "<<_vc->get("DiscJet_eta", ij)<<endl;
   }
-  /*for(unsigned int ij=0;ij<nFwdJets;ij++) { 
+  //for(unsigned int ij=0;ij<nFwdJets;ij++) { 
     //add back the standard jets
-    met += _uncleanFwdJets[ij];
+    //met += _uncleanFwdJets[ij];
     //JES varied jets
-    float scale=_dbm->getDBValue("jes", _vc->get("JetFwd_eta", ij), _vc->get("JetFwd_pt", ij));
-    scale = ((SystUtils::kUp==getUncDir())?1:(-1))*scale;
-    TVector2 jet; jet.SetMagPhi(_vc->get("JetFwd_pt", ij), _vc->get("JetFwd_phi", ij) );
-    met -= jet;
+    //float scale=_dbm->getDBValue("jes", _vc->get("JetFwd_eta", ij), _vc->get("JetFwd_pt", ij));
+    //scale = ((SystUtils::kUp==getUncDir())?1:(-1))*scale;
+    //TVector2 jet; jet.SetMagPhi(_vc->get("JetFwd_pt", ij), _vc->get("JetFwd_phi", ij) );
+    //met -= jet;
     //cout<<" -> "<<_vc->get("JetFwd_pt", ij)*(1+scale)<<" / "<<_vc->get("JetFwd_eta", ij)<<endl;
-  }*/
+  //}
 
+  return met;*/
+  string ext="met";
+  if((isInUncProc() &&  getUncName()=="JES") )
+    ext += ((SystUtils::kUp==getUncDir())?"_jecUp":"_jecDown");
+
+  TVector2 met; met.SetMagPhi(_vc->get(ext+"_pt"), _vc->get(ext+"_phi") );
+  //cout<<"MET :"<<getUncName()<<" / "<<getUncDir()<<" --> "<<met.Mod()<<endl;
   return met;
 }
 
@@ -1880,7 +1924,7 @@ void WZsyst::fillValidationHistos(string reg){
   fill(reg+"_NJets40"        , _vc->get("nJet40")        , _weight);
 }  
 
-void WZsyst::fillWZhistos(CandList* leps, string reg, float MllZ) {
+void WZsyst::fillWZhistos(CandList* leps, string reg) {
   //fill("l1Pt", (_idxFake==_idxL2)?(_l1Cand->pt()):_l2Cand->pt(), _weight );
   //fill("l2Pt", (_idxFake==_idxL2)?(_l2Cand->pt()):_l1Cand->pt(), _weight );
   fill("HT_"    , _HT       , _weight);
@@ -1891,6 +1935,7 @@ void WZsyst::fillWZhistos(CandList* leps, string reg, float MllZ) {
   fill("NJets_" , _nJets    , _weight);
   fill("M3l_"   , _wzMod->m3lTight(leps), _weight); // avoiding cases such as [tight, tight, loose, tight]
   fill("M3lfull_", _wzMod->m3lTight(leps), _weight); // avoiding cases such as [tight, tight, loose, tight]
+  fill("mZ1_"+reg            , _wzMod->bestmZ(leps)      , _weight);
   if (_DoValidationPlots) {
       if (reg.find("0")==std::string::npos) {
         //fill("lepZ1_jetPtRatio_"+reg, _vc->get("LepGood_jetPtRatio", _idxLZ1)           , _weight);
@@ -1917,8 +1962,8 @@ void WZsyst::fillWZhistos(CandList* leps, string reg, float MllZ) {
       //fill("MET"            , _vc->get("met_pt")        , _weight);
       //fill("htJet40j_"+reg       , _vc->get("htJet40j")      , _weight); // not present in MiniAODv2 Heppy Trees
       //fill("mZ1_"+reg            , _vc->get("mZ1")           , _weight);
-      if (reg.find("0")!=std::string::npos) fill("mZ1_"+reg            , _wzMod->bestmZ(leps)      , _weight); // avoiding cases such as [tight, tight, loose, tight]
-      else fill("mZ1_"+reg            , MllZ      , _weight); // consult WZModule.cc for explanation of this if-else
+      //if (reg.find("0")!=std::string::npos)  // avoiding cases such as [tight, tight, loose, tight]
+      //else fill("mZ1_"+reg            , MllZ      , _weight); // consult WZModule.cc for explanation of this if-else
       //fill("MTmin_"+reg          , _mTmin                    , _weight);
       //fill("NBJetsLoose25_"+reg  , _vc->get("nBJetLoose25")  , _weight); // not present in MiniAODv2 Heppy Trees
       //fill("NBJetsMedium25_"+reg , _vc->get("nBJetMedium25") , _weight); // not present in MiniAODv2 Heppy Trees
@@ -1926,20 +1971,64 @@ void WZsyst::fillWZhistos(CandList* leps, string reg, float MllZ) {
       //fill("NJets40_"+reg        , _vc->get("nJet40")        , _weight); // not present in MiniAODv2 Heppy Trees
 
   }
-  if (_DoCheckPlots && reg.find("0")==std::string::npos) {
+  if (_DoCheckPlots) {
 /*
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ2)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLW )          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("muon_eta_"+reg, _vc->get("LepGood_Eta", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("lepZ1_mediumMuonId_"+reg, _vc->get("LepGood_mediumMuonId", _idxLZ1)          , _weight);
-    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==13) fill("lepZ1_mediumMuonId_"+reg, _vc->get("LepGood_mediumMuonId", _idxLZ1)          , _weight);*/
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==11) fill("ecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ2))==11) fill("ecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLZ2)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLW ))==11) fill("ecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLW )          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==11) fill("hcalPFClusterIso_"+reg, _vc->get("LepGood_hcalPFClusterIso", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ2))==11) fill("hcalPFClusterIso_"+reg, _vc->get("LepGood_hcalPFClusterIso", _idxLZ2)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLW ))==11) fill("hcalPFClusterIso_"+reg, _vc->get("LepGood_hcalPFClusterIso", _idxLW )          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==11) fill("trackIso_"+reg, _vc->get("LepGood_trackIso", _idxLZ1)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLZ2))==11) fill("trackIso_"+reg, _vc->get("LepGood_trackIso", _idxLZ2)          , _weight);
+    if (abs(_vc->get("LepGood_pdgId",_idxLW ))==11) fill("trackIso_"+reg, _vc->get("LepGood_trackIso", _idxLW )          , _weight);
+    */
+    
+    for (unsigned int ilep=0; ilep < leps->size(); ilep++){
+      if ( std::abs(leps->at(ilep)->pdgId()) == 11 ){
+        fill("ecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", ilep)          , _weight);
+        fill("hcalPFClusterIso_"+reg, _vc->get("LepGood_hcalPFClusterIso", ilep)          , _weight);
+        fill("dr03TkSumPt_"+reg, _vc->get("LepGood_dr03TkSumPt", ilep)          , _weight);
+        fill("RelecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", ilep)/_vc->get("LepGood_pt", ilep)          , _weight);    
+        fill("RelhcalPFClusterIso_"+reg, _vc->get("LepGood_hcalPFClusterIso", ilep)/_vc->get("LepGood_pt", ilep)          , _weight);
+        fill("Reldr03TkSumPt_"+reg, _vc->get("LepGood_dr03TkSumPt", ilep)/_vc->get("LepGood_pt", ilep)          , _weight); 
+
+        fill("etaSc_"+reg, _vc->get("LepGood_etaSc", ilep)          , _weight);
+        fill("dEtaScTrkIn_"+reg, _vc->get("LepGood_dEtaScTrkIn", ilep)          , _weight);
+        fill("dPhiScTrkIn_"+reg, _vc->get("LepGood_dPhiScTrkIn", ilep)          , _weight);    
+        fill("sigmaIEtaIEta_"+reg, _vc->get("LepGood_sigmaIEtaIEta_full5x", ilep)          , _weight);
+        fill("hadronicOverEm_"+reg, _vc->get("LepGood_hadronicOverEm", ilep)          , _weight);
+        fill("eInvMinusPInv_"+reg, _vc->get("LepGood_eInvMinusPInv", ilep)          , _weight);      
+        fill("relIso03_"+reg, _vc->get("LepGood_relIso03", ilep)          , _weight);
+        fill("lostHits_"+reg, _vc->get("LepGood_lostHits", ilep)          , _weight);
+        fill("dxy_"+reg, _vc->get("LepGood_dxy", ilep)          , _weight);       
+        fill("dz_"+reg, _vc->get("LepGood_dz", ilep)          , _weight);       
+        fill("convVeto_"+reg, _vc->get("LepGood_convVeto", ilep)          , _weight);
+      }
+    }
+
+
+
+    /*
+    fill("ecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLZ1)          , _weight);
+    fill("ecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLZ2)          , _weight);
+    fill("ecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLW )          , _weight);
+    fill("hcalPFClusterIso_"+reg, _vc->get("LepGood_hcalPFClusterIso", _idxLZ1)          , _weight);
+    fill("hcalPFClusterIso_"+reg, _vc->get("LepGood_hcalPFClusterIso", _idxLZ2)          , _weight);
+    fill("hcalPFClusterIso_"+reg, _vc->get("LepGood_hcalPFClusterIso", _idxLW )          , _weight);
+    fill("dr03TkSumPt_"+reg, _vc->get("LepGood_dr03TkSumPt", _idxLZ1)          , _weight);
+    fill("dr03TkSumPt_"+reg, _vc->get("LepGood_dr03TkSumPt", _idxLZ2)          , _weight);
+    fill("dr03TkSumPt_"+reg, _vc->get("LepGood_dr03TkSumPt", _idxLW )          , _weight);
+    fill("RelecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLZ1)/_vc->get("LepGood_pt", _idxLZ1)          , _weight);
+    fill("RelecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLZ2)/_vc->get("LepGood_pt", _idxLZ2)          , _weight);
+    fill("RelecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLW )/_vc->get("LepGood_pt", _idxLW)           , _weight);
+    fill("RelhcalPFClusterIso_"+reg, _vc->get("LepGood_hcalPFClusterIso", _idxLZ1)/_vc->get("LepGood_pt", _idxLZ1)          , _weight);
+    fill("RelhcalPFClusterIso_"+reg, _vc->get("LepGood_hcalPFClusterIso", _idxLZ2)/_vc->get("LepGood_pt", _idxLZ2)          , _weight);
+    fill("RelhcalPFClusterIso_"+reg, _vc->get("LepGood_hcalPFClusterIso", _idxLW )/_vc->get("LepGood_pt", _idxLW)           , _weight);
+    fill("Reldr03TkSumPt_"+reg, _vc->get("LepGood_dr03TkSumPt", _idxLZ1)/_vc->get("LepGood_pt", _idxLZ1)          , _weight);
+    fill("Reldr03TkSumPt_"+reg, _vc->get("LepGood_dr03TkSumPt", _idxLZ2)/_vc->get("LepGood_pt", _idxLZ2)          , _weight);
+    fill("Reldr03TkSumPt_"+reg, _vc->get("LepGood_dr03TkSumPt", _idxLW )/_vc->get("LepGood_pt", _idxLW)           , _weight);
+    */
   }
 }
 

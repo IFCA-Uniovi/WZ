@@ -25,6 +25,7 @@ public:
   CandList bestGenZ(const CandList* leps, int& idxZ1, int& idxZ2);
   float bestGenmZ(const CandList* leps);
 
+  bool truthMatch(const vector<unsigned int> recolepsidx);
 
   bool IsLooseBarrelElectronWW(int idx);
   bool IsLooseEndcapElectronWW(int idx);
@@ -53,10 +54,12 @@ public:
   float GCtriggerScaleFactorZZ(int pdgId1, int pdgId2, float pt1, float pt2, float ht);
   float GCeventScaleFactorZZ(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht);
   
-  float GCleptonScaleFactorWW(int pdgId, float pt, float eta);
-  float GCMediumElectronScaleFactorWW(float pt, float eta);
-  float GCTightElectronScaleFactorWW(float pt, float eta);
-  float GCMediumMuonScaleFactorWW(float pt, float eta);
+  float LeptonScaleFactorWW(int pdgId, float pt, float eta);
+  float MediumElectronScaleFactorWW(float pt, float eta);
+  float POGMediumElectronScaleFactorWW(float pt, float eta);
+  float TightElectronScaleFactorWW(float pt, float eta);
+  float MediumMuonScaleFactorWW(float pt, float eta);
+  float POGMediumMuonScaleFactorWW(float pt, float eta);
   
   void cleanJetsOld(CandList* leptons, 
 		 CandList& cleanJets, vector<pair<string, unsigned int> >& jetIdxs,

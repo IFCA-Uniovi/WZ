@@ -119,6 +119,14 @@ WZsynchro::initialize(){
   _vc->registerVar("GenPart_phi"                  );
   _vc->registerVar("GenPart_pdgId"                );
   _vc->registerVar("GenPart_motherId"             );
+  
+  _vc->registerVar("ngenLep"                     );
+  _vc->registerVar("genLep_pt"                   );
+  _vc->registerVar("genLep_eta"                  );
+  _vc->registerVar("genLep_phi"                  );
+  _vc->registerVar("genLep_pdgId"                );
+  _vc->registerVar("genLep_motherId"             );
+  _vc->registerVar("genLep_charge"               );
 
   //LHE gen level weights
   _vc->registerVar("nLHEweight"                   );
@@ -250,6 +258,7 @@ WZsynchro::initialize(){
   addWorkflow( kWZCR, "WZCR");
   //addWorkflow( kGlobalmId, "mId" );  
   addWorkflow( kWZSM, "WZSM");
+  addWorkflow( kWZSM_0sel, "WZSM0sel");
   addWorkflow( kWZSM_3l, "WZSMstep0");
   addWorkflow( kWZSM_3lwz, "WZSMstep1");
   addWorkflow( kWZSM_3lwzZsel, "WZSMstep2");
@@ -349,7 +358,7 @@ WZsynchro::modifyWeight() {
     //_weight *= _vc->get("genWeight");
     //pileup weights
     //_weight *= _vc->get("vtxWeight");
-    if (!_DoPupiDump) _weight *= _vc->get("puWeight");
+    //if (!_DoPupiDump) _weight *= _vc->get("puWeight");
   }
 
 }
@@ -390,6 +399,7 @@ WZsynchro::defineOutput() {
 
   vector<string> reg;
   //reg.push_back("WZSM");
+  reg.push_back("WZSM0sel");
   reg.push_back("WZSMstep0");
   reg.push_back("WZSMstep1");
   reg.push_back("WZSMstep2");
@@ -470,12 +480,26 @@ WZsynchro::defineOutput() {
     _hm->addVariable("lepZ1_mvaIdPhys14_"+reg[r] , 240, 0., 1.2, "Z Leading Lepton mva Id (Phys14)", false);
     _hm->addVariable("lepZ2_mvaIdPhys14_"+reg[r] , 240, 0., 1.2, "Z Subleading Lepton mva Id (Phys14)", false);
     _hm->addVariable("lepW_mvaIdPhys14_"+reg[r]  , 240, 0., 1.2, "W Lepton medium mva Id (Phys14)", false);*/
-    _hm->addVariable("ecalPFClusterIso_"+reg[r], 40000, -1000., 1000., "ecalPFClusterIso", false);
-    _hm->addVariable("hcalPFClusterIso_"+reg[r], 40000, -1000., 1000., "hcalPFClusterIso", false);
-    _hm->addVariable("dr03TkSumPt_"+reg[r] ,     40000, -1000., 1000., "trackIso", false);
-    _hm->addVariable("RelecalPFClusterIso_"+reg[r], 400, -10., 10., "ecalPFClusterIso/pT", false);
-    _hm->addVariable("RelhcalPFClusterIso_"+reg[r], 400, -10., 10., "hcalPFClusterIso/pT", false);
-    _hm->addVariable("Reldr03TkSumPt_"+reg[r] ,     400, -10., 10., "dr03TkSumPt/pT", false);
+    
+    _hm->addVariable("etaSc_"+reg[r], 400, -2.5, 2.5, "#eta_{SC}", false);
+    _hm->addVariable("dEtaScTrkIn_"+reg[r], 120, -0.012, 0.012, "dEtaScTrkIn", false);
+    _hm->addVariable("dPhiScTrkIn_"+reg[r] ,     50, -0.1, 0.1, "dPhiScTrkIn", false);
+    _hm->addVariable("sigmaIEtaIEta_"+reg[r] ,     100, 0., 0.035, "#sigma_{i#eta i#eta}", false);    
+    _hm->addVariable("hadronicOverEm_"+reg[r] ,     100, 0., 0.1, "H/E", false);    
+    _hm->addVariable("eInvMinusPInv_"+reg[r] ,     100, -0.1, 0.1, "1/E - 1/p", false);    
+    _hm->addVariable("relIso03_"+reg[r] ,     200, 0., 5., "relIso03", false);    
+    _hm->addVariable("lostHits_"+reg[r] ,     3, 0., 3., "lostHits", false);    
+    _hm->addVariable("dxy_"+reg[r] ,     40, -0.04, 0.04, "dxy", false);    
+    _hm->addVariable("dz_"+reg[r] ,     75, -0.75, 0.75, "dz", false);    
+    _hm->addVariable("convVeto_"+reg[r] ,     2, 0., 2., "convVeto", false);    
+    
+    _hm->addVariable("ecalPFClusterIso_"+reg[r], 400, 0., 200., "ecalPFClusterIso", false);
+    _hm->addVariable("hcalPFClusterIso_"+reg[r], 400, 0., 200., "hcalPFClusterIso", false);
+    _hm->addVariable("dr03TkSumPt_"+reg[r] ,     400, 0., 200., "trackIso", false);
+    _hm->addVariable("RelecalPFClusterIso_"+reg[r], 400, 0., 5., "ecalPFClusterIso/pT", false);
+    _hm->addVariable("RelhcalPFClusterIso_"+reg[r], 400, 0., 5., "hcalPFClusterIso/pT", false);
+    _hm->addVariable("Reldr03TkSumPt_"+reg[r] ,     400, 0., 5., "dr03TkSumPt/pT", false);
+    
   }
 
  
@@ -507,7 +531,18 @@ WZsynchro::run() {
   if (_DoEventDump){
     //if (_vc->get("evt") > 80000) return;
     //cout << "dump event " << _vc->get("evt") << endl;
-    txt_eventdump.open("workdir/logs/WZTo3LNu_eventVarsfix"+_lepflav+".txt",std::ios_base::app);
+    if ( !((_vc->get("run")==257613 && _vc->get("evt")==491264074) || //eee
+         (_vc->get("run")==257613 && _vc->get("evt")==1811772854) ||
+         (_vc->get("run")==258177 && _vc->get("evt")==1821523066) ||
+         (_vc->get("run")==258440 && _vc->get("evt")==874453550) ||
+         (_vc->get("run")==258706 && _vc->get("evt")==642085566) ||
+         (_vc->get("run")==257461 && _vc->get("evt")==61526959) || //mmm
+         (_vc->get("run")==257682 && _vc->get("evt")==307737205) ||
+         (_vc->get("run")==258211 && _vc->get("evt")==40203218) ||
+         (_vc->get("run")==258656 && _vc->get("evt")==96741521) ||
+         (_vc->get("run")==259686 && _vc->get("evt")==487956021)) ) return;
+    cout << _vc->get("run") << "\t" << _vc->get("evt") << endl;    
+    txt_eventdump.open("workdir/logs/WZsel_datacomp_"+_lepflav+".txt",std::ios_base::app);
   }
 
   if (_DoPupiDump){
@@ -521,7 +556,9 @@ WZsynchro::run() {
   }
   
   counter("denominator");
+
   
+
   retrieveObjects();
  
   WZ3lSelection();
@@ -665,6 +702,12 @@ WZsynchro::retrieveObjects(){
   
   _jetCleanLeps10.clear();
   _jetCleanLeps10Idx.clear();
+  
+  _genLeps.clear();
+  _genLepsIdx.clear();
+
+  _rawLeps.clear();
+  _rawLepsIdx.clear();
 
   selectLeptons3l();
 
@@ -706,14 +749,230 @@ void
 WZsynchro::WZ3lSelection() {
   setWorkflow(kWZSM);
   
+  if (_DoCheckPlots && _rawLeps.size() > 0) {
+    setWorkflow(kWZSM_0sel); fillWZhistos(&_rawLeps,"WZSM0sel"); setWorkflow(kWZSM);
+  }
+  
   // HLT selection
   if (!passHLT()) return;
+  if ( _looseLeps10.size() > 3 ) return;
+   
+  
+  if(_DoEventDump){
+    for(size_t il=0;il<_looseLeps10.size(); il++) {
 
+      if (_lepflav=="eee" && std::abs(_vc->get("LepGood_pdgId", il))==11){
+                  //             run:lu:evt:ptZ1:etZ1:phZ1:rIZ1:metP:metF:eSc1:dEI1:dFI1:sie1:HoE1:E-p1:ecI1:hcI1:trI1:loH1:dxy1:d_z1:vet1
+          txt_eventdump << Form("%lu:%d:%lu:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.0f:%.4f:%.4f:%.4f\n",
+                  (unsigned long)_vc->get("run"),
+			      (int)_vc->get("lumi"),
+			      (unsigned long)_vc->get("evt"),
+			      _vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_eta", il),
+			      _vc->get("LepGood_phi", il),
+			      _vc->get("LepGood_relIso03", il),
+			      _vc->get("met_pt"),
+			      _vc->get("met_phi"),
+			      _vc->get("LepGood_etaSc"             , il),
+			      _vc->get("LepGood_dEtaScTrkIn"             , il),
+			      _vc->get("LepGood_dPhiScTrkIn"             , il),
+			      _vc->get("LepGood_sigmaIEtaIEta"             , il),
+			      _vc->get("LepGood_hadronicOverEm"             , il),
+			      _vc->get("LepGood_eInvMinusPInv"             , il),
+			      _vc->get("LepGood_ecalPFClusterIso", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_hcalPFClusterIso", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_dr03TkSumPt", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_lostHits"                , il),
+			       std::abs(_vc->get("LepGood_dxy"           , il)),
+			       std::abs(_vc->get("LepGood_dz"           , il)),
+			       std::abs(_vc->get("LepGood_convVeto"           , il)) );
+         cout << "loose" << endl;
+         //             run:lu:evt:ptZ1:etZ1:phZ1:rIZ1:metP:metF:eSc1:dEI1:dFI1:sie1:HoE1:E-p1:ecI1:hcI1:trI1:loH1:dxy1:d_z1:vet1:HLT:pId:tiId
+          cout << Form("%lu:%d:%lu:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.0f:%.4f:%.4f:%.0f:%d:%.0f:%.0f\n",
+                  (unsigned long)_vc->get("run"),
+			      (int)_vc->get("lumi"),
+			      (unsigned long)_vc->get("evt"),
+			      _vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_eta", il),
+			      _vc->get("LepGood_phi", il),
+			      _vc->get("LepGood_relIso03", il),
+			      _vc->get("met_pt"),
+			      _vc->get("met_phi"),
+			      _vc->get("LepGood_etaSc"             , il),
+			      _vc->get("LepGood_dEtaScTrkIn"             , il),
+			      _vc->get("LepGood_dPhiScTrkIn"             , il),
+			      _vc->get("LepGood_sigmaIEtaIEta"             , il),
+			      _vc->get("LepGood_hadronicOverEm"             , il),
+			      _vc->get("LepGood_eInvMinusPInv"             , il),
+			      _vc->get("LepGood_ecalPFClusterIso", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_hcalPFClusterIso", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_dr03TkSumPt", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_lostHits"                , il),
+			       std::abs(_vc->get("LepGood_dxy"           , il)),
+			       std::abs(_vc->get("LepGood_dz"           , il)),
+			       std::abs(_vc->get("LepGood_convVeto"           , il)),
+			       passHLT(),
+			       _vc->get("LepGood_pdgId", il),
+			       _vc->get("LepGood_tightId", il) );
+
+           
+      } else if (_lepflav=="mmm" && std::abs(_vc->get("LepGood_pdgId", il))==13){
+                       //         run:lu:evt:ptZ1:etZ1:phZ1:rIZ1:metP:metF:muid:d_xy:d__z:tIso
+           txt_eventdump << Form("%lu:%d:%lu:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f\n",
+			      (unsigned long)_vc->get("run"),
+			      (int)_vc->get("lumi"),
+			      (unsigned long)_vc->get("evt"),
+			      _vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_eta", il),
+			      _vc->get("LepGood_phi", il),
+			      _vc->get("LepGood_relIso04", il),
+			      _vc->get("met_pt"),
+			      _vc->get("met_phi"),
+			      _vc->get("LepGood_mediumMuonId"             , il),
+			       std::abs(_vc->get("LepGood_dxy"           , il)),
+			       std::abs(_vc->get("LepGood_dz"           , il)),
+			       _vc->get("LepGood_dr03TkSumPt", il)/_vc->get("LepGood_pt", il) );
+         cout << "loose" << endl;
+              //         run:lu:evt:ptZ1:etZ1:phZ1:rIZ1:metP:metF:muid:d_xy:d__z:tIso:HLT:pId
+           cout << Form("%lu:%d:%lu:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%d:%.0f\n",
+			      (unsigned long)_vc->get("run"),
+			      (int)_vc->get("lumi"),
+			      (unsigned long)_vc->get("evt"),
+			      _vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_eta", il),
+			      _vc->get("LepGood_phi", il),
+			      _vc->get("LepGood_relIso04", il),
+			      _vc->get("met_pt"),
+			      _vc->get("met_phi"),
+			      _vc->get("LepGood_mediumMuonId"             , il),
+			       std::abs(_vc->get("LepGood_dxy"           , il)),
+			       std::abs(_vc->get("LepGood_dz"           , il)),
+			       _vc->get("LepGood_dr03TkSumPt", il)/_vc->get("LepGood_pt", il),
+			       passHLT(),
+			       _vc->get("LepGood_pdgId", il) );           
+        }
+
+    }
+  }
+  
+  
+  
+  
   //step 0 only 3 leptons with pt > 10 GeV
   if(!makeCut(_tightLeps10.size()==3,"Three leptons")) return;
+  
+  if(_DoEventDump){
+    for(size_t il=0;il<_tightLeps10.size(); il++) {
 
+      if (_lepflav=="eee" && std::abs(_vc->get("LepGood_pdgId", il))==11){
+                  //             run:lu:evt:ptZ1:etZ1:phZ1:rIZ1:metP:metF:eSc1:dEI1:dFI1:sie1:HoE1:E-p1:ecI1:hcI1:trI1:loH1:dxy1:d_z1:vet1
+          txt_eventdump << Form("%lu:%d:%lu:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.0f:%.4f:%.4f:%.4f\n",
+                  (unsigned long)_vc->get("run"),
+			      (int)_vc->get("lumi"),
+			      (unsigned long)_vc->get("evt"),
+			      _vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_eta", il),
+			      _vc->get("LepGood_phi", il),
+			      _vc->get("LepGood_relIso03", il),
+			      _vc->get("met_pt"),
+			      _vc->get("met_phi"),
+			      _vc->get("LepGood_etaSc"             , il),
+			      _vc->get("LepGood_dEtaScTrkIn"             , il),
+			      _vc->get("LepGood_dPhiScTrkIn"             , il),
+			      _vc->get("LepGood_sigmaIEtaIEta"             , il),
+			      _vc->get("LepGood_hadronicOverEm"             , il),
+			      _vc->get("LepGood_eInvMinusPInv"             , il),
+			      _vc->get("LepGood_ecalPFClusterIso", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_hcalPFClusterIso", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_dr03TkSumPt", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_lostHits"                , il),
+			       std::abs(_vc->get("LepGood_dxy"           , il)),
+			       std::abs(_vc->get("LepGood_dz"           , il)),
+			       std::abs(_vc->get("LepGood_convVeto"           , il)) );
+         cout << "tight" << endl;
+         //             run:lu:evt:ptZ1:etZ1:phZ1:rIZ1:metP:metF:eSc1:dEI1:dFI1:sie1:HoE1:E-p1:ecI1:hcI1:trI1:loH1:dxy1:d_z1:vet1:HLT:pId:tiId
+          cout << Form("%lu:%d:%lu:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.0f:%.4f:%.4f:%.0f:%d:%.0f:%.0f\n",
+                  (unsigned long)_vc->get("run"),
+			      (int)_vc->get("lumi"),
+			      (unsigned long)_vc->get("evt"),
+			      _vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_eta", il),
+			      _vc->get("LepGood_phi", il),
+			      _vc->get("LepGood_relIso03", il),
+			      _vc->get("met_pt"),
+			      _vc->get("met_phi"),
+			      _vc->get("LepGood_etaSc"             , il),
+			      _vc->get("LepGood_dEtaScTrkIn"             , il),
+			      _vc->get("LepGood_dPhiScTrkIn"             , il),
+			      _vc->get("LepGood_sigmaIEtaIEta"             , il),
+			      _vc->get("LepGood_hadronicOverEm"             , il),
+			      _vc->get("LepGood_eInvMinusPInv"             , il),
+			      _vc->get("LepGood_ecalPFClusterIso", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_hcalPFClusterIso", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_dr03TkSumPt", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_lostHits"                , il),
+			       std::abs(_vc->get("LepGood_dxy"           , il)),
+			       std::abs(_vc->get("LepGood_dz"           , il)),
+			       std::abs(_vc->get("LepGood_convVeto"           , il)),
+			       passHLT(),
+			       _vc->get("LepGood_pdgId", il),
+			       _vc->get("LepGood_tightId", il) );
+
+           
+      } else if (_lepflav=="mmm" && std::abs(_vc->get("LepGood_pdgId", il))==13){
+                       //         run:lu:evt:ptZ1:etZ1:phZ1:rIZ1:metP:metF:muid:d_xy:d__z:tIso
+           txt_eventdump << Form("%lu:%d:%lu:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f\n",
+			      (unsigned long)_vc->get("run"),
+			      (int)_vc->get("lumi"),
+			      (unsigned long)_vc->get("evt"),
+			      _vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_eta", il),
+			      _vc->get("LepGood_phi", il),
+			      _vc->get("LepGood_relIso04", il),
+			      _vc->get("met_pt"),
+			      _vc->get("met_phi"),
+			      _vc->get("LepGood_mediumMuonId"             , il),
+			       std::abs(_vc->get("LepGood_dxy"           , il)),
+			       std::abs(_vc->get("LepGood_dz"           , il)),
+			       _vc->get("LepGood_dr03TkSumPt", il)/_vc->get("LepGood_pt", il) );
+         cout << "tight" << endl;
+              //         run:lu:evt:ptZ1:etZ1:phZ1:rIZ1:metP:metF:muid:d_xy:d__z:tIso:HLT:pId
+           cout << Form("%lu:%d:%lu:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%d:%.0f\n",
+			      (unsigned long)_vc->get("run"),
+			      (int)_vc->get("lumi"),
+			      (unsigned long)_vc->get("evt"),
+			      _vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_eta", il),
+			      _vc->get("LepGood_phi", il),
+			      _vc->get("LepGood_relIso04", il),
+			      _vc->get("met_pt"),
+			      _vc->get("met_phi"),
+			      _vc->get("LepGood_mediumMuonId"             , il),
+			       std::abs(_vc->get("LepGood_dxy"           , il)),
+			       std::abs(_vc->get("LepGood_dz"           , il)),
+			       _vc->get("LepGood_dr03TkSumPt", il)/_vc->get("LepGood_pt", il),
+			       passHLT(),
+			       _vc->get("LepGood_pdgId", il) );           
+        }
+
+    }
+  }  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  /*
+  if(!_vc->get("isData")){
+    if (!_wzMod->truthMatch( _tightLeps10Idx ) ) return;
+  }
+*/
   //if (_WZstep == 0) fillWZhistos(0.0, 0.0);
-  CandList l3 =_wzMod->ThreeLeps( (&_tightLeps10));
+  //CandList l3 =_wzMod->ThreeLeps( (&_tightLeps10));
   
 /*
   if ( _vc->get("isData")!=1 ){
@@ -724,9 +983,9 @@ WZsynchro::WZ3lSelection() {
   }
   */
   int munumber = 0;
-  if(std::abs(l3[0]->pdgId())==13 ) munumber++;
-  if(std::abs(l3[1]->pdgId())==13 ) munumber++;
-  if(std::abs(l3[2]->pdgId())==13 ) munumber++;
+  if(std::abs(_tightLeps10[0]->pdgId())==13 ) munumber++;
+  if(std::abs(_tightLeps10[1]->pdgId())==13 ) munumber++;
+  if(std::abs(_tightLeps10[2]->pdgId())==13 ) munumber++;
   if (_lepflav=="eee" && munumber!=0) return;
   if (_lepflav=="eem" && munumber!=1) return;
   if (_lepflav=="mme" && munumber!=2) return;
@@ -736,22 +995,22 @@ WZsynchro::WZ3lSelection() {
   //if(_DoEventDump) EventDump();
   
   int ossfpair = 0;
-  if ( (l3[0]->pdgId() + l3[1]->pdgId()) == 0 ) ossfpair++;
-  if ( (l3[1]->pdgId() + l3[2]->pdgId()) == 0 ) ossfpair++;
-  if ( (l3[0]->pdgId() + l3[2]->pdgId()) == 0 ) ossfpair++;
+  if ( (_tightLeps10[0]->pdgId() + _tightLeps10[1]->pdgId()) == 0 ) ossfpair++;
+  if ( (_tightLeps10[1]->pdgId() + _tightLeps10[2]->pdgId()) == 0 ) ossfpair++;
+  if ( (_tightLeps10[0]->pdgId() + _tightLeps10[2]->pdgId()) == 0 ) ossfpair++;
   if ( ossfpair == 0 ) return;
   
 
 
-  /*
+
   if ( _vc->get("isData")!=1 && !_DoPupiDump) {
-    _weight *= _wzMod->GCleptonScaleFactorWW (l3[0]->pdgId(), l3[0]->pt(), l3[0]->eta() );
-    _weight *= _wzMod->GCleptonScaleFactorWW (l3[1]->pdgId(), l3[1]->pt(), l3[1]->eta() );
-    _weight *= _wzMod->GCleptonScaleFactorWW (l3[2]->pdgId(), l3[2]->pt(), l3[2]->eta() );
+    _weight *= _wzMod->LeptonScaleFactorWW (_tightLeps10[0]->pdgId(), _tightLeps10[0]->pt(), _tightLeps10[0]->eta() );
+    _weight *= _wzMod->LeptonScaleFactorWW (_tightLeps10[1]->pdgId(), _tightLeps10[1]->pt(), _tightLeps10[1]->eta() );
+    _weight *= _wzMod->LeptonScaleFactorWW (_tightLeps10[2]->pdgId(), _tightLeps10[2]->pt(), _tightLeps10[2]->eta() );
   }
-*/
+
   
-  setWorkflow(kWZSM_3l); fillWZhistos(&l3,"WZSMstep0"); setWorkflow(kWZSM);
+  setWorkflow(kWZSM_3l); fillWZhistos(&_tightLeps10,"WZSMstep0"); setWorkflow(kWZSM);
 
 
   CandList candWZ =_wzMod->bestWZ( (&_tightLeps10), _idxLZ1, _idxLZ2, _idxLW);
@@ -787,12 +1046,19 @@ WZsynchro::WZ3lSelection() {
     if(std::abs(_lZ2Cand->pdgId())!=13 ) return;
     if(std::abs(_lWCand->pdgId())!=13 ) return;
   }
+
+  if(_DoEventDump){
+    EventDump();
+    return;
+  }
+
   
   if ( !WLepton( _idxLW, _lWCand->pdgId() ) ) return;
-  if ( std::abs(_lWCand->pdgId())==11 ){
-    _weight /= _wzMod->GCleptonScaleFactorWW(_lWCand->pdgId(), _lWCand->pt(), _lWCand->eta() );
-    _weight *= _wzMod->GCTightElectronScaleFactorWW(_lWCand->pt(), _lWCand->eta() );
-  }
+  
+  if ( !_vc->get("isData") && std::abs(_lWCand->pdgId())==11 ){
+    _weight /= _wzMod->LeptonScaleFactorWW(_lWCand->pdgId(), _lWCand->pt(), _lWCand->eta() );
+    _weight *= _wzMod->TightElectronScaleFactorWW(_lWCand->pt(), _lWCand->eta() );
+  } 
   
   if(!makeCut( 1>0, "WZ candidate" ) ) return;
   //if (_WZstep == 1) fillWZhistos(0.0, 0.0);
@@ -801,7 +1067,7 @@ WZsynchro::WZ3lSelection() {
   
 
    
-  if (std::abs(_wzMod->bestmZ(&_tightLeps10) - 91) > 15) return;
+  if (std::abs(_wzMod->bestmZ(&candWZ) - 91) > 15) return;
   
   if(!makeCut( _lZ1Cand->pt()>20, "Z sel" ) ) return;
   //if (_WZstep == 2) fillWZhistos(0.0, 0.0);
@@ -858,7 +1124,7 @@ WZsynchro::WZ3lSelection() {
   if(!makeCut(_nBJets==0,"0 b-jets")) return;
   //if (_WZstep == 6) fillWZhistos(0.0, 0.0);
   setWorkflow(kWZSM_3lwzZselWselM3lNbj0); fillWZhistos(&candWZ,"WZSMstep6"); setWorkflow(kWZSM);
-  if(_DoEventDump) EventDump();
+  //if(_DoEventDump) EventDump();
    
   setWorkflow(kGlobal); 
 }
@@ -1750,6 +2016,106 @@ WZsynchro::selectLeptons3l() {
            cout<<" mediumMuonId: "<< _vc->get("LepGood_mediumMuonId"     , il)<<"  relIso04: "<< _vc->get("LepGood_relIso04"     , il)<<"   dr03TkSumPt: "<< _vc->get("LepGood_dr03TkSumPt"            , il)<<endl;
     }    
     */
+   /*
+    cout << _lepflav << endl;
+    cout << _DoEventDump << endl;
+    if(_DoEventDump){
+      if (_lepflav=="eee" && std::abs(_vc->get("LepGood_pdgId", il))==11){
+                  //             run:lu:evt:ptZ1:etZ1:phZ1:rIZ1:metP:metF:eSc1:dEI1:dFI1:sie1:HoE1:E-p1:ecI1:hcI1:trI1:loH1:dxy1:d_z1:vet1
+          txt_eventdump << Form("%lu:%d:%lu:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.0f:%.4f:%.4f:%.4f\n",
+                  (unsigned long)_vc->get("run"),
+			      (int)_vc->get("lumi"),
+			      (unsigned long)_vc->get("evt"),
+			      _vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_eta", il),
+			      _vc->get("LepGood_phi", il),
+			      _vc->get("LepGood_relIso03", il),
+			      _vc->get("met_pt"),
+			      _vc->get("met_phi"),
+			      _vc->get("LepGood_etaSc"             , il),
+			      _vc->get("LepGood_dEtaScTrkIn"             , il),
+			      _vc->get("LepGood_dPhiScTrkIn"             , il),
+			      _vc->get("LepGood_sigmaIEtaIEta"             , il),
+			      _vc->get("LepGood_hadronicOverEm"             , il),
+			      _vc->get("LepGood_eInvMinusPInv"             , il),
+			      _vc->get("LepGood_ecalPFClusterIso", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_hcalPFClusterIso", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_dr03TkSumPt", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_lostHits"                , il),
+			       std::abs(_vc->get("LepGood_dxy"           , il)),
+			       std::abs(_vc->get("LepGood_dz"           , il)),
+			       std::abs(_vc->get("LepGood_convVeto"           , il)) );
+
+         //             run:lu:evt:ptZ1:etZ1:phZ1:rIZ1:metP:metF:eSc1:dEI1:dFI1:sie1:HoE1:E-p1:ecI1:hcI1:trI1:loH1:dxy1:d_z1:vet1:HLT:pId:tiId
+          cout << Form("%lu:%d:%lu:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.0f:%.4f:%.4f:%.0f:%d:%.0f:%.0f\n",
+                  (unsigned long)_vc->get("run"),
+			      (int)_vc->get("lumi"),
+			      (unsigned long)_vc->get("evt"),
+			      _vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_eta", il),
+			      _vc->get("LepGood_phi", il),
+			      _vc->get("LepGood_relIso03", il),
+			      _vc->get("met_pt"),
+			      _vc->get("met_phi"),
+			      _vc->get("LepGood_etaSc"             , il),
+			      _vc->get("LepGood_dEtaScTrkIn"             , il),
+			      _vc->get("LepGood_dPhiScTrkIn"             , il),
+			      _vc->get("LepGood_sigmaIEtaIEta"             , il),
+			      _vc->get("LepGood_hadronicOverEm"             , il),
+			      _vc->get("LepGood_eInvMinusPInv"             , il),
+			      _vc->get("LepGood_ecalPFClusterIso", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_hcalPFClusterIso", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_dr03TkSumPt", il)/_vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_lostHits"                , il),
+			       std::abs(_vc->get("LepGood_dxy"           , il)),
+			       std::abs(_vc->get("LepGood_dz"           , il)),
+			       std::abs(_vc->get("LepGood_convVeto"           , il)),
+			       passHLT(),
+			       _vc->get("LepGood_pdgId", il),
+			       _vc->get("LepGood_tightId", il) );
+
+           
+      } else if (_lepflav=="mmm" && std::abs(_vc->get("LepGood_pdgId", il))==13){
+                       //         run:lu:evt:ptZ1:etZ1:phZ1:rIZ1:metP:metF:muid:d_xy:d__z:tIso
+           txt_eventdump << Form("%lu:%d:%lu:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f\n",
+			      (unsigned long)_vc->get("run"),
+			      (int)_vc->get("lumi"),
+			      (unsigned long)_vc->get("evt"),
+			      _vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_eta", il),
+			      _vc->get("LepGood_phi", il),
+			      _vc->get("LepGood_relIso04", il),
+			      _vc->get("met_pt"),
+			      _vc->get("met_phi"),
+			      _vc->get("LepGood_mediumMuonId"             , il),
+			       std::abs(_vc->get("LepGood_dxy"           , il)),
+			       std::abs(_vc->get("LepGood_dz"           , il)),
+			       _vc->get("LepGood_dr03TkSumPt", il)/_vc->get("LepGood_pt", il) );
+
+              //         run:lu:evt:ptZ1:etZ1:phZ1:rIZ1:metP:metF:muid:d_xy:d__z:tIso:HLT:pId
+           cout << Form("%lu:%d:%lu:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%d:%.0f\n",
+			      (unsigned long)_vc->get("run"),
+			      (int)_vc->get("lumi"),
+			      (unsigned long)_vc->get("evt"),
+			      _vc->get("LepGood_pt", il),
+			      _vc->get("LepGood_eta", il),
+			      _vc->get("LepGood_phi", il),
+			      _vc->get("LepGood_relIso04", il),
+			      _vc->get("met_pt"),
+			      _vc->get("met_phi"),
+			      _vc->get("LepGood_mediumMuonId"             , il),
+			       std::abs(_vc->get("LepGood_dxy"           , il)),
+			       std::abs(_vc->get("LepGood_dz"           , il)),
+			       _vc->get("LepGood_dr03TkSumPt", il)/_vc->get("LepGood_pt", il),
+			       passHLT(),
+			       _vc->get("LepGood_pdgId", il) );           
+    
+      }
+    }
+
+    */
+    _rawLeps.push_back(cand);
+    _rawLepsIdx.push_back(il); 
     
     if(!looseLepton(il, cand->pdgId() ) ) continue;
     if(cand->pt()<10) continue;
@@ -1764,6 +2130,27 @@ WZsynchro::selectLeptons3l() {
     _tightLeps20.push_back(cand);
     _tightLeps20Idx.push_back(il);
     
+  }
+  
+  
+  if (!_vc->get("isData")){
+    for(size_t igl=0;igl<_vc->get("ngenLep"); igl++) {
+
+      bool isMu=std::abs(_vc->get("genLep_pdgId", igl))==13;
+
+      Candidate* cand=Candidate::create(_vc->get("genLep_pt", igl),
+				      _vc->get("genLep_eta", igl),
+				      _vc->get("genLep_phi", igl),
+				      _vc->get("genLep_pdgId", igl),
+				      _vc->get("genLep_charge", igl),
+				      isMu?0.105:0.0005);
+    
+      //if(!genLepton(il, cand->pdgId() ) ) continue;
+      //if(cand->pt()<10) continue;
+      _genLeps.push_back(cand);
+      _genLepsIdx.push_back(igl);  
+
+    }
   }
 }
 
@@ -1910,22 +2297,22 @@ void WZsynchro::fillWZhistos(CandList* leps, string reg) {
         //fill("lepZ1_jetPtRatio_"+reg, _vc->get("LepGood_jetPtRatio", _idxLZ1)           , _weight);
         //fill("lepZ1_jetPtRel_"+reg  , _vc->get("LepGood_jetPtRel", _idxLZ1)             , _weight);
         fill("lepZ1_miniRelIso_"+reg, _vc->get("LepGood_miniRelIso", _idxLZ1)             , _weight);
-        fill("lepZ1_Pt_"+reg        , _vc->get("LepGood_pt", _idxLZ1)                     , _weight);
-        fill("lepZ1_Eta_"+reg       , fabs(_vc->get("LepGood_eta", _idxLZ1))              , _weight);
+        fill("lepZ1_Pt_"+reg        , _lZ1Cand->pt()                     , _weight);
+        fill("lepZ1_Eta_"+reg       , fabs(_lZ1Cand->eta())              , _weight);
         fill("lepZ1_SIP3D_"+reg     , _vc->get("LepGood_sip3d", _idxLZ1)                  , _weight);
   
         //fill("lepZ2_jetPtRatio_"+reg, _vc->get("LepGood_jetPtRatio", _idxLZ2)           , _weight);
         //fill("lepZ2_jetPtRel_"+reg  , _vc->get("LepGood_jetPtRel", _idxLZ2)             , _weight);
         fill("lepZ2_miniRelIso_"+reg, _vc->get("LepGood_miniRelIso", _idxLZ2)             , _weight);
-        fill("lepZ2_Pt_"+reg        , _vc->get("LepGood_pt", _idxLZ2)                     , _weight);
-        fill("lepZ2_Eta_"+reg       , fabs(_vc->get("LepGood_eta", _idxLZ2))              , _weight);
+        fill("lepZ2_Pt_"+reg        , _lZ2Cand->pt()                      , _weight);
+        fill("lepZ2_Eta_"+reg       , fabs(_lZ2Cand->eta())              , _weight);
         fill("lepZ2_SIP3D_"+reg     , _vc->get("LepGood_sip3d", _idxLZ2)                  , _weight);
   
         //fill("lepW_jetPtRatio_"+reg, _vc->get("LepGood_jetPtRatio", _idxLW)           , _weight);
         //fill("lepW_jetPtRel_"+reg  , _vc->get("LepGood_jetPtRel", _idxLW)             , _weight);
         fill("lepW_miniRelIso_"+reg, _vc->get("LepGood_miniRelIso", _idxLW)             , _weight);
-        fill("lepW_Pt_"+reg        , _vc->get("LepGood_pt", _idxLW)                     , _weight);
-        fill("lepW_Eta_"+reg       , fabs(_vc->get("LepGood_eta", _idxLW))              , _weight);
+        fill("lepW_Pt_"+reg        , _lWCand->pt()                      , _weight);
+        fill("lepW_Eta_"+reg       , fabs(_lWCand->eta())              , _weight);
         fill("lepW_SIP3D_"+reg     , _vc->get("LepGood_sip3d", _idxLW)                  , _weight);
       }
       //fill("MET"            , _vc->get("met_pt")        , _weight);
@@ -1940,7 +2327,7 @@ void WZsynchro::fillWZhistos(CandList* leps, string reg) {
       //fill("NJets40_"+reg        , _vc->get("nJet40")        , _weight); // not present in MiniAODv2 Heppy Trees
 
   }
-  if (_DoCheckPlots && reg.find("0")==std::string::npos) {
+  if (_DoCheckPlots) {
 /*
     if (abs(_vc->get("LepGood_pdgId",_idxLZ1))==11) fill("ecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLZ1)          , _weight);
     if (abs(_vc->get("LepGood_pdgId",_idxLZ2))==11) fill("ecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLZ2)          , _weight);
@@ -1953,6 +2340,32 @@ void WZsynchro::fillWZhistos(CandList* leps, string reg) {
     if (abs(_vc->get("LepGood_pdgId",_idxLW ))==11) fill("trackIso_"+reg, _vc->get("LepGood_trackIso", _idxLW )          , _weight);
     */
     
+    for (unsigned int ilep=0; ilep < leps->size(); ilep++){
+      if ( std::abs(leps->at(ilep)->pdgId()) == 11 ){
+        fill("ecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", ilep)          , _weight);
+        fill("hcalPFClusterIso_"+reg, _vc->get("LepGood_hcalPFClusterIso", ilep)          , _weight);
+        fill("dr03TkSumPt_"+reg, _vc->get("LepGood_dr03TkSumPt", ilep)          , _weight);
+        fill("RelecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", ilep)/_vc->get("LepGood_pt", ilep)          , _weight);    
+        fill("RelhcalPFClusterIso_"+reg, _vc->get("LepGood_hcalPFClusterIso", ilep)/_vc->get("LepGood_pt", ilep)          , _weight);
+        fill("Reldr03TkSumPt_"+reg, _vc->get("LepGood_dr03TkSumPt", ilep)/_vc->get("LepGood_pt", ilep)          , _weight); 
+
+        fill("etaSc_"+reg, _vc->get("LepGood_etaSc", ilep)          , _weight);
+        fill("dEtaScTrkIn_"+reg, _vc->get("LepGood_dEtaScTrkIn", ilep)          , _weight);
+        fill("dPhiScTrkIn_"+reg, _vc->get("LepGood_dPhiScTrkIn", ilep)          , _weight);    
+        fill("sigmaIEtaIEta_"+reg, _vc->get("LepGood_sigmaIEtaIEta_full5x", ilep)          , _weight);
+        fill("hadronicOverEm_"+reg, _vc->get("LepGood_hadronicOverEm", ilep)          , _weight);
+        fill("eInvMinusPInv_"+reg, _vc->get("LepGood_eInvMinusPInv", ilep)          , _weight);      
+        fill("relIso03_"+reg, _vc->get("LepGood_relIso03", ilep)          , _weight);
+        fill("lostHits_"+reg, _vc->get("LepGood_lostHits", ilep)          , _weight);
+        fill("dxy_"+reg, _vc->get("LepGood_dxy", ilep)          , _weight);       
+        fill("dz_"+reg, _vc->get("LepGood_dz", ilep)          , _weight);       
+        fill("convVeto_"+reg, _vc->get("LepGood_convVeto", ilep)          , _weight);
+      }
+    }
+
+
+
+    /*
     fill("ecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLZ1)          , _weight);
     fill("ecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLZ2)          , _weight);
     fill("ecalPFClusterIso_"+reg, _vc->get("LepGood_ecalPFClusterIso", _idxLW )          , _weight);
@@ -1971,8 +2384,11 @@ void WZsynchro::fillWZhistos(CandList* leps, string reg) {
     fill("Reldr03TkSumPt_"+reg, _vc->get("LepGood_dr03TkSumPt", _idxLZ1)/_vc->get("LepGood_pt", _idxLZ1)          , _weight);
     fill("Reldr03TkSumPt_"+reg, _vc->get("LepGood_dr03TkSumPt", _idxLZ2)/_vc->get("LepGood_pt", _idxLZ2)          , _weight);
     fill("Reldr03TkSumPt_"+reg, _vc->get("LepGood_dr03TkSumPt", _idxLW )/_vc->get("LepGood_pt", _idxLW)           , _weight);
+    */
   }
 }
+
+
 
 
 bool
@@ -2011,6 +2427,7 @@ void WZsynchro::EventDump(){
   //if (_vc->get("evt") > 60000) return;
   //if (_vc->get("evt") < 10000 || _vc->get("evt") > 750000) return;
   //txt_eventdump << (unsigned long)_vc->get("evt") << endl;
+  //txt_eventdump << Form("%lu:%lu:%llu\n", (unsigned long)_vc->get("run"), (unsigned long)_vc->get("lumi"), (unsigned long long)_vc->get("evt") );
   /*
   for (int i=0; i<3; i++){
       //int index = AnalysisLeptons[i].index;
@@ -2108,6 +2525,7 @@ void WZsynchro::EventDump(){
 			       _vc->get("LepGood_dr03TkSumPt", _idxLW)/_vc->get("LepGood_pt", _idxLW) );
     txt_eventdump << endl;    
 */
+/*
   txt_eventdump << Form("%d:%d:%d:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.0f:%.0f:%.0f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f",
 			      (unsigned long)_vc->get("run"),
 			      (unsigned long)_vc->get("lumi"),
@@ -2144,6 +2562,217 @@ void WZsynchro::EventDump(){
 			       _vc->get("LepGood_dr03TkSumPt", _idxLZ2)/_vc->get("LepGood_pt", _idxLZ2),
 			       _vc->get("LepGood_dr03TkSumPt", _idxLW)/_vc->get("LepGood_pt", _idxLW) );
     txt_eventdump << endl;  
+    */
+    if (_lepflav=="eee"){
+                  /*             run:lu:evt:ptZ1:etZ1:phZ1:rIZ1:ptZ2:etZ2:phZ2:rIZ2:ptW1:etW1:phW1:rIW1:dR12:dR1W:dR2W:mllZ:metP:metF:m_3l:nBje:eSc1:eSc2:eScW:dEI1:dEI2:dEIW:dFI1:dFI2:dFIW:sie1:sie2:sieW:HoE1:HoE2:HoEW:E-p1:E-p2:E-pW:
+ecI1:ecI2:ecW3:hcI1:hcI2:hcIW:trI1:trI2:trIW:loH1:loH2:loHW:dxy1:dxy2:dxyW:d_z1:d_z2:d_zW:vet1:vet2:vetW*/
+          txt_eventdump << Form("%lu:%d:%lu:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.0f:%.0f:%.0f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f\n",
+                  (unsigned long)_vc->get("run"),
+			      (int)_vc->get("lumi"),
+			      (unsigned long)_vc->get("evt"),
+			      _lZ1Cand->pt(),
+			      _vc->get("LepGood_eta", _idxLZ1),
+			      _vc->get("LepGood_phi", _idxLZ1),
+			      _vc->get("LepGood_relIso03", _idxLZ1),
+			      _lZ2Cand->pt(),
+			      _vc->get("LepGood_eta", _idxLZ2),
+			      _vc->get("LepGood_phi", _idxLZ2),
+			      _vc->get("LepGood_relIso03", _idxLZ2),
+			      _lWCand->pt(),
+			      _vc->get("LepGood_eta", _idxLW),
+			      _vc->get("LepGood_phi", _idxLW),
+			      _vc->get("LepGood_relIso03", _idxLW),
+			      _lZ1Cand->dR(_lZ2Cand),
+			      _lZ1Cand->dR(_lWCand),
+			      _lZ2Cand->dR(_lWCand),
+			      Candidate::create(_lZ1Cand, _lZ2Cand)->mass(),
+			      _vc->get("met_pt"),
+			      _vc->get("met_phi"),
+			      _wzMod->m3lTight(&_tightLeps10),
+			      _nBJets,
+			      _vc->get("LepGood_etaSc"             , _idxLZ1),
+			      _vc->get("LepGood_etaSc"             , _idxLZ2),
+			      _vc->get("LepGood_etaSc"             , _idxLW),
+			      _vc->get("LepGood_dEtaScTrkIn"             , _idxLZ1),
+			      _vc->get("LepGood_dEtaScTrkIn"             , _idxLZ2),
+			      _vc->get("LepGood_dEtaScTrkIn"             , _idxLW),
+			      _vc->get("LepGood_dPhiScTrkIn"             , _idxLZ1),
+			      _vc->get("LepGood_dPhiScTrkIn"             , _idxLZ2),
+			      _vc->get("LepGood_dPhiScTrkIn"             , _idxLW),
+			      _vc->get("LepGood_sigmaIEtaIEta"             , _idxLZ1),
+			      _vc->get("LepGood_sigmaIEtaIEta"             , _idxLZ2),
+			      _vc->get("LepGood_sigmaIEtaIEta"             , _idxLW),
+			      _vc->get("LepGood_hadronicOverEm"             , _idxLZ1),
+			      _vc->get("LepGood_hadronicOverEm"             , _idxLZ2),
+			      _vc->get("LepGood_hadronicOverEm"             , _idxLW),
+			      _vc->get("LepGood_eInvMinusPInv"             , _idxLZ1),
+			      _vc->get("LepGood_eInvMinusPInv"             , _idxLZ2),
+			      _vc->get("LepGood_eInvMinusPInv"             , _idxLW),
+			      _vc->get("LepGood_ecalPFClusterIso", _idxLZ1)/_vc->get("LepGood_pt", _idxLZ1),
+			      _vc->get("LepGood_ecalPFClusterIso", _idxLZ2)/_vc->get("LepGood_pt", _idxLZ2),
+			      _vc->get("LepGood_ecalPFClusterIso", _idxLW)/_vc->get("LepGood_pt", _idxLW),
+			      _vc->get("LepGood_hcalPFClusterIso", _idxLZ1)/_vc->get("LepGood_pt", _idxLZ1),
+			      _vc->get("LepGood_hcalPFClusterIso", _idxLZ2)/_vc->get("LepGood_pt", _idxLZ2),
+			      _vc->get("LepGood_hcalPFClusterIso", _idxLW)/_vc->get("LepGood_pt", _idxLW),
+			      _vc->get("LepGood_dr03TkSumPt", _idxLZ1)/_vc->get("LepGood_pt", _idxLZ1),
+			      _vc->get("LepGood_dr03TkSumPt", _idxLZ2)/_vc->get("LepGood_pt", _idxLZ2),
+			      _vc->get("LepGood_dr03TkSumPt", _idxLW)/_vc->get("LepGood_pt", _idxLW),
+			      _vc->get("LepGood_lostHits"                , _idxLZ1),
+			      _vc->get("LepGood_lostHits"                , _idxLZ2),
+			      _vc->get("LepGood_lostHits"                , _idxLW),
+			       std::abs(_vc->get("LepGood_dxy"           , _idxLZ1)),
+			       std::abs(_vc->get("LepGood_dxy"           , _idxLZ2)),
+			       std::abs(_vc->get("LepGood_dxy"           , _idxLW)),
+			       std::abs(_vc->get("LepGood_dz"           , _idxLZ1)),
+			       std::abs(_vc->get("LepGood_dz"           , _idxLZ2)),
+			       std::abs(_vc->get("LepGood_dz"           , _idxLW)),
+			       std::abs(_vc->get("LepGood_convVeto"           , _idxLZ1)),
+			       std::abs(_vc->get("LepGood_convVeto"           , _idxLZ2)),
+			       std::abs(_vc->get("LepGood_convVeto"           , _idxLW)) );
+
+
+          cout << Form("%lu:%d:%lu:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.0f:%.0f:%.0f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f\n",
+                  (unsigned long)_vc->get("run"),
+			      (int)_vc->get("lumi"),
+			      (unsigned long)_vc->get("evt"),
+			      _vc->get("LepGood_pt", _idxLZ1),
+			      _vc->get("LepGood_eta", _idxLZ1),
+			      _vc->get("LepGood_phi", _idxLZ1),
+			      _vc->get("LepGood_relIso03", _idxLZ1),
+			      _vc->get("LepGood_pt", _idxLZ2),
+			      _vc->get("LepGood_eta", _idxLZ2),
+			      _vc->get("LepGood_phi", _idxLZ2),
+			      _vc->get("LepGood_relIso03", _idxLZ2),
+			      _vc->get("LepGood_pt", _idxLW),
+			      _vc->get("LepGood_eta", _idxLW),
+			      _vc->get("LepGood_phi", _idxLW),
+			      _vc->get("LepGood_relIso03", _idxLW),
+			      _lZ1Cand->dR(_lZ2Cand),
+			      _lZ1Cand->dR(_lWCand),
+			      _lZ2Cand->dR(_lWCand),
+			      Candidate::create(_lZ1Cand, _lZ2Cand)->mass(),
+			      _vc->get("met_pt"),
+			      _vc->get("met_phi"),
+			      _wzMod->m3lTight(&_tightLeps10),
+			      _nBJets,
+			      _vc->get("LepGood_etaSc"             , _idxLZ1),
+			      _vc->get("LepGood_etaSc"             , _idxLZ2),
+			      _vc->get("LepGood_etaSc"             , _idxLW),
+			      _vc->get("LepGood_dEtaScTrkIn"             , _idxLZ1),
+			      _vc->get("LepGood_dEtaScTrkIn"             , _idxLZ2),
+			      _vc->get("LepGood_dEtaScTrkIn"             , _idxLW),
+			      _vc->get("LepGood_dPhiScTrkIn"             , _idxLZ1),
+			      _vc->get("LepGood_dPhiScTrkIn"             , _idxLZ2),
+			      _vc->get("LepGood_dPhiScTrkIn"             , _idxLW),
+			      _vc->get("LepGood_sigmaIEtaIEta"             , _idxLZ1),
+			      _vc->get("LepGood_sigmaIEtaIEta"             , _idxLZ2),
+			      _vc->get("LepGood_sigmaIEtaIEta"             , _idxLW),
+			      _vc->get("LepGood_hadronicOverEm"             , _idxLZ1),
+			      _vc->get("LepGood_hadronicOverEm"             , _idxLZ2),
+			      _vc->get("LepGood_hadronicOverEm"             , _idxLW),
+			      _vc->get("LepGood_eInvMinusPInv"             , _idxLZ1),
+			      _vc->get("LepGood_eInvMinusPInv"             , _idxLZ2),
+			      _vc->get("LepGood_eInvMinusPInv"             , _idxLW),
+			      _vc->get("LepGood_ecalPFClusterIso", _idxLZ1)/_vc->get("LepGood_pt", _idxLZ1),
+			      _vc->get("LepGood_ecalPFClusterIso", _idxLZ2)/_vc->get("LepGood_pt", _idxLZ2),
+			      _vc->get("LepGood_ecalPFClusterIso", _idxLW)/_vc->get("LepGood_pt", _idxLW),
+			      _vc->get("LepGood_hcalPFClusterIso", _idxLZ1)/_vc->get("LepGood_pt", _idxLZ1),
+			      _vc->get("LepGood_hcalPFClusterIso", _idxLZ2)/_vc->get("LepGood_pt", _idxLZ2),
+			      _vc->get("LepGood_hcalPFClusterIso", _idxLW)/_vc->get("LepGood_pt", _idxLW),
+			      _vc->get("LepGood_dr03TkSumPt", _idxLZ1)/_vc->get("LepGood_pt", _idxLZ1),
+			      _vc->get("LepGood_dr03TkSumPt", _idxLZ2)/_vc->get("LepGood_pt", _idxLZ2),
+			      _vc->get("LepGood_dr03TkSumPt", _idxLW)/_vc->get("LepGood_pt", _idxLW),
+			      _vc->get("LepGood_lostHits"                , _idxLZ1),
+			      _vc->get("LepGood_lostHits"                , _idxLZ2),
+			      _vc->get("LepGood_lostHits"                , _idxLW),
+			       std::abs(_vc->get("LepGood_dxy"           , _idxLZ1)),
+			       std::abs(_vc->get("LepGood_dxy"           , _idxLZ2)),
+			       std::abs(_vc->get("LepGood_dxy"           , _idxLW)),
+			       std::abs(_vc->get("LepGood_dz"           , _idxLZ1)),
+			       std::abs(_vc->get("LepGood_dz"           , _idxLZ2)),
+			       std::abs(_vc->get("LepGood_dz"           , _idxLW)),
+			       std::abs(_vc->get("LepGood_convVeto"           , _idxLZ1)),
+			       std::abs(_vc->get("LepGood_convVeto"           , _idxLZ2)),
+			       std::abs(_vc->get("LepGood_convVeto"           , _idxLW)) );
+
+    } else if (_lepflav=="mmm"){
+			      /*         run:lu:evt:ptZ1:etZ1:phZ1:rIZ1:ptZ2:etZ2:phZ2:rIZ2:ptW1:etW1:phW1:rIW1:dR12:dR1W:dR2W:mllZ:metP:metF:m_3l:nBje*/
+      txt_eventdump << Form("%lu:%d:%lu:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.0f:%.0f:%.0f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f\n",
+			      (unsigned long)_vc->get("run"),
+			      (int)_vc->get("lumi"),
+			      (unsigned long)_vc->get("evt"),
+			      _vc->get("LepGood_pt", _idxLZ1),
+			      _vc->get("LepGood_eta", _idxLZ1),
+			      _vc->get("LepGood_phi", _idxLZ1),
+			      _vc->get("LepGood_relIso04", _idxLZ1),
+			      _vc->get("LepGood_pt", _idxLZ2),
+			      _vc->get("LepGood_eta", _idxLZ2),
+			      _vc->get("LepGood_phi", _idxLZ2),
+			      _vc->get("LepGood_relIso04", _idxLZ2),
+			      _vc->get("LepGood_pt", _idxLW),
+			      _vc->get("LepGood_eta", _idxLW),
+			      _vc->get("LepGood_phi", _idxLW),
+			      _vc->get("LepGood_relIso04", _idxLW),
+			      _lZ1Cand->dR(_lZ2Cand),
+			      _lZ1Cand->dR(_lWCand),
+			      _lZ2Cand->dR(_lWCand),
+			      Candidate::create(_lZ1Cand, _lZ2Cand)->mass(),
+			      _vc->get("met_pt"),
+			      _vc->get("met_phi"),
+			      _wzMod->m3lTight(&_tightLeps10),
+			      _nBJets,
+			      _vc->get("LepGood_mediumMuonId"             , _idxLZ1),
+			      _vc->get("LepGood_mediumMuonId"             , _idxLZ2),
+			      _vc->get("LepGood_mediumMuonId"             , _idxLW),
+			       std::abs(_vc->get("LepGood_dxy"           , _idxLZ1)),
+			       std::abs(_vc->get("LepGood_dxy"           , _idxLZ2)),
+			       std::abs(_vc->get("LepGood_dxy"           , _idxLW)),
+			       std::abs(_vc->get("LepGood_dz"           , _idxLZ1)),
+			       std::abs(_vc->get("LepGood_dz"           , _idxLZ2)),
+			       std::abs(_vc->get("LepGood_dz"           , _idxLW)),
+			       _vc->get("LepGood_dr03TkSumPt", _idxLZ1)/_vc->get("LepGood_pt", _idxLZ1),
+			       _vc->get("LepGood_dr03TkSumPt", _idxLZ2)/_vc->get("LepGood_pt", _idxLZ2),
+			       _vc->get("LepGood_dr03TkSumPt", _idxLW)/_vc->get("LepGood_pt", _idxLW) );
+
+      cout << Form("%lu:%d:%lu:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.0f:%.0f:%.0f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f:%.4f\n",
+			      (unsigned long)_vc->get("run"),
+			      (int)_vc->get("lumi"),
+			      (unsigned long)_vc->get("evt"),
+			      _vc->get("LepGood_pt", _idxLZ1),
+			      _vc->get("LepGood_eta", _idxLZ1),
+			      _vc->get("LepGood_phi", _idxLZ1),
+			      _vc->get("LepGood_relIso04", _idxLZ1),
+			      _vc->get("LepGood_pt", _idxLZ2),
+			      _vc->get("LepGood_eta", _idxLZ2),
+			      _vc->get("LepGood_phi", _idxLZ2),
+			      _vc->get("LepGood_relIso04", _idxLZ2),
+			      _vc->get("LepGood_pt", _idxLW),
+			      _vc->get("LepGood_eta", _idxLW),
+			      _vc->get("LepGood_phi", _idxLW),
+			      _vc->get("LepGood_relIso04", _idxLW),
+			      _lZ1Cand->dR(_lZ2Cand),
+			      _lZ1Cand->dR(_lWCand),
+			      _lZ2Cand->dR(_lWCand),
+			      Candidate::create(_lZ1Cand, _lZ2Cand)->mass(),
+			      _vc->get("met_pt"),
+			      _vc->get("met_phi"),
+			      _wzMod->m3lTight(&_tightLeps10),
+			      _nBJets,
+			      _vc->get("LepGood_mediumMuonId"             , _idxLZ1),
+			      _vc->get("LepGood_mediumMuonId"             , _idxLZ2),
+			      _vc->get("LepGood_mediumMuonId"             , _idxLW),
+			       std::abs(_vc->get("LepGood_dxy"           , _idxLZ1)),
+			       std::abs(_vc->get("LepGood_dxy"           , _idxLZ2)),
+			       std::abs(_vc->get("LepGood_dxy"           , _idxLW)),
+			       std::abs(_vc->get("LepGood_dz"           , _idxLZ1)),
+			       std::abs(_vc->get("LepGood_dz"           , _idxLZ2)),
+			       std::abs(_vc->get("LepGood_dz"           , _idxLW)),
+			       _vc->get("LepGood_dr03TkSumPt", _idxLZ1)/_vc->get("LepGood_pt", _idxLZ1),
+			       _vc->get("LepGood_dr03TkSumPt", _idxLZ2)/_vc->get("LepGood_pt", _idxLZ2),
+			       _vc->get("LepGood_dr03TkSumPt", _idxLW)/_vc->get("LepGood_pt", _idxLW) );    
+    
+    }
+      
 }
 
 
