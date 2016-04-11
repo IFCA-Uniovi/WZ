@@ -69,7 +69,7 @@ void template_plotsWZv2_25ns(std::string var,std::string fileName){
   //Lumis( or XSections ) pb-1 & KFactors ************************************
   string Norm="";
   
-  float lumi=1280.226; //pb-1 19470 // runs 
+  float lumi=2318.; //pb-1 19470 // runs 
   float energy=13; //TeV
 
   bool useXS=true;
@@ -118,6 +118,7 @@ void template_plotsWZv2_25ns(std::string var,std::string fileName){
   md.anConf.addSample( "Tree_WWTo2L2Nu_0"        , "WW"         ,  kAzure-7 );
   //md.anConf.addSample( "Tree_WW_0"               , "WW"         ,  kAzure-7);
   md.anConf.addSample( "Tree_WGToLNuG_0"         , "W#gamma"    ,  kBlue);
+  md.anConf.addSample( "Tree_ZGTo2LG_0"          , "Z#gamma"    ,  kBlue-10);
   md.anConf.addSample( "Tree_ZZ_0"               , "ZZ"         ,  kRed+3);
   md.anConf.addSample( "Tree_GGHZZ4L_0"          , "ZZ"         ,  kRed+3);
   md.anConf.addSample( "Tree_TTJets"             , "t#bar{t}"   ,  kYellow  );
@@ -130,18 +131,19 @@ void template_plotsWZv2_25ns(std::string var,std::string fileName){
   md.anConf.addSample( "Tree_WWZ_0"              , "VVV"        ,  kYellow-6 );
   md.anConf.addSample( "Tree_WZZ_0"              , "VVV"        ,  kYellow-6 );
   md.anConf.addSample( "Tree_ZZZ_0"              , "VVV"        ,  kYellow-6 );
+  md.anConf.addSample( "Tree_tZq_ll_0"           , "tZ"         ,  kMagenta+4  );
   
   // the order MATTERS!!!
 
   md.anConf.addSample( "Tree_DoubleEG_Run2015C_05Oct_0"       , "data", kBlack);  
   md.anConf.addSample( "Tree_DoubleEG_Run2015D_05Oct_0"       , "data", kBlack);
-  md.anConf.addSample( "Tree_DoubleEG_Run2015D_v4_0"          , "data", kBlack);
+  md.anConf.addSample( "Tree_DoubleEG_Run2015D_v4Full_0"          , "data", kBlack);
   md.anConf.addSample( "Tree_DoubleMuon_Run2015C_05Oct_0"     , "data", kBlack);
   md.anConf.addSample( "Tree_DoubleMuon_Run2015D_05Oct_0"     , "data", kBlack);
-  md.anConf.addSample( "Tree_DoubleMuon_Run2015D_v4_0"        , "data", kBlack);
+  md.anConf.addSample( "Tree_DoubleMuon_Run2015D_v4Full_0"        , "data", kBlack);
   md.anConf.addSample( "Tree_MuonEG_Run2015C_05Oct_0"         , "data", kBlack);
   md.anConf.addSample( "Tree_MuonEG_Run2015D_05Oct_0"         , "data", kBlack);
-  md.anConf.addSample( "Tree_MuonEG_Run2015D_v4_0"            , "data", kBlack); 
+  md.anConf.addSample( "Tree_MuonEG_Run2015D_v4Full_0"            , "data", kBlack); 
 
 //  //===============================================================
   

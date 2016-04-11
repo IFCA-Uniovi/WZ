@@ -13,9 +13,14 @@ void listyieldsWZ25(std::string rootfile, int wzstep){
 	
 	
 	TFile *f = new TFile(rootfile.c_str());
-	TH1F *histo = (TH1F*)f->Get(Form("M3l_WZSMstep%i/Tree_WZTo3LNu_0",wzstep));
-	Int_t yield = histo->GetEntries();
+	//TH1F *histo = (TH1F*)f->Get(Form("MET_WZSMstep%i/Tree_WZTo3LNu_0",wzstep));
+	TH1F *histo = (TH1F*)f->Get(Form("MET_WZSMstep%i/WZTo3LNu",wzstep));
+	//Int_t yield = histo->GetEntries();
 
+	//Double_t integral = histo->Integral(0,100000000);
+	Double_t yield = histo->Integral(0,100000000)*4.42965/1980800*2260;
+
+	
 	
 	if (rootfile.find("all") != std::string::npos){
 		cout << "Selection step:	" << WZstepname[wzstep] << "	" << "all	" << yield << endl;

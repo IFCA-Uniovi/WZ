@@ -6,7 +6,7 @@
 
 
 
-void listyieldsWZ_test(std::string rootfile, int wzstep, std::string proc,int var){
+void listyieldsWZ_bkg(std::string rootfile, int wzstep, std::string proc,int var){
 	string WZstepname [7]= {"Three leptons",
 	"WZ candidate",
 	"Z sel",
@@ -38,13 +38,13 @@ void listyieldsWZ_test(std::string rootfile, int wzstep, std::string proc,int va
 	Double_t normfactor;
 	
 	if (proc.find("DYJetsToLL_M10to50") != std::string::npos) normfactor=18610/2.967885e+07;
-	else if (proc.find("DYJetsToLL_M50") != std::string::npos) normfactor=6025.2/2.874797e+07;
+	else if (proc.find("DYJetsToLL_M50") != std::string::npos) normfactor=6025.2/28747969;
 	else if (proc.find("_TW_") != std::string::npos) normfactor=35.6/995600;
 	else if (proc.find("TbarW") != std::string::npos) normfactor=35.6/988500;
 	else if (proc.find("TToLeptons_sch") != std::string::npos) normfactor=3.68064/984400;
 	else if (proc.find("TToLeptons_tch") != std::string::npos) normfactor=44.071956/3299800;
 	else if (proc.find("TbarToLeptons_tch") != std::string::npos) normfactor=26.2278/1680200;
-	else if (proc.find("TTJets") != std::string::npos) normfactor=831.8/8.970451e+07;
+	else if (proc.find("TTJets") != std::string::npos) normfactor=831.8/89704515;
 	else if (proc.find("TTWToLNu") != std::string::npos) normfactor=0.2043/252908;
 	else if (proc.find("TTZToLLNuNu") != std::string::npos) normfactor=0.2529/398000;
 	else if (proc.find("TTHnobb") != std::string::npos) normfactor=0.2151/1562609;
@@ -58,19 +58,19 @@ void listyieldsWZ_test(std::string rootfile, int wzstep, std::string proc,int va
 	else if (proc.find("_WWZ_") != std::string::npos) normfactor=0.1651/250000;
 	else if (proc.find("_WZZ_") != std::string::npos) normfactor=0.05565/250000;
 	else if (proc.find("_ZZZ_") != std::string::npos) normfactor=0.01398/250000;
-
+	else if (proc.find("_ZGTo2LG_") != std::string::npos) normfactor=117.864/4451319;
 	
-    Double_t yield_scaled = histo->Integral(0,100000000)*normfactor*2260;
+    Double_t yield_scaled = histo->Integral(0,100000000)*normfactor*2318;
 
 	if (rootfile.find("all") != std::string::npos){
-		cout << WZstepname[wzstep] << "\t" << variation[var] <<"\t" << integral << endl;
+		cout << WZstepname[wzstep] << "\tall\t" << yield_scaled << endl;
 	} else if (rootfile.find("eee") != std::string::npos) {
-		cout << "Selection step:	" << WZstepname[wzstep] << "	" << "eee	" << yield << endl;
+		cout << WZstepname[wzstep] << "\teee\t" << yield_scaled << endl;
 	} else if (rootfile.find("eem") != std::string::npos) {
-		cout << "Selection step:	" << WZstepname[wzstep] << "	" << "eem	" << yield << endl;
+		cout << WZstepname[wzstep] << "\teem\t" << yield_scaled << endl;
 	} else if (rootfile.find("mme") != std::string::npos) {
-		cout << "Selection step:	" << WZstepname[wzstep] << "	" << "mme	" << yield << endl;
+		cout << WZstepname[wzstep] << "\tmme\t" << yield_scaled << endl;
 	} else if (rootfile.find("mmm") != std::string::npos) {
-		cout << "Selection step:	" << WZstepname[wzstep] << "	" << "mmm	" << yield << endl;
+		cout << WZstepname[wzstep] << "\tmmm\t" << yield_scaled << endl;
 	}
 }

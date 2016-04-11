@@ -999,7 +999,7 @@ SusyModule::cleanJets(CandList* leptons,
     for(unsigned int il=0;il<leptons->size();il++) {
       it = cmap.find(leptons->at(il));
 
-      if(it->second.first > 0.4 ) continue;
+      if(it->second.first > 0.3 ) continue;
       if(it->second.second == jets[ij] ) {pass=false; break;}
     }
 

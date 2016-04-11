@@ -22,3 +22,4 @@ FILES += UncertaintyTest
 FILES += WZsynchro
 FILES += FakeRatioWZ
 FILES += WZsyst
+FILES += WZacc

@@ -1,20 +1,28 @@
  #!/bin/bash
 
+
+####### Use with rootfiles produced by analyzer WZacc
+
+
+
 # get WZ synchronization table
 #templateCFG=template_fakeEstim.cfg
 #templateCFG=template_WZ3l.cfg
 
-NAME="WZ3L_testnew"
-DIR="workdir/root/WZsynchro/"
+NAME="WZ3L_pdfWZ"
+DIR="workdir/root/WZacc/"
 #FLAVs=( "all" "eee" "eem" "mme" "mmm" )
-#FLAVs=( "all" )
-FLAVs=( "all" "eee" "eem" "mme" "mmm" )
-#WZSTEPs=( "0" "1" "2" "3" "4" "5" "6" )
-WZSTEPs=( "6" )
+FLAVs=( "all" )
+#FLAVs=( "eee" "eem" "mme" "mmm" )
+#WZSTEPs=( "4" "3" "2" "1" "0" )
+WZSTEPs=(  "6" )
+#VARs=( "0" "1" "2" "3" "4")
+#VARs=( "5" "6" "7" )
+VARs=( "567" )
 
-QSQRs=( "1001" )
-#QSQRs=( "1001" "1002" "1003" "1004" "1005" "1006" "1007" "1008" "1009" )
-#PDFrange=( "2001" "2100" )
+#QSQRs=( "1001" )
+QSQRs=( "1001" "1002" "1003" "1004" "1005" "1006" "1007" "1008" "1009" )
+PDFrange=( "2101" "2102" )
 
 LHEs=()
 nQSQR=0
@@ -40,13 +48,31 @@ if [ ! -d "workdir/logs" ]; then
   mkdir workdir/logs
 fi
 
-> workdir/logs/yieldsWZ_testnew.txt
-for iwzstep in ${WZSTEPs[@]}; do
+PROCS=( "Tree_WZTo3LNu_noSkim" )
+    
+# "Tree_WZTo3LNu_0"
+#"Tree_TW_0"
+#	"Tree_TbarW_0"
+#	"Tree_TToLeptons_sch_0"
+#	"Tree_TToLeptons_tch_0"
+#	"Tree_TbarToLeptons_tch_0"
+#	"Tree_TTWToLNu_0"
+#	"Tree_TTZToLLNuNu_0"
+#	"Tree_TTGJets_0"
+#	"Tree_TTHnobb_0"
+
+
+> workdir/logs/yieldsWZ_alphasWZ.txt
+for iproc in ${PROCS[@]}; do
+  proc=$iproc
+  echo $proc >> workdir/logs/yieldsWZ_alphasWZ.txt
+
+  for iwzstep in ${WZSTEPs[@]}; do
 
       wzstep=$iwzstep
       ii=0
 
-
+    #echo "STEP"$wzstep >> workdir/logs/yieldsWZ_alphasWZ.txt
 	  
 	for iflav in ${FLAVs[@]}; do  
 	  flav=$iflav
@@ -56,6 +82,10 @@ for iwzstep in ${WZSTEPs[@]}; do
 	      
 	      LHESYS=""
 	      replaceLHESYS=""
+	      
+	      for ivar in ${VARs[@]}; do
+	      var=$ivar
+	      
 	      if (( ilhe < nQSQR )); then
 	         LHESYS="LHE"
 	         replaceLHESYS="replaceLHESYS"
@@ -72,19 +102,21 @@ for iwzstep in ${WZSTEPs[@]}; do
               #sed -i 's|'$replaceLHESYS'|'$lhe'|' cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg
    	
               #echo running: ${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg
-              file=${DIR}${NAME}_WZSTEP6_LEPFLAV${flav}_${LHESYS}${lhe}.root
+              file=${DIR}${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.root
 	      #echo $FILE
 	      #qsub -q all.q -N MPAFjob -o $MPAF/workdir/logs/log_${sr}_${pt}_${mva}_${btag}_${flav}_${LHESYS}${lhe}.out -e $MPAF/workdir/logs/log_${sr}_${pt}_${mva}_${btag}_${flav}_${LHESYS}${lhe}.err $MPAF/scripts/submit.sh $MPAF/cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg              
 	      #analysis -c cfg/tmpFiles/${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.cfg >& $MPAF/workdir/logs/log_${NAME}_WZSTEP${wzstep}_LEPFLAV${flav}_${LHESYS}${lhe}.log
-	      root -q -l -b display/cards/listyieldsWZ25.C\(\"${file}\",${wzstep}\) >> workdir/logs/yieldsWZ_testnew.txt
+	      root -q -l -b display/cards/listyieldsWZ_acc.C\(\"${file}\",${wzstep},\"${proc}\",${var},${lhe}\) >> workdir/logs/yieldsWZ_alphasWZ.txt
               ilhe=`echo $ilhe +1 | bc`
 
               #ii=`echo $ii +1 | bc`
 
           done
+          done
 	done
+  done
 done
 
-sed -i '/Processing/d' workdir/logs/yieldsWZ_testnew.txt
-sed -i '/^$/d' workdir/logs/yieldsWZ_testnew.txt
+sed -i '/Processing/d' workdir/logs/yieldsWZ_alphasWZ.txt
+sed -i '/^$/d' workdir/logs/yieldsWZ_alphasWZ.txt
 

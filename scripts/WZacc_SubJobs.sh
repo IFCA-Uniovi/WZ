@@ -1,20 +1,19 @@
  #!/bin/bash
+#Run over flavors and selection steps, producing rootfiles from which yields will be extracted with yieldsWZ25_table.sh
+#usage from MPAF folder: source scripts/phys14exerc_SubJobs.sh
+#templateCFG=template_fakeEstim.cfg
+templateCFG=template_WZacc.cfg
 
-#Run to generate rootfiles to be used for creating WZ validation plots with MiniAODv2 Heppy trees (???? pb-1), with Sub_SynchroPlotsv2_WZ25.sh
-
-
-templateCFG=template_WZ25plots_v2.cfg
-
-NAME="WZ3L_tZ_NoTMNoPU"
-FLAVs=( "all" "eee" "eem" "mme" "mmm" )
-#FLAVs=( "all" )
-#FLAVs=( "eee" "eem" "mme" "mmm" )
+NAME="WZ3L_pdfWZ"
+#FLAVs=( "all" "eee" "eem" "mme" "mmm" )
+FLAVs=( "all" )
+#FLAVs=( "mmm" "mme" "eem" "eee" )
+#WZSTEPs=( "4" "3" "2" "1" "0" )
 WZSTEPs=( "6" )
-#WZSTEPs=( "0" "1" "2" "3" "4" "5" "6" )
 
-QSQRs=( "1001" )
-#QSQRs=( "1001" "1002" "1003" "1004" "1005" "1006" "1007" "1008" "1009" )
-#PDFrange=( "2001" "2100" )
+#QSQRs=( "1001" )
+QSQRs=( "1001" "1002" "1003" "1004" "1005" "1006" "1007" "1008" "1009" )
+PDFrange=( "2101" "2102" )
 
 LHEs=()
 nQSQR=0

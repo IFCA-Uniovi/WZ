@@ -214,8 +214,8 @@ std::vector<std::string> get_vec_proc() {
   //result.push_back("T1tttt_1600_1200");
 
   result.push_back("Tree_WZTo3LNu_0");  
-  result.push_back("Tree_TTWToLNu_0");
-  result.push_back("Tree_TTZToLLNuNu_0");
+  //result.push_back("Tree_TTWToLNu_0");
+  //result.push_back("Tree_TTZToLLNuNu_0");
   
   //result.push_back("fakes");
   //result.push_back("WJets");
@@ -473,19 +473,19 @@ void doWZ_steps() {
 
 void doQ2(int total, int varset, bool latex) {
   
-  std::string fileroot = "/nfs/fanae/user/nachos/WZ/workdir/root/WZsynchro/theosystALL_LEPPTall_LEPFLAVall_LHE";
+  std::string fileroot = "/nfs/fanae/user/nachos/WZ/workdir/root/theosyst/theosystALL_LEPPTall_LEPFLAVall_LHE";
   
   //RA7
   //std::string fileroot = "/nfs/fanae/user/nachos/WZ/workdir/root/SUSY3L/pSUSY3L_BRnoMT2_ttWttZ_LEPPTall_LEPFLAVall_LHE";
   
-  //std::string fileroot = "/nfs/fanae/user/vizan/MPAF/Spring15_151019/MPAF/workdir/root/WZsynchro/FE_ttWttZ_XNJXHT_V2_LEPPTall_LEPFLAVall_LHE";
-  //std::string fileroot = "/nfs/fanae/user/vizan/MPAF/Spring15_151019/MPAF/workdir/root/WZsynchro/FE_ttWttZ_XNJXHT_LEPPTall_LEPFLAVall_LHE";
-  //std::string fileroot = "/nfs/fanae/user/vizan/MPAF/Spring15_151019/MPAF/workdir/root/WZsynchro/FE_ttWttZ_LEPPTall_LEPFLAVall_LHE";
-  //std::string fileroot = "/nfs/fanae/user/vizan/MPAF/Spring15_151019/MPAF/workdir/root/WZsynchro/FE_testyyy_LEPPTall_LEPFLAVall_LHE";
+  //std::string fileroot = "/nfs/fanae/user/vizan/MPAF/Spring15_151019/MPAF/workdir/root/theosyst/FE_ttWttZ_XNJXHT_V2_LEPPTall_LEPFLAVall_LHE";
+  //std::string fileroot = "/nfs/fanae/user/vizan/MPAF/Spring15_151019/MPAF/workdir/root/theosyst/FE_ttWttZ_XNJXHT_LEPPTall_LEPFLAVall_LHE";
+  //std::string fileroot = "/nfs/fanae/user/vizan/MPAF/Spring15_151019/MPAF/workdir/root/theosyst/FE_ttWttZ_LEPPTall_LEPFLAVall_LHE";
+  //std::string fileroot = "/nfs/fanae/user/vizan/MPAF/Spring15_151019/MPAF/workdir/root/theosyst/FE_testyyy_LEPPTall_LEPFLAVall_LHE";
   
   //Spring 15 before synchro
-  //std::string fileroot = "/nfs/fanae/user/vizan/MPAF/Spring15_151009/MPAF/workdir/root/WZsynchro/FE_ttZlow_LEPPTall_LEPFLAVall_LHE";
-  //std::string fileroot = "/nfs/fanae/user/vizan/MPAF/Spring15_151009/MPAF/workdir/root/WZsynchro/FE_LEPPTall_LEPFLAVall_LHE";
+  //std::string fileroot = "/nfs/fanae/user/vizan/MPAF/Spring15_151009/MPAF/workdir/root/theosyst/FE_ttZlow_LEPPTall_LEPFLAVall_LHE";
+  //std::string fileroot = "/nfs/fanae/user/vizan/MPAF/Spring15_151009/MPAF/workdir/root/theosyst/FE_LEPPTall_LEPFLAVall_LHE";
   
   
   //std::string fileroot = "/nfs/fanae/user/vizan/MPAF/Phys14_150519/MPAF/workdir/root/FakeEstim/FE_LEPPTall_LEPFLAVall_LHE";
@@ -562,7 +562,15 @@ void doQ2(int total, int varset, bool latex) {
       std::string s_sysAcc_Min = "";
       
       double RMS = 0;
-
+      
+      double num_Zero = 0;
+      double den_Zero = 0;
+      double num_acc_Max = 0;
+      double num_acc_Min = 0;
+      double den_acc_Max = 0;
+      double den_acc_Min = 0;
+      double numAcc_vec[8];
+      double denAcc_vec[8];
             
       for (unsigned int isample = 0; isample < sample.size(); isample++) {
         //std::cout << "sample[" << vec_proc[iproc] << "][" << isample << "]=" << sample[isample] << std::endl;
@@ -588,6 +596,8 @@ void doQ2(int total, int varset, bool latex) {
 	    
 	    val_Zero += tmpval*normFactor;
 	    err_square_Zero += (tmperr*normFactor)*(tmperr*normFactor);
+	    num_Zero += tmpval;
+	    den_Zero += map_wsum[sample[isample].c_str()][vec_Q2sys[0]];
 	    
 	    //std::cout << "sample[" << vec_proc[iproc] << "][" << isample << "]=" << sample[isample] << "\t" << tmpval*normFactor << "\t$pm$\t" << tmperr*normFactor << std::endl; 
 	  }
@@ -695,6 +705,8 @@ void doQ2(int total, int varset, bool latex) {
 	    errAcc_square_vec[iq2] += (tmperr*normFactor)*(tmperr*normFactor);
 	    valTot_vec[iq2] = tmpval*normFactorTot;
 	    errTot_square_vec[iq2] += (tmperr*normFactorTot)*(tmperr*normFactorTot);
+	    numAcc_vec[iq2] = tmpval; 
+	    denAcc_vec[iq2] = map_wsum[sample[isample].c_str()][vec_Q2sys_long[iq2+1]];
 	    
 	    //std::cout << "sample[" << vec_proc[iproc] << "][" << isample << "]=" << sample[isample] << "\t" << tmpval*normFactor << "\t$pm$\t" << tmperr*normFactor << std::endl; 
 	  }
@@ -728,10 +740,17 @@ void doQ2(int total, int varset, bool latex) {
       
       double sysAcc_vec[8];
       double sysTot_vec[8];
+      double numMax, fidMax;
+      double numMin, fidMin;
       for (unsigned int iq2 = 0; iq2 < 8; iq2++) {
       if (iq2==4 || iq2==6) continue;
-        if (valAcc_vec[iq2] != 0 && val_Zero != 0) sysAcc_vec[iq2] = (valAcc_vec[iq2] > val_Zero)? valAcc_vec[iq2]/val_Zero - 1.0: -val_Zero/valAcc_vec[iq2] + 1.0;
-        if (valTot_vec[iq2] != 0 && val_Zero != 0) sysTot_vec[iq2] = (valTot_vec[iq2] > val_Zero)? valTot_vec[iq2]/val_Zero - 1.0: -val_Zero/valTot_vec[iq2] + 1.0;
+        //if (valAcc_vec[iq2] != 0 && val_Zero != 0) sysAcc_vec[iq2] = (valAcc_vec[iq2] > val_Zero)? valAcc_vec[iq2]/val_Zero - 1.0: -val_Zero/valAcc_vec[iq2] + 1.0;
+        //if (valTot_vec[iq2] != 0 && val_Zero != 0) sysTot_vec[iq2] = (valTot_vec[iq2] > val_Zero)? valTot_vec[iq2]/val_Zero - 1.0: -val_Zero/valTot_vec[iq2] + 1.0;
+        if (valAcc_vec[iq2] != 0 && val_Zero != 0){
+          sysAcc_vec[iq2] = valAcc_vec[iq2]/val_Zero - 1.0;
+          sysTot_vec[iq2] = valTot_vec[iq2]/val_Zero - 1.0;
+        }
+        //if (valTot_vec[iq2] != 0 && val_Zero != 0) sysTot_vec[iq2] = (valTot_vec[iq2] > val_Zero)? valTot_vec[iq2]/val_Zero - 1.0: -val_Zero/valTot_vec[iq2] + 1.0;
         std::string sqsqr;
 	    std::stringstream convert;
 	    convert << (iq2+1002);
@@ -743,11 +762,19 @@ void doQ2(int total, int varset, bool latex) {
             sysTot_Max = sysTot_vec[iq2];
 	        sysAcc_Max = sysAcc_vec[iq2];
 	        s_sysAcc_Max = sqsqr;
+	        numMax = valAcc_vec[iq2]-val_Zero;
+	        fidMax = valAcc_vec[iq2];
+	        num_acc_Max = numAcc_vec[iq2];
+	        den_acc_Max = denAcc_vec[iq2];
 	      }
 	      if (sysAcc_vec[iq2] < sysAcc_Min) {
 	        sysTot_Min = sysTot_vec[iq2];
 	        sysAcc_Min = sysAcc_vec[iq2];
 	        s_sysAcc_Min = sqsqr;
+	        numMin = valAcc_vec[iq2]-val_Zero;
+	        fidMin = valAcc_vec[iq2];
+	        num_acc_Min = numAcc_vec[iq2];
+	        den_acc_Min = denAcc_vec[iq2];
 	      }
 	    } else if (total == 3) { // largest deviations in total
 	      RMS += sysTot_vec[iq2]*sysTot_vec[iq2];
@@ -792,16 +819,22 @@ void doQ2(int total, int varset, bool latex) {
       } else if (total == 2) {
         if (latex) {
 	      printf ("%.2f%s%.2f", val_Zero, "\t$\\pm$\t", err_Zero);
-          std::string tmp_smax = "-$>$"+s_sysAcc_Max;
-          std::string tmp_smin = "-$>$"+s_sysAcc_Min;
+          std::string tmp_smax = "$\\leftarrow$"+s_sysAcc_Max;
+          std::string tmp_smin = "$\\leftarrow$"+s_sysAcc_Min;
           printf ("%s%.3f%s%s", "\t\\textcolor{blue}{(", sysAcc_Max, tmp_smax.c_str(), ")}\t");
           printf ("%s%.3f%s%s", "\t\\textcolor{green}{(", sysAcc_Min, tmp_smin.c_str(),")}");
+          printf ("%s%.2f", "\tnumCen:\t", num_Zero);
+          printf ("%s%.2f", "\tdenCen:\t", den_Zero);
+          printf ("%s%.2f", "\tnumMax:\t", num_acc_Max);
+          printf ("%s%.2f", "\tdenMax:\t", den_acc_Max);
+          printf ("%s%.2f", "\tnumMin:\t", num_acc_Min);
+          printf ("%s%.2f", "\tdenMin:\t", den_acc_Min);
 	    }        
       } else if (total == 3) {
         if (latex) {
 	      printf ("%.2f%s%.2f", val_Zero, "\t$\\pm$\t", err_Zero);
-          std::string tmp_smax = "-$>$"+s_sysTot_Max;
-          std::string tmp_smin = "-$>$"+s_sysTot_Min;
+          std::string tmp_smax = "$\\leftarrow$"+s_sysTot_Max;
+          std::string tmp_smin = "$\\leftarrow$"+s_sysTot_Min;
           printf ("%s%.3f%s%s", "\t\\textcolor{blue}{(", sysTot_Max, tmp_smax.c_str(), ")}\t");
           printf ("%s%.3f%s%s", "\t\\textcolor{green}{(", sysTot_Min, tmp_smin.c_str(),")}");
 	    }         
@@ -836,13 +869,13 @@ void doQ2(int total, int varset, bool latex) {
 
 void doPDF(int total, int varset, bool latex) {
   
-  std::string fileroot = "/nfs/fanae/user/nachos/WZ/workdir/root/WZsynchro/theosystALL_LEPPTall_LEPFLAVall_LHE";
+  std::string fileroot = "/nfs/fanae/user/nachos/WZ/workdir/root/theosyst/theosystALL_LEPPTall_LEPFLAVall_LHE";
   
   //RA7
   //std::string fileroot = "/nfs/fanae/user/nachos/WZ/workdir/root/SUSY3L/pSUSY3L_BRnoMT2_ttWttZ_LEPPTall_LEPFLAVall_LHE";
 
   
-  //std::string fileroot = "/nfs/fanae/user/vizan/MPAF/Spring15_151009/MPAF/workdir/root/WZsynchro/FE_LEPPTall_LEPFLAVall_LHE";
+  //std::string fileroot = "/nfs/fanae/user/vizan/MPAF/Spring15_151009/MPAF/workdir/root/theosyst/FE_LEPPTall_LEPFLAVall_LHE";
   
   
   //Phys14
@@ -1067,8 +1100,8 @@ void doPDF(int total, int varset, bool latex) {
         printf ("%s%.3f%s", "\t\\textcolor{green}{(", sysAcc_Min, ")}\t");
       }
       else if (total == 1) {
-        std::string tmp_smax = "-$>$"+s_sysTot_Max;
-        std::string tmp_smin = "-$>$"+s_sysTot_Min;
+        std::string tmp_smax = "$\\leftarrow$"+s_sysTot_Max;
+        std::string tmp_smin = "$\\leftarrow$"+s_sysTot_Min;
         printf ("%s%.3f%s%s", "\t\\textcolor{blue}{(", sysTot_Max, tmp_smax.c_str(), ")}\t");
         printf ("%s%.3f%s%s%.3f", "\t\\textcolor{green}{(", sysTot_Min, tmp_smin.c_str(),")}\tRMS: ", RMS);
         //printf ("%s%.3f%s%s", "\t\\textcolor{green}{(", sysTot_Min, tmp_smin.c_str(),")}\t");
@@ -1076,8 +1109,8 @@ void doPDF(int total, int varset, bool latex) {
         //printf ("%s%.3f%s", "\t\\textcolor{green}{(", sysTot_Min, ")}\t");
       }
       else if (total == 2) {
-        std::string tmp_smax = "-$>$"+s_sysAcc_Max;
-        std::string tmp_smin = "-$>$"+s_sysAcc_Min;
+        std::string tmp_smax = "$\\leftarrow$"+s_sysAcc_Max;
+        std::string tmp_smin = "$\\leftarrow$"+s_sysAcc_Min;
         printf ("%s%.3f%s%s", "\t\\textcolor{blue}{(", sysAcc_Max, tmp_smax.c_str(), ")}\t");
         printf ("%s%.3f%s%s%.3f", "\t\\textcolor{green}{(", sysAcc_Min, tmp_smin.c_str(),")}\tRMS: ", RMS);
         //printf ("%s%.3f%s%s", "\t\\textcolor{green}{(", sysTot_Min, tmp_smin.c_str(),")}\t");
@@ -1228,12 +1261,12 @@ void doSomething() {
   //TFile* f = new TFile("/nfs/fanae/user/vizan/MPAF/Phys14_150519/MPAF/workdir/root/FakeEstim/FE_LEPPTall_LEPFLAVall_LHE1001.root");
 
 
-  //TFile* f = new TFile("/nfs/fanae/user/vizan/MPAF/Phys14_150618/MPAF/workdir/root/WZsynchro/FE_LEPPTall_LEPFLAVall_LHE1001.root");
-  //TFile* f = new TFile("/nfs/fanae/user/vizan/MPAF/Phys14_150618/MPAF/workdir/root/WZsynchro/FE_LEPPTall_LEPFLAVall_LHE1001_replica2.root");
-  //TFile* f = new TFile("/nfs/fanae/user/vizan/MPAF/Phys14_150618/MPAF/workdir/root/WZsynchro/test_WZstep0.root");
-  //TFile* f = new TFile("/nfs/fanae/user/vizan/MPAF/Phys14_150618/MPAF/workdir/root/WZsynchro/FE_LEPPTall_LEPFLAVall_LHE1001_WZstep4.root");
-  TFile* f = new TFile("/nfs/fanae/user/nachos/WZ/workdir/root/WZsynchro/theosystALL_LEPPTall_LEPFLAVall_LHE1001.root");
-  //TFile* f = new TFile("/nfs/fanae/user/vizan/MPAF/Phys14_150618/MPAF/workdir/root/WZsynchro/testWZSTEP5.root");
+  //TFile* f = new TFile("/nfs/fanae/user/vizan/MPAF/Phys14_150618/MPAF/workdir/root/theosyst/FE_LEPPTall_LEPFLAVall_LHE1001.root");
+  //TFile* f = new TFile("/nfs/fanae/user/vizan/MPAF/Phys14_150618/MPAF/workdir/root/theosyst/FE_LEPPTall_LEPFLAVall_LHE1001_replica2.root");
+  //TFile* f = new TFile("/nfs/fanae/user/vizan/MPAF/Phys14_150618/MPAF/workdir/root/theosyst/test_WZstep0.root");
+  //TFile* f = new TFile("/nfs/fanae/user/vizan/MPAF/Phys14_150618/MPAF/workdir/root/theosyst/FE_LEPPTall_LEPFLAVall_LHE1001_WZstep4.root");
+  TFile* f = new TFile("/nfs/fanae/user/nachos/WZ/workdir/root/theosyst/theosystALL_LEPPTall_LEPFLAVall_LHE1001.root");
+  //TFile* f = new TFile("/nfs/fanae/user/vizan/MPAF/Phys14_150618/MPAF/workdir/root/theosyst/testWZSTEP5.root");
   
   
   //general parameters ********************* general parameters
