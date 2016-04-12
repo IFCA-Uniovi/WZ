@@ -21,21 +21,58 @@ public:
   float bestmZ(const CandList* leps);
   float m3lTight(const CandList* leps);
   
+  CandList bestGenWZ(const CandList* leps, int& idxZ1, int& idxZ2, int& idxW);
+  CandList bestGenZ(const CandList* leps, int& idxZ1, int& idxZ2);
+  float bestGenmZ(const CandList* leps);
+
+  bool truthMatch(const vector<unsigned int> recolepsidx);
+
+  bool IsLooseBarrelElectronWW(int idx);
+  bool IsLooseEndcapElectronWW(int idx);
+  bool IsLooseMuonWW(int idx);
+  bool IsMediumBarrelElectronWW(int idx);
+  bool IsMediumEndcapElectronWW(int idx);
+  bool IsTightBarrelElectronWW(int idx);
+  bool IsTightEndcapElectronWW(int idx);
+  bool IsTightMuonWW(int idx);
   
-  float GCleptonScaleFactorWZ(int pdgId, float pt, float eta);
-  float GCelectronScaleFactorWZ(float pt, float eta);
-  float GCmuonScaleFactorWZ(float pt, float eta);
+  bool IsLooseBarrelElectronZZ(int idx);
+  bool IsLooseEndcapElectronZZ(int idx);
+  bool IsLooseMuonZZ(int idx);
+  bool IsTightBarrelElectronZZ(int idx);
+  bool IsTightEndcapElectronZZ(int idx);
+  bool IsTightMuonZZ(int idx);
+ 
+  float bTagSF_HL(CandList& jets , vector<pair<string, unsigned int> >& jetIdx ,
+               CandList& bJets, vector<pair<string, unsigned int> >& bJetIdx,
+	           int heavy, int light);
   
-  float GCtriggerScaleFactorWZ(int pdgId1, int pdgId2, float pt1, float pt2, float ht);
-  float GCeventScaleFactorWZ(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht);
+  float GCleptonScaleFactorZZ(int pdgId, float pt, float eta);
+  float GCelectronScaleFactorZZ(float pt, float eta);
+  float GCmuonScaleFactorZZ(float pt, float eta);
   
+  float GCtriggerScaleFactorZZ(int pdgId1, int pdgId2, float pt1, float pt2, float ht);
+  float GCeventScaleFactorZZ(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht);
+  
+  float LeptonScaleFactorWW(int pdgId, float pt, float eta);
+  float MediumElectronScaleFactorWW(float pt, float eta);
+  float POGMediumElectronScaleFactorWW(float pt, float eta);
+  float TightElectronScaleFactorWW(float pt, float eta);
+  float MediumMuonScaleFactorWW(float pt, float eta);
+  float POGMediumMuonScaleFactorWW(float pt, float eta);
+  
+  void cleanJetsOld(CandList* leptons, 
+		 CandList& cleanJets, vector<pair<string, unsigned int> >& jetIdxs,
+		 CandList& cleanBJets, vector<pair<string,unsigned int> >& bJetIdxs,
+		 CandList& lepJets, vector<pair<string,unsigned int> >& lepJetsIdxs,
+		 float thr, float bthr, bool isJESUnc = false, int dir = 0);
   
   bool IsDumpable(int evt);
 
 protected:
   //const
-  VarClass* _vc;
-  DataBaseManager* _dbm;
+  //VarClass* _vc;
+  //DataBaseManager* _dbm;
 
 
 };

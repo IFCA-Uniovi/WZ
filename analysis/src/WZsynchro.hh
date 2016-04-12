@@ -64,9 +64,10 @@ private:
   void categorize();
 
   bool passCERNSelection();
-  //bool looseLepton(int idx, int pdgId);
+
   bool looseLepton(int idx, int pdgId);
   bool tightLepton(int idx, int pdgId);
+  bool WLepton(int idx, int pdgId);
   bool fakableLepton(const Candidate*c, int idx, int pdgId, bool bypass);
   
   //==============================
@@ -80,7 +81,7 @@ private:
   
   void fillhistos();
   void fillValidationHistos(std::string reg);
-  void fillWZhistos(CandList* leps, std::string reg, float MllZ);
+  void fillWZhistos(CandList* leps, std::string reg);
   
   bool checkDoubleCount();
   
@@ -142,6 +143,7 @@ private:
 	kWZCR,
 	
 	kWZSM,
+	kWZSM_0sel,
 	kWZSM_3l,
 	kWZSM_3lwz,
 	kWZSM_3lwzZsel,
@@ -214,6 +216,12 @@ private:
   CandList _jetCleanLeps10;
   std::vector<unsigned int>  _jetCleanLeps10Idx;
   
+  CandList _genLeps;
+  std::vector<unsigned int>  _genLepsIdx;
+
+  CandList _rawLeps;
+  std::vector<unsigned int>  _rawLepsIdx;
+  
   unsigned int _nLooseLeps;
  
 
@@ -242,6 +250,7 @@ private:
   string _SR;
   string _FR;
   int _LHESYS;
+  int _fastSim;
 
   int _fakeEl;
   int _fakeMu;

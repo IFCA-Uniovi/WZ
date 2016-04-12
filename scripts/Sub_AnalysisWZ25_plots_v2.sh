@@ -5,7 +5,7 @@
 
 templateCFG=template_WZ25plots_v2.cfg
 
-NAME="WZ3Lplotsv2"
+NAME="WZ3L_tZ_NoTMNoPU"
 FLAVs=( "all" "eee" "eem" "mme" "mmm" )
 #FLAVs=( "all" )
 #FLAVs=( "eee" "eem" "mme" "mmm" )
